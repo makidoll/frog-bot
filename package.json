@@ -1,0 +1,13 @@
+{
+	"name": "frogbot",
+	"private": true,
+	"scripts": {
+		"start": "tsc -w"
+	},
+	"dependencies": {
+		"discord.js": "^13.7.0"
+	},
+	"devDependencies": {
+		"typescript": "^4.6.4"
+	}
+}

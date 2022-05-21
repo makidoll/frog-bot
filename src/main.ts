@@ -7,9 +7,19 @@ import {
 	TextChannel,
 	User,
 } from "discord.js";
-
+import { HtmlRenderer } from "./html-renderer";
+import * as fs from "fs/promises";
 import { BOT_TOKEN, ROLES_CHANNEL, MESSAGES_TO_ROLES } from "./conts";
 
+const htmlRenderer = new HtmlRenderer();
+
+(async () => {
+	await htmlRenderer.launch();
+	const buffer = await htmlRenderer.renderHtml("<h1>hi</h1>", 400, 300);
+	await fs.writeFile("./test.png", buffer);
+})();
+
+/*
 const client = new Client({
 	intents: [
 		Intents.FLAGS.GUILDS,
@@ -89,3 +99,4 @@ client.on("messageReactionRemove", (reaction, user) => {
 });
 
 client.login(BOT_TOKEN);
+*/

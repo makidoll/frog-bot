@@ -11,15 +11,14 @@ import { HtmlRenderer } from "./html-renderer";
 import * as fs from "fs/promises";
 import { BOT_TOKEN, ROLES_CHANNEL, MESSAGES_TO_ROLES } from "./conts";
 
-const htmlRenderer = new HtmlRenderer();
+// const htmlRenderer = new HtmlRenderer();
 
-(async () => {
-	await htmlRenderer.launch();
-	const buffer = await htmlRenderer.renderHtml("<h1>hi</h1>", 400, 300);
-	await fs.writeFile("./test.png", buffer);
-})();
+// (async () => {
+// 	await htmlRenderer.launch();
+// 	const buffer = await htmlRenderer.renderHtml("<h1>hi</h1>", 400, 300);
+// 	await fs.writeFile("./test.png", buffer);
+// })();
 
-/*
 const client = new Client({
 	intents: [
 		Intents.FLAGS.GUILDS,
@@ -98,5 +97,12 @@ client.on("messageReactionRemove", (reaction, user) => {
 	} catch (error) {}
 });
 
-client.login(BOT_TOKEN);
-*/
+client.on("error", error => {
+	console.error(error);
+	process.exit(1);
+});
+
+client.login(BOT_TOKEN).catch(error => {
+	console.error(error);
+	process.exit(1);
+});

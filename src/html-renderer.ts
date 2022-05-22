@@ -9,15 +9,19 @@ export class HtmlRenderer {
 		this.browser = await puppeteer.launch();
 	}
 
-	async renderHtml(html: string, width: number, height: number) {
+	async renderHtml(
+		path: string,
+		width: number,
+		height: number,
+		doWithPathFn?: (page: puppeteer.Page) => Promise<any>,
+	) {
 		const page = await this.browser.newPage();
 		await page.setViewport({
 			width,
 			height,
 		});
-		await page.setContent(html, {
-			waitUntil: "networkidle0",
-		});
+		await page.goto(path);
+		if (doWithPathFn != null) await doWithPathFn(page);
 		const screenshot = await page.screenshot({
 			type: "png",
 			encoding: "binary",

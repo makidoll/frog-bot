@@ -2,7 +2,8 @@
 	"name": "frogbot",
 	"private": true,
 	"scripts": {
-		"start": "tsc -w"
+		"start": "tsc -w",
+		"build": "tsc"
 	},
 	"dependencies": {
 		"discord.js": "^13.7.0",

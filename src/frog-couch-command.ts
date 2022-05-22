@@ -13,7 +13,8 @@ export async function frogCouchCommand(
 		.slice(0, 4);
 
 	const buffer = await htmlRenderer.renderHtml(
-		path.resolve(__dirname, "../assets/frog-couch/frog-couch.html"),
+		"file://" +
+			path.resolve(__dirname, "../assets/frog-couch/frog-couch.html"),
 		600,
 		500,
 		async page => {
@@ -46,3 +47,4 @@ export async function frogCouchCommand(
 
 	message.channel.send({ files: [buffer] });
 }
+

@@ -22,21 +22,21 @@ export async function frogCouchCommand(
 				await page.$eval(
 					"#username-" + i,
 					(e, username) => {
-						e.textContent = username;
+						(e.textContent as any) = username;
 					},
 					messages[i].author.username,
 				);
 				await page.$eval(
 					"#message-" + i,
 					(e, message) => {
-						e.textContent = message;
+						(e.textContent as any) = message;
 					},
 					messages[i].content,
 				);
 				await page.$eval(
 					"#avatar-" + i,
 					(e, avatar) => {
-						e.style.backgroundImage = `url(${avatar})`;
+						(e as any).style.backgroundImage = `url(${avatar})`;
 					},
 					messages[i].author.displayAvatarURL(),
 				);
@@ -47,4 +47,3 @@ export async function frogCouchCommand(
 
 	message.channel.send({ files: [buffer] });
 }
-

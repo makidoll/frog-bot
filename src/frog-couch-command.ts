@@ -1,6 +1,7 @@
 import { Message } from "discord.js";
 import { HtmlRenderer } from "./html-renderer";
 import * as path from "path";
+import { downloadToDataUri, getUsernameAndAvatarURL } from "./utils";
 
 export async function frogCouchCommand(
 	message: Message,
@@ -19,12 +20,16 @@ export async function frogCouchCommand(
 		500,
 		async page => {
 			for (let i = 0; i < 4; i++) {
+				const { username, avatarURL } = await getUsernameAndAvatarURL(
+					messages[i].author,
+					message.guild,
+				);
 				await page.$eval(
 					"#username-" + i,
 					(e, username) => {
 						(e.textContent as any) = username;
 					},
-					messages[i].author.username,
+					username,
 				);
 				await page.$eval(
 					"#message-" + i,
@@ -38,10 +43,10 @@ export async function frogCouchCommand(
 					(e, avatar) => {
 						(e as any).style.backgroundImage = `url(${avatar})`;
 					},
-					messages[i].author.displayAvatarURL(),
+					await downloadToDataUri(avatarURL),
 				);
 			}
-			await page.waitForNetworkIdle();
+			// await page.waitForNetworkIdle();
 		},
 	);
 

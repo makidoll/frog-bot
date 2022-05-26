@@ -16,8 +16,6 @@ export async function frogHugCommand(
 	const from = await getUsernameAndAvatarURL(message.author, message.guild);
 	const to = await getUsernameAndAvatarURL(toUser, message.guild);
 
-	console.log((await downloadToDataUri(from.avatarURL)).slice(0, 100));
-
 	const buffer = await htmlRenderer.renderHtml(
 		"file://" + path.resolve(__dirname, "../assets/frog-hug/frog-hug.html"),
 		// 1125,

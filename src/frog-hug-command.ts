@@ -1,22 +1,22 @@
 import { Message } from "discord.js";
 import { HtmlRenderer } from "./html-renderer";
 import * as path from "path";
-import { downloadToDataUri } from "./utils";
+import { downloadToDataUri, getUsernameAndAvatarURL } from "./utils";
 
 export async function frogHugCommand(
 	message: Message,
 	htmlRenderer: HtmlRenderer,
 ) {
-	const mention = message.mentions.users.first();
-	if (mention == null) {
+	const toUser = message.mentions.users.first();
+	if (toUser == null) {
 		message.channel.send("ribbit! pls mention someone");
 		return;
 	}
 
-	const avatars = await Promise.all([
-		downloadToDataUri(message.author.avatarURL()),
-		downloadToDataUri(mention.avatarURL()),
-	]);
+	const from = await getUsernameAndAvatarURL(message.author, message.guild);
+	const to = await getUsernameAndAvatarURL(toUser, message.guild);
+
+	console.log((await downloadToDataUri(from.avatarURL)).slice(0, 100));
 
 	const buffer = await htmlRenderer.renderHtml(
 		"file://" + path.resolve(__dirname, "../assets/frog-hug/frog-hug.html"),
@@ -30,14 +30,14 @@ export async function frogHugCommand(
 				(e, username) => {
 					(e.textContent as any) = username;
 				},
-				message.author.username,
+				from.username,
 			);
 			await page.$eval(
 				"#from-avatar",
 				(e, avatar) => {
 					(e as any).src = avatar;
 				},
-				avatars[0],
+				await downloadToDataUri(from.avatarURL),
 			);
 
 			await page.$eval(
@@ -45,14 +45,14 @@ export async function frogHugCommand(
 				(e, username) => {
 					(e.textContent as any) = username;
 				},
-				mention.username,
+				to.username,
 			);
 			await page.$eval(
 				"#to-avatar",
 				(e, avatar) => {
 					(e as any).src = avatar;
 				},
-				avatars[1],
+				await downloadToDataUri(to.avatarURL),
 			);
 
 			// using data uris, speeds this up

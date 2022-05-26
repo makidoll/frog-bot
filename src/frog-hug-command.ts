@@ -1,6 +1,7 @@
 import { Message } from "discord.js";
 import { HtmlRenderer } from "./html-renderer";
 import * as path from "path";
+import { downloadToDataUri } from "./utils";
 
 export async function frogHugCommand(
 	message: Message,
@@ -12,10 +13,17 @@ export async function frogHugCommand(
 		return;
 	}
 
+	const avatars = await Promise.all([
+		downloadToDataUri(message.author.avatarURL()),
+		downloadToDataUri(mention.avatarURL()),
+	]);
+
 	const buffer = await htmlRenderer.renderHtml(
 		"file://" + path.resolve(__dirname, "../assets/frog-hug/frog-hug.html"),
-		1125,
-		799,
+		// 1125,
+		// 799,
+		563,
+		400,
 		async page => {
 			await page.$eval(
 				"#from-name",
@@ -29,7 +37,7 @@ export async function frogHugCommand(
 				(e, avatar) => {
 					(e as any).src = avatar;
 				},
-				message.author.avatarURL(),
+				avatars[0],
 			);
 
 			await page.$eval(
@@ -44,10 +52,11 @@ export async function frogHugCommand(
 				(e, avatar) => {
 					(e as any).src = avatar;
 				},
-				mention.avatarURL(),
+				avatars[1],
 			);
 
-			await page.waitForNetworkIdle();
+			// using data uris, speeds this up
+			// await page.waitForNetworkIdle();
 		},
 	);
 

@@ -6,7 +6,28 @@ import {
 	TextChannel,
 	User,
 } from "discord.js";
-import { MESSAGES_TO_ROLES, ROLES_CHANNEL } from "./conts";
+
+const ROLES_CHANNEL = "976645075142594561";
+const MESSAGES_TO_ROLES = {
+	"976645626437718016": {
+		"🟢": "they/them",
+		"🔴": "she/her",
+		"🔵": "he/him",
+		"⚪": "it/its",
+		"🟣": "xe/xir",
+		"🧚‍♀️": "fae/faer",
+		"🟡": "any/all",
+	},
+	"976647010730004480": {
+		"1️⃣": "north america",
+		"2️⃣": "south america",
+		"3️⃣": "europe",
+		"4️⃣": "africa",
+		"5️⃣": "asia",
+		"6️⃣": "oceania",
+		"7️⃣": "outer space",
+	},
+};
 
 function manageRoleFromMessageReaction(
 	client: Client,

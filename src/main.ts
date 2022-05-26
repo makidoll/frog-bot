@@ -1,8 +1,9 @@
+import "dotenv/config"; // loads .env file to process.env
+
 import { Client, Intents } from "discord.js";
 import { HtmlRenderer } from "./html-renderer";
 import { frogCouchCommand } from "./frog-couch-command";
 import { initReactionRoles } from "./reaction-roles";
-import { BOT_TOKEN } from "./conts";
 
 const htmlRenderer = new HtmlRenderer();
 htmlRenderer.launch();
@@ -35,7 +36,7 @@ client.on("error", error => {
 	process.exit(1);
 });
 
-client.login(BOT_TOKEN).catch(error => {
+client.login(process.env.BOT_TOKEN).catch(error => {
 	console.error(error);
 	process.exit(1);
 });

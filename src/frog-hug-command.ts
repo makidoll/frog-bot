@@ -54,20 +54,27 @@ export async function frogHugCommand(
 				);
 				await page.$eval(
 					"#name-" + i,
-					(e, username) => {
-						(e.textContent as any) = username;
+					(el, username) => {
+						(el.textContent as any) = username;
 					},
 					username,
 				);
 				await page.$eval(
 					"#avatar-" + i,
-					(e, avatar) => {
-						(e as any).src = avatar;
+					(el, avatar) => {
+						(el as any).src = avatar;
 					},
 					await downloadToDataUri(avatarURL),
 				);
 			}
-			// using data uris, speeds this up
+			// clone and turn old to shadows
+			await page.$$eval(".user", els => {
+				for (const el of els) {
+					el.parentNode.appendChild(el.cloneNode(true));
+					el.className += " shadow";
+				}
+			});
+			// using data uris, this speeds this up
 			// await page.waitForNetworkIdle();
 		},
 	);

@@ -6,7 +6,9 @@ export class HtmlRenderer {
 	constructor() {}
 
 	async launch() {
-		this.browser = await puppeteer.launch();
+		this.browser = await puppeteer.launch({
+			// headless: false,
+		});
 	}
 
 	async renderHtml(
@@ -26,6 +28,7 @@ export class HtmlRenderer {
 			type: "png",
 			encoding: "binary",
 		});
+		page.close();
 		return screenshot;
 	}
 }

@@ -3,56 +3,69 @@ import { HtmlRenderer } from "./html-renderer";
 import * as path from "path";
 import { downloadToDataUri, getUsernameAndAvatarURL } from "./utils";
 
+const frogHugSizes = {
+	"2": [563, 400],
+	"3": [619, 579],
+};
+
+function removeDuplicates(input: any[]) {
+	let unique = [];
+	for (const item of input) {
+		if (!unique.includes(item)) unique.push(item);
+	}
+	return unique;
+}
+
 export async function frogHugCommand(
 	message: Message,
 	htmlRenderer: HtmlRenderer,
 ) {
-	const toUser = message.mentions.users.first();
-	if (toUser == null) {
-		message.channel.send("ribbit! pls mention someone");
+	const usersHugging = removeDuplicates([
+		message.author,
+		...message.mentions.users.values(),
+	]);
+
+	if (usersHugging.length == 1) {
+		message.channel.send("ribbit! pls mention someone or multiple");
 		return;
 	}
 
-	const from = await getUsernameAndAvatarURL(message.author, message.guild);
-	const to = await getUsernameAndAvatarURL(toUser, message.guild);
+	if (!Object.keys(frogHugSizes).includes(String(usersHugging.length))) {
+		message.channel.send("ribbit! too many people sorry :(");
+		return;
+	}
+
+	const imageSize = frogHugSizes[String(usersHugging.length)];
 
 	const buffer = await htmlRenderer.renderHtml(
-		"file://" + path.resolve(__dirname, "../assets/frog-hug/frog-hug.html"),
-		// 1125,
-		// 799,
-		563,
-		400,
+		"file://" +
+			path.resolve(
+				__dirname,
+				"../assets/frog-hug/" + usersHugging.length + ".html",
+			),
+		imageSize[0],
+		imageSize[1],
 		async page => {
-			await page.$eval(
-				"#from-name",
-				(e, username) => {
-					(e.textContent as any) = username;
-				},
-				from.username,
-			);
-			await page.$eval(
-				"#from-avatar",
-				(e, avatar) => {
-					(e as any).src = avatar;
-				},
-				await downloadToDataUri(from.avatarURL),
-			);
-
-			await page.$eval(
-				"#to-name",
-				(e, username) => {
-					(e.textContent as any) = username;
-				},
-				to.username,
-			);
-			await page.$eval(
-				"#to-avatar",
-				(e, avatar) => {
-					(e as any).src = avatar;
-				},
-				await downloadToDataUri(to.avatarURL),
-			);
-
+			for (let i = 0; i < usersHugging.length; i++) {
+				const { username, avatarURL } = await getUsernameAndAvatarURL(
+					usersHugging[i],
+					message.guild,
+				);
+				await page.$eval(
+					"#name-" + i,
+					(e, username) => {
+						(e.textContent as any) = username;
+					},
+					username,
+				);
+				await page.$eval(
+					"#avatar-" + i,
+					(e, avatar) => {
+						(e as any).src = avatar;
+					},
+					await downloadToDataUri(avatarURL),
+				);
+			}
 			// using data uris, speeds this up
 			// await page.waitForNetworkIdle();
 		},

@@ -1,0 +1,64 @@
+<html>
+	<head>
+		<style>
+			@font-face {
+				font-family: "Littlefox";
+				font-style: normal;
+				font-weight: 400;
+				src: url(../Littlefox-Regular.woff2) format("woff2");
+			}
+
+			* {
+				margin: 0;
+			}
+
+			body {
+				font-family: "Littlefox";
+				overflow: hidden;
+				zoom: 50%;
+			}
+
+			.image {
+				width: 1125px;
+				height: 799px;
+				background-image: url(./2.jpg);
+				background-position: 0 0;
+				background-repeat: no-repeat;
+				background-size: 100%;
+			}
+
+			.user {
+				position: absolute;
+			}
+
+			.avatar {
+				border-radius: 999px;
+				width: 275px;
+				height: 275px;
+				box-shadow: 0 0 64px #000;
+			}
+
+			.name {
+				font-size: 80px;
+				color: #fff;
+				text-align: center;
+				margin-left: -1024px;
+				margin-right: -1024px;
+				margin-top: 16px;
+				text-shadow: 0 0 64px #000;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="image">
+			<div class="user" style="top: 400px; left: 225px">
+				<img id="avatar-0" class="avatar" />
+				<div id="name-0" class="name"></div>
+			</div>
+			<div class="user" style="top: 350px; left: 605px">
+				<img id="avatar-1" class="avatar" />
+				<div id="name-1" class="name"></div>
+			</div>
+		</div>
+	</body>
+</html>

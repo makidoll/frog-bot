@@ -27,6 +27,7 @@ export class HtmlRenderer {
 		const screenshot = await page.screenshot({
 			type: "png",
 			encoding: "binary",
+			omitBackground: true,
 		});
 		page.close();
 		return screenshot;

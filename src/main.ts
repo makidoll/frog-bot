@@ -8,6 +8,7 @@ import { SlashCommandBuilder } from "@discordjs/builders";
 import { REST } from "@discordjs/rest";
 import { Routes } from "discord-api-types/v9";
 import { frogHugCommand } from "./frog-hug-command";
+import { frogComfyCommand } from "./frog-comfy-command";
 
 const htmlRenderer = new HtmlRenderer();
 htmlRenderer.launch();
@@ -63,12 +64,14 @@ client.on("ready", async () => {
 client.on("messageCreate", async message => {
 	if (message.author.bot) return;
 
-	const content = message.content.toLowerCase().trim();
+	const m = message.content.toLowerCase().trim();
 
-	if (content == "frog couch") {
+	if (m == "frog couch" || m.startsWith("frouch")) {
 		frogCouchCommand(message, htmlRenderer);
-	} else if (content.startsWith("frog hug") || content.startsWith("frug")) {
+	} else if (m.startsWith("frog hug") || m.startsWith("frug")) {
 		frogHugCommand(message, htmlRenderer);
+	} else if (m.startsWith("frog comfy") || m.startsWith("fromfy")) {
+		frogComfyCommand(message, htmlRenderer);
 	}
 });
 

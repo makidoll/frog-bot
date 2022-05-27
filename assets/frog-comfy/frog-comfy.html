@@ -1,0 +1,47 @@
+<html>
+	<head>
+		<style>
+			* {
+				margin: 0;
+			}
+
+			.avatar-container,
+			.comfy,
+			.avatar {
+				position: absolute;
+				margin: auto;
+			}
+
+			.avatar {
+				width: 38px;
+				height: 38px;
+				top: 44px;
+				left: 68px;
+			}
+
+			.avatar-container {
+				width: 128px;
+				height: 127px;
+				clip-path: url(#comfy-clip);
+			}
+		</style>
+	</head>
+	<body>
+		<div class="avatar-container">
+			<img class="avatar" id="avatar" />
+		</div>
+		<img class="comfy" src="./frog-comfy.png" />
+		<svg
+			width="0"
+			height="0"
+			viewBox="0 0 128 127"
+			xmlns="http://www.w3.org/2000/svg"
+		>
+			<clipPath id="comfy-clip">
+				<path
+					d="m70.313 49.43-6.848 19.58 7.596 12.411 15.942-.321 12.625-4.493 6.955-5.778 1.926-6.313-.642-13.481-4.708-8.024-9.843-2.033-23.003 8.452Z"
+				/>
+			</clipPath>
+		</svg>
+	</body>
+</html>

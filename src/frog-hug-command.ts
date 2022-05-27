@@ -8,6 +8,7 @@ const frogHugSizes = {
 	"3": [619, 579],
 	"4": [599, 786],
 	"5": [567, 743],
+	"6": [903, 715],
 };
 
 function removeDuplicates(input: any[]) {
@@ -22,10 +23,19 @@ export async function frogHugCommand(
 	message: Message,
 	htmlRenderer: HtmlRenderer,
 ) {
-	const usersHugging = removeDuplicates([
+	// const usersHugging = removeDuplicates([
+	// 	message.author,
+	// 	...message.mentions.users.values(),
+	// ]);
+
+	const usersHugging = [
 		message.author,
-		...message.mentions.users.values(),
-	]);
+		message.author,
+		message.author,
+		message.author,
+		message.author,
+		message.author,
+	];
 
 	if (usersHugging.length == 1) {
 		message.channel.send("ribbit! pls mention someone or multiple");

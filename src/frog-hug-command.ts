@@ -6,6 +6,7 @@ import { downloadToDataUri, getUsernameAndAvatarURL } from "./utils";
 const frogHugSizes = {
 	"2": [563, 400],
 	"3": [619, 579],
+	"4": [599, 786],
 };
 
 function removeDuplicates(input: any[]) {

@@ -23,19 +23,19 @@ export async function frogHugCommand(
 	message: Message,
 	htmlRenderer: HtmlRenderer,
 ) {
-	// const usersHugging = removeDuplicates([
-	// 	message.author,
-	// 	...message.mentions.users.values(),
-	// ]);
+	const usersHugging = removeDuplicates([
+		message.author,
+		...message.mentions.users.values(),
+	]);
 
-	const usersHugging = [
-		message.author,
-		message.author,
-		message.author,
-		message.author,
-		message.author,
-		message.author,
-	];
+	// const usersHugging = [
+	// 	message.author,
+	// 	message.author,
+	// 	message.author,
+	// 	message.author,
+	// 	message.author,
+	// 	message.author,
+	// ];
 
 	if (usersHugging.length == 1) {
 		message.channel.send("ribbit! pls mention someone or multiple");

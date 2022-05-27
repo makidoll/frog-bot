@@ -7,6 +7,7 @@ const frogHugSizes = {
 	"2": [563, 400],
 	"3": [619, 579],
 	"4": [599, 786],
+	"5": [567, 743],
 };
 
 function removeDuplicates(input: any[]) {

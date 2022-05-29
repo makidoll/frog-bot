@@ -39,9 +39,12 @@ body {
 	font-size: 80px;
 	color: #fff;
 	text-align: center;
-	margin-left: -1024px;
-	margin-right: -1024px;
 	margin-top: 16px;
+	height: 110px;
+	/* avatar width + left + right */
+	margin-left: -50px;
+	margin-right: -50px;
+	width: 375px;
 }
 
 .user.shadow .name {

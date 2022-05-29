@@ -85,6 +85,11 @@ export async function frogHugCommand(
 					el.className += " shadow";
 				}
 			});
+			// do text fit now
+			await page.evaluate("doTextFit()");
+			// await new Promise(resolve => {
+			// 	setTimeout(resolve, 100000);
+			// });
 			// using data uris, this speeds this up
 			// await page.waitForNetworkIdle();
 		},

@@ -4,12 +4,14 @@ import * as path from "path";
 import { downloadToDataUri, getUsernameAndAvatarURL } from "./utils";
 
 const frogHugInfo = {
-	"2": { variations: 2 },
+	"2": { variations: 3 },
 	"3": { variations: 1 },
 	"4": { variations: 1 },
 	"5": { variations: 1 },
 	"6": { variations: 1 },
 };
+
+const alphabet = "abcdefghijklmnopqrstuvwxyz";
 
 function removeDuplicates(input: any[]) {
 	let unique = [];
@@ -51,7 +53,9 @@ export async function frogHugCommand(
 
 	const filename =
 		usersHugging.length +
-		(variations > 1 ? "-" + Math.floor(Math.random() * variations) : "");
+		(variations > 1
+			? alphabet[Math.floor(Math.random() * variations)]
+			: "");
 
 	const buffer = await htmlRenderer.renderHtml(
 		"file://" +

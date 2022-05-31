@@ -12,13 +12,14 @@
 body {
 	font-family: "Littlefox";
 	overflow: hidden;
-	zoom: 50%;
 }
 
 .image {
 	background-position: 0 0;
 	background-repeat: no-repeat;
 	background-size: 100%;
+	transform: scale(0.5);
+	transform-origin: 0 0;
 }
 
 .user {

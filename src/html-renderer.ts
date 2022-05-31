@@ -13,15 +13,9 @@ export class HtmlRenderer {
 
 	async renderHtml(
 		path: string,
-		width: number,
-		height: number,
 		doWithPathFn?: (page: puppeteer.Page) => Promise<any>,
 	) {
 		const page = await this.browser.newPage();
-		await page.setViewport({
-			width,
-			height,
-		});
 		await page.goto(path);
 		if (doWithPathFn != null) await doWithPathFn(page);
 		const screenshot = await page.screenshot({

@@ -15,8 +15,6 @@ export async function frogComfyCommand(
 	const buffer = await htmlRenderer.renderHtml(
 		"file://" +
 			path.resolve(__dirname, "../assets/frog-comfy/frog-comfy.html"),
-		128,
-		127,
 		async page => {
 			await page.$eval(
 				"#avatar",
@@ -25,6 +23,10 @@ export async function frogComfyCommand(
 				},
 				await downloadToDataUri(avatarURL),
 			);
+			await page.setViewport({
+				width: 128,
+				height: 127,
+			});
 		},
 	);
 

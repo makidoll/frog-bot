@@ -3,12 +3,12 @@ import { HtmlRenderer } from "./html-renderer";
 import * as path from "path";
 import { downloadToDataUri, getUsernameAndAvatarURL } from "./utils";
 
-const frogHugSizes = {
-	"2": [563, 400],
-	"3": [619, 579],
-	"4": [599, 786],
-	"5": [567, 743],
-	"6": [903, 715],
+const frogHugInfo = {
+	"2": { variations: 2 },
+	"3": { variations: 1 },
+	"4": { variations: 1 },
+	"5": { variations: 1 },
+	"6": { variations: 1 },
 };
 
 function removeDuplicates(input: any[]) {
@@ -42,21 +42,20 @@ export async function frogHugCommand(
 		return;
 	}
 
-	if (!Object.keys(frogHugSizes).includes(String(usersHugging.length))) {
+	if (!Object.keys(frogHugInfo).includes(String(usersHugging.length))) {
 		message.channel.send("ribbit! too many people sorry :(");
 		return;
 	}
 
-	const imageSize = frogHugSizes[String(usersHugging.length)];
+	const { variations } = frogHugInfo[String(usersHugging.length)];
+
+	const filename =
+		usersHugging.length +
+		(variations > 1 ? "-" + Math.floor(Math.random() * variations) : "");
 
 	const buffer = await htmlRenderer.renderHtml(
 		"file://" +
-			path.resolve(
-				__dirname,
-				"../assets/frog-hug/" + usersHugging.length + ".html",
-			),
-		imageSize[0],
-		imageSize[1],
+			path.resolve(__dirname, "../assets/frog-hug/" + filename + ".html"),
 		async page => {
 			for (let i = 0; i < usersHugging.length; i++) {
 				const { username, avatarURL } = await getUsernameAndAvatarURL(
@@ -78,18 +77,27 @@ export async function frogHugCommand(
 					await downloadToDataUri(avatarURL),
 				);
 			}
-			// clone and turn old to shadows
-			await page.$$eval(".user", els => {
-				for (const el of els) {
-					el.parentNode.appendChild(el.cloneNode(true));
-					el.className += " shadow";
-				}
+
+			// make shadows and make text fit
+			await page.evaluate("postProcess()");
+
+			// get image width and height
+			const width = await page.evaluate(
+				"document.querySelector('.image').getBoundingClientRect().width",
+			);
+			const height = await page.evaluate(
+				"document.querySelector('.image').getBoundingClientRect().height",
+			);
+
+			await page.setViewport({
+				width: Math.floor(width),
+				height: Math.floor(height),
 			});
-			// do text fit now
-			await page.evaluate("doTextFit()");
+
 			// await new Promise(resolve => {
-			// 	setTimeout(resolve, 100000);
+			// 	setTimeout(resolve, 1000000);
 			// });
+
 			// using data uris, this speeds this up
 			// await page.waitForNetworkIdle();
 		},

@@ -16,8 +16,6 @@ export async function frogCouchCommand(
 	const buffer = await htmlRenderer.renderHtml(
 		"file://" +
 			path.resolve(__dirname, "../assets/frog-couch/frog-couch.html"),
-		600,
-		500,
 		async page => {
 			for (let i = 0; i < 4; i++) {
 				const { username, avatarURL } = await getUsernameAndAvatarURL(
@@ -46,6 +44,10 @@ export async function frogCouchCommand(
 					await downloadToDataUri(avatarURL),
 				);
 			}
+			await page.setViewport({
+				width: 600,
+				height: 500,
+			});
 			// await page.waitForNetworkIdle();
 		},
 	);

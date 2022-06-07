@@ -2,6 +2,9 @@ import axios from "axios";
 import { Message } from "discord.js";
 import { HtmlRenderer } from "./html-renderer";
 import * as path from "path";
+import axiosRetry from "axios-retry";
+
+axiosRetry(axios, { retries: 6 });
 
 export async function dalleCommand(
 	message: Message,

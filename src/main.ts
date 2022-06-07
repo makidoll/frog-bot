@@ -9,6 +9,7 @@ import { REST } from "@discordjs/rest";
 import { Routes } from "discord-api-types/v9";
 import { frogHugCommand } from "./frog-hug-command";
 import { frogComfyCommand } from "./frog-comfy-command";
+import { dalleCommand } from "./dalle-command";
 
 const htmlRenderer = new HtmlRenderer();
 htmlRenderer.launch();
@@ -72,6 +73,8 @@ client.on("messageCreate", async message => {
 		frogHugCommand(message, htmlRenderer);
 	} else if (m.startsWith("frog comfy") || m.startsWith("fromfy")) {
 		frogComfyCommand(message, htmlRenderer);
+	} else if (m.startsWith("dalle ")) {
+		dalleCommand(message, htmlRenderer);
 	}
 });
 

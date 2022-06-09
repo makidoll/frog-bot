@@ -19,16 +19,21 @@ export const DalleCommand: Command = {
 		message: Message,
 		htmlRenderer: HtmlRenderer,
 	) => {
+		const serverName = "maki's server";
+
 		const workingOnIt = await message.reply(
-			"ribbit! generating images... might take up to 2 minutes",
+			"ribbit! generating images... might take up to a minute, using: " +
+				serverName,
 		);
 
 		try {
 			const res = await axios({
 				method: "post",
-				url: "https://bf.dallemini.ai/generate",
+				// url: "https://bf.dallemini.ai/generate",
+				url: "http://192.168.1.10:41773/dalle",
 				timeout: 1000 * 60 * 5, // 5 minutes
-				data: { prompt },
+				// data: { prompt },
+				data: { num_images: 9, text: prompt },
 			});
 
 			const buffer = await htmlRenderer.renderHtml(
@@ -36,7 +41,8 @@ export const DalleCommand: Command = {
 					path.resolve(__dirname, "../../assets/dalle-mini.html"),
 				async page => {
 					await page.evaluate(
-						"addImages(" + JSON.stringify(res.data.images) + ")",
+						// "addImages(" + JSON.stringify(res.data.images) + ")",
+						"addImages(" + JSON.stringify(res.data) + ")",
 					);
 					await page.setViewport({
 						width: 256 * 3,
@@ -46,7 +52,7 @@ export const DalleCommand: Command = {
 			);
 
 			await message.reply({
-				content: 'here is "' + prompt + '"',
+				content: 'here is "' + prompt + '", using: ' + serverName,
 				files: [buffer],
 			});
 		} catch (error) {

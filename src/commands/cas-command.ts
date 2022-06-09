@@ -59,7 +59,7 @@ async function liquidRescale(
 			`${percentage}x${percentage}%!`,
 			"-resize",
 			`${outputWidth}x${outputHeight}!`,
-			"-", // MAKE SURE ITS PNG maybe idk
+			"png:-",
 		],
 		{ input: image, encoding: null },
 	);

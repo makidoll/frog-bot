@@ -11,11 +11,13 @@ import { DalleCommand } from "./commands/dalle-command";
 import { FrogComfyCommand } from "./commands/frog-comfy-command";
 import { FrogCouchCommand } from "./commands/frog-couch-command";
 import { FrogHugCommand } from "./commands/frog-hug-command";
+import { CasCommand } from "./commands/cas-command";
 
 const htmlRenderer = new HtmlRenderer();
 htmlRenderer.launch();
 
 const allCommands: Command[] = [
+	CasCommand,
 	DalleCommand,
 	FrogComfyCommand,
 	FrogCouchCommand,

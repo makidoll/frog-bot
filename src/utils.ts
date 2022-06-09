@@ -1,6 +1,14 @@
 import axios from "axios";
 import { Guild, User } from "discord.js";
 
+export async function downloadToBuffer(url: string) {
+	try {
+		const req = await axios({ url, responseType: "arraybuffer" });
+		return req.data;
+	} catch (error) {
+		return "";
+	}
+}
 export async function downloadToDataUri(url: string) {
 	try {
 		const req = await axios({ url, responseType: "arraybuffer" });

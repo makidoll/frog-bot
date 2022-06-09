@@ -1,0 +1,167 @@
+import { Message } from "discord.js";
+import { Command } from "../command.js";
+import { HtmlRenderer } from "../html-renderer.js";
+import { downloadToBuffer } from "../utils.js";
+import * as fs from "fs/promises";
+import * as path from "path";
+import * as tmp from "tmp-promise";
+import * as os from "os";
+import * as execa from "execa";
+import { fitBox } from "fit-box";
+
+function getMagickPath(tool: string) {
+	return os.platform() == "win32"
+		? { path: "magick", args: [tool] }
+		: { path: tool, args: [] };
+}
+
+function getGifskiPath() {
+	const platform = os.platform();
+	if (platform == "win32") {
+		return path.resolve(
+			__dirname,
+			"../../node_modules/gifski/bin/windows/gifski.exe",
+		);
+	} else {
+		return path.resolve(
+			__dirname,
+			"../../node_modules/gifski/bin/debian/gifski",
+		);
+	}
+}
+
+async function getWidthHeight(image: Buffer) {
+	const magick = getMagickPath("identify");
+	const { stdout } = await execa(
+		magick.path,
+		[...magick.args, "-format", "%wx%h", "-"],
+		{
+			input: image,
+		},
+	);
+	const [widthStr, heightStr] = stdout.split("x");
+	return { width: parseInt(widthStr), height: parseInt(heightStr) };
+}
+
+async function liquidRescale(
+	image: Buffer,
+	percentage: number,
+	outputWidth: number,
+	outputHeight: number,
+): Promise<Buffer> {
+	const magick = getMagickPath("convert");
+	const { stdout } = await execa(
+		magick.path,
+		[
+			...magick.args,
+			"-",
+			"-liquid-rescale",
+			`${percentage}x${percentage}%!`,
+			"-resize",
+			`${outputWidth}x${outputHeight}!`,
+			"-", // MAKE SURE ITS PNG maybe idk
+		],
+		{ input: image, encoding: null },
+	);
+	return stdout as any;
+}
+
+async function makeGif(frames: Buffer[], fps: number, quality: number) {
+	const framePaths = await Promise.all(
+		frames.map(async frame => {
+			const filePath = await tmp.file({ postfix: ".png" });
+			await fs.writeFile(filePath.path, frame);
+			return filePath;
+		}),
+	);
+
+	const outputPath = await tmp.file({ postfix: ".gif" });
+
+	await execa(getGifskiPath(), [
+		"--output",
+		outputPath.path,
+		"--fps",
+		fps.toString(),
+		"--quality",
+		quality.toString(),
+		"--nosort",
+		...framePaths.map(p => p.path),
+	]);
+
+	const outputBuffer = await fs.readFile(outputPath.path);
+
+	// remove all temp files
+
+	for (const framePath of framePaths) {
+		await framePath.cleanup();
+	}
+
+	outputPath.cleanup();
+
+	// ok done
+
+	return outputBuffer;
+}
+
+export const CasCommand: Command = {
+	commands: ["cas"],
+	onMessage: async (
+		argument: string,
+		message: Message,
+		htmlRenderer: HtmlRenderer,
+	) => {
+		try {
+			const attachment = message.attachments.at(0);
+
+			if (attachment == null) {
+				message.channel.send("ribbit! please send an image");
+				return;
+			}
+
+			if (!["image/png", "image/jpeg"].includes(attachment.contentType)) {
+				message.channel.send("ribbit! png or jpg please");
+				return;
+			}
+
+			message.channel.send("ribbit! im working on it, please wait");
+
+			const inputBuffer = await downloadToBuffer(attachment.url);
+
+			const original = await getWidthHeight(inputBuffer);
+			const { width, height } = fitBox({
+				boundary: { width: 400, height: 300 },
+				box: original,
+			});
+
+			// 100 to smallest
+			const smallestSize = 10;
+
+			const frames = await Promise.all(
+				new Array(100 - smallestSize + 1).fill(null).map((_, i) => {
+					const percentage = 100 - i;
+					return liquidRescale(
+						inputBuffer,
+						percentage,
+						width,
+						height,
+					);
+				}),
+			);
+
+			const outputBuffer = await makeGif(frames, 30, 80);
+			fs.writeFile("test.gif", outputBuffer);
+
+			message.channel.send({
+				files: [
+					{
+						attachment: outputBuffer,
+						name: "output.gif",
+					},
+				],
+			});
+		} catch (error) {
+			message.channel.send("ribbit! it failed sorry :(");
+			console.error(error);
+		}
+	},
+};

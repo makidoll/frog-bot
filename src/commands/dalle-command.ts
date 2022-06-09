@@ -22,7 +22,7 @@ export const DalleCommand: Command = {
 		const serverName = "maki's server, dalle mega fp16";
 
 		const workingOnIt = await message.reply(
-			"ribbit! generating images... might take up to a minute, using: " +
+			"ribbit! generating images... might take up to 2 minutes, using: " +
 				serverName,
 		);
 

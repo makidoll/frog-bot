@@ -108,7 +108,7 @@ export const CasCommand: Command = {
 	shortCommand: "fras",
 	help: {
 		arguments: "<attached image>",
-		description: "😎 makes a funny content aware scaling gif",
+		description: "🔎 makes a funny content aware scaling zoomy gif",
 	},
 	onMessage: async (
 		argument: string,

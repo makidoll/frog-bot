@@ -62,11 +62,11 @@ export const DalleCommand: Command = {
 		const queue = dalleQueue.queueTask(dalleTask) + 1;
 
 		workingOnItMessage = await message.reply(
-			"ribbit! generating images... might take up to " +
+			"ribbit! generating images... might take up to **" +
 				1.5 * queue +
-				" minutes **(" +
+				" minutes," +
 				stNdRdTh(queue) +
-				" in queue)**,\n*using: " +
+				" in queue**,\n*using: " +
 				serverName +
 				"*",
 		);

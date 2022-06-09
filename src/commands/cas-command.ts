@@ -158,7 +158,6 @@ export const CasCommand: Command = {
 			);
 
 			const outputBuffer = await makeGif(frames, 30, 80);
-			fs.writeFile("test.gif", outputBuffer);
 
 			message.channel.send({
 				files: [

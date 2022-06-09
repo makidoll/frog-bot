@@ -22,8 +22,14 @@ function removeDuplicates(input: any[]) {
 	return unique;
 }
 
-export const FrogHugCommand: Command = {
-	commands: ["frug", "frog hug"],
+export const HugCommand: Command = {
+	command: "hug",
+	shortCommand: "frug",
+	help: {
+		arguments: "<mention(s)>",
+		description:
+			"🫂 does a frog hug with frens, or more. yes, 2, 3, 4, 5 or 6 (find me a pic for more lol)",
+	},
 	onMessage: async (
 		argument: string,
 		message: Message,

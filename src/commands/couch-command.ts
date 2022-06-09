@@ -4,8 +4,13 @@ import * as path from "path";
 import { downloadToDataUri, getUsernameAndAvatarURL } from "../utils";
 import { Command } from "../command";
 
-export const FrogCouchCommand: Command = {
-	commands: ["frouch", "frog couch"],
+export const CouchCommand: Command = {
+	command: "couch",
+	shortCommand: "frouch",
+	help: {
+		arguments: "",
+		description: "🛋️ puts the last 4 messages on the frog couch",
+	},
 	onMessage: async (
 		argument: string,
 		message: Message,

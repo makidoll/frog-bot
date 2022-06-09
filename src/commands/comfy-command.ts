@@ -4,8 +4,13 @@ import * as path from "path";
 import { downloadToDataUri, getUsernameAndAvatarURL } from "../utils";
 import { Command } from "../command";
 
-export const FrogComfyCommand: Command = {
-	commands: ["fromfy", "frog comfy"],
+export const ComfyCommand: Command = {
+	command: "comfy",
+	shortCommand: "fromfy",
+	help: {
+		arguments: "[optional mention]",
+		description: "🧶 put you or fren in comfy frog",
+	},
 	onMessage: async (
 		argument: string,
 		message: Message,

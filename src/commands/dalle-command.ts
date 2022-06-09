@@ -8,7 +8,12 @@ import { Command } from "../command";
 axiosRetry(axios, { retries: 6 });
 
 export const DalleCommand: Command = {
-	commands: ["dalle"],
+	command: "dalle",
+	shortCommand: "falle",
+	help: {
+		arguments: "<prompt>",
+		description: "🎨 generate 9 images from text using ai",
+	},
 	onMessage: async (
 		prompt: string,
 		message: Message,

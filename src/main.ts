@@ -8,20 +8,23 @@ import { REST } from "@discordjs/rest";
 import { Routes } from "discord-api-types/v9";
 import { Command } from "./command";
 import { DalleCommand } from "./commands/dalle-command";
-import { FrogComfyCommand } from "./commands/frog-comfy-command";
-import { FrogCouchCommand } from "./commands/frog-couch-command";
-import { FrogHugCommand } from "./commands/frog-hug-command";
+import { ComfyCommand } from "./commands/comfy-command";
+import { CouchCommand } from "./commands/couch-command";
+import { HugCommand } from "./commands/hug-command";
 import { CasCommand } from "./commands/cas-command";
+import { HelpCommand } from "./commands/help-command";
 
 const htmlRenderer = new HtmlRenderer();
 htmlRenderer.launch();
 
-const allCommands: Command[] = [
-	CasCommand,
+export const commandPrefix = "frog ";
+export const availableCommands: Command[] = [
+	HelpCommand,
+	CouchCommand,
+	HugCommand,
+	ComfyCommand,
 	DalleCommand,
-	FrogComfyCommand,
-	FrogCouchCommand,
-	FrogHugCommand,
+	CasCommand,
 ];
 
 const client = new Client({
@@ -77,20 +80,19 @@ client.on("messageCreate", async message => {
 
 	const lowerContent = message.content.toLowerCase().trim();
 
-	for (let { commands, onMessage } of allCommands) {
-		let foundCommand = null;
-		for (let command of commands) {
-			if (lowerContent.startsWith(command.toLowerCase())) {
-				foundCommand = command;
-				break;
-			}
-		}
+	for (let { command, shortCommand, onMessage } of availableCommands) {
+		let short = shortCommand;
+		let long = commandPrefix + command;
 
-		if (foundCommand != null) {
-			const argument = message.content.substring(foundCommand.length);
-			onMessage(argument, message, htmlRenderer);
-			break; // dont run other commands
-		}
+		let commandLength = 0;
+		if (lowerContent.startsWith(short)) commandLength = short.length;
+		else if (lowerContent.startsWith(long)) commandLength = long.length;
+
+		if (commandLength == 0) continue;
+
+		const argument = message.content.substring(command.length + 1); // 1 for space in betwee
+		onMessage(argument, message, htmlRenderer);
+		break; // dont run other commands
 	}
 });
 

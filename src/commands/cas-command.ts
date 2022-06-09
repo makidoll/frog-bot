@@ -104,7 +104,12 @@ async function makeGif(frames: Buffer[], fps: number, quality: number) {
 }
 
 export const CasCommand: Command = {
-	commands: ["cas"],
+	command: "cas",
+	shortCommand: "fas",
+	help: {
+		arguments: "<attached image>",
+		description: "😎 makes a funny content aware scaling gif",
+	},
 	onMessage: async (
 		argument: string,
 		message: Message,

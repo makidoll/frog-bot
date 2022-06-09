@@ -39,6 +39,16 @@ const client = new Client({
 client.on("ready", async () => {
 	console.log(`Logged in as: ${client.user.tag}!`);
 
+	client.user.setPresence({
+		activities: [
+			{
+				name: "you type: frog help",
+				type: "WATCHING",
+				url: "https://maki.cafe",
+			},
+		],
+	});
+
 	initReactionRoles(client);
 
 	// const command = new SlashCommandBuilder()

@@ -2,17 +2,25 @@ import "dotenv/config"; // loads .env file to process.env
 
 import { Client, Intents } from "discord.js";
 import { HtmlRenderer } from "./html-renderer";
-import { frogCouchCommand } from "./frog-couch-command";
 import { initReactionRoles } from "./reaction-roles";
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { REST } from "@discordjs/rest";
 import { Routes } from "discord-api-types/v9";
-import { frogHugCommand } from "./frog-hug-command";
-import { frogComfyCommand } from "./frog-comfy-command";
-import { dalleCommand } from "./dalle-command";
+import { Command } from "./command";
+import { DalleCommand } from "./commands/dalle-command";
+import { FrogComfyCommand } from "./commands/frog-comfy-command";
+import { FrogCouchCommand } from "./commands/frog-couch-command";
+import { FrogHugCommand } from "./commands/frog-hug-command";
 
 const htmlRenderer = new HtmlRenderer();
 htmlRenderer.launch();
+
+const allCommands: Command[] = [
+	DalleCommand,
+	FrogComfyCommand,
+	FrogCouchCommand,
+	FrogHugCommand,
+];
 
 const client = new Client({
 	intents: [
@@ -65,16 +73,22 @@ client.on("ready", async () => {
 client.on("messageCreate", async message => {
 	if (message.author.bot) return;
 
-	const m = message.content.toLowerCase().trim();
+	const lowerContent = message.content.toLowerCase().trim();
 
-	if (m == "frog couch" || m.startsWith("frouch")) {
-		frogCouchCommand(message, htmlRenderer);
-	} else if (m.startsWith("frog hug") || m.startsWith("frug")) {
-		frogHugCommand(message, htmlRenderer);
-	} else if (m.startsWith("frog comfy") || m.startsWith("fromfy")) {
-		frogComfyCommand(message, htmlRenderer);
-	} else if (m.startsWith("dalle ")) {
-		dalleCommand(message, htmlRenderer);
+	for (let { commands, onMessage } of allCommands) {
+		let foundCommand = null;
+		for (let command of commands) {
+			if (lowerContent.startsWith(command.toLowerCase())) {
+				foundCommand = command;
+				break;
+			}
+		}
+
+		if (foundCommand != null) {
+			const argument = message.content.substring(foundCommand.length);
+			onMessage(argument, message, htmlRenderer);
+			break; // dont run other commands
+		}
 	}
 });
 

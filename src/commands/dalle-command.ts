@@ -19,7 +19,7 @@ export const DalleCommand: Command = {
 		message: Message,
 		htmlRenderer: HtmlRenderer,
 	) => {
-		const serverName = "maki's server";
+		const serverName = "maki's server, dalle mega fp16";
 
 		const workingOnIt = await message.reply(
 			"ribbit! generating images... might take up to a minute, using: " +

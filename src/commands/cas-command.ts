@@ -43,6 +43,26 @@ async function getWidthHeight(image: Buffer) {
 	return { width: parseInt(widthStr), height: parseInt(heightStr) };
 }
 
+async function rescale(
+	image: Buffer,
+	outputWidth: number,
+	outputHeight: number,
+): Promise<Buffer> {
+	const magick = getMagickPath("convert");
+	const { stdout } = await execa(
+		magick.path,
+		[
+			...magick.args,
+			"-",
+			"-resize",
+			`${outputWidth}x${outputHeight}!`,
+			"png:-",
+		],
+		{ input: image, encoding: null },
+	);
+	return stdout as any;
+}
+
 async function liquidRescale(
 	image: Buffer,
 	percentage: number,
@@ -137,15 +157,21 @@ export const CasCommand: Command = {
 		);
 
 		try {
-			const inputBuffer = await downloadToBuffer(
+			const originalInputBuffer = await downloadToBuffer(
 				attachment == null ? argument : attachment.url,
 			);
 
-			const original = await getWidthHeight(inputBuffer);
 			const { width, height } = fitBox({
 				boundary: { width: 400, height: 300 },
-				box: original,
+				box: await getWidthHeight(originalInputBuffer),
 			});
+
+			// downscale first or otherwise it will take forever
+			const inputBuffer = await rescale(
+				originalInputBuffer,
+				width,
+				height,
+			);
 
 			// 100 to smallest
 			const smallestSize = 10;

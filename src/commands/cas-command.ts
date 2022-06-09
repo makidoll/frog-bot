@@ -117,12 +117,13 @@ export const CasCommand: Command = {
 	) => {
 		const attachment = message.attachments.at(0);
 
-		if (attachment == null) {
+		if (attachment == null && !argument.startsWith("http")) {
 			message.reply("ribbit! please send an image");
 			return;
 		}
 
 		if (
+			attachment &&
 			!["image/png", "image/jpeg", "image/webp"].includes(
 				attachment.contentType,
 			)
@@ -136,7 +137,9 @@ export const CasCommand: Command = {
 		);
 
 		try {
-			const inputBuffer = await downloadToBuffer(attachment.url);
+			const inputBuffer = await downloadToBuffer(
+				attachment == null ? argument : attachment.url,
+			);
 
 			const original = await getWidthHeight(inputBuffer);
 			const { width, height } = fitBox({

@@ -100,7 +100,7 @@ client.on("messageCreate", async message => {
 
 		if (commandLength == 0) continue;
 
-		const argument = message.content.substring(command.length + 1); // 1 for space in betwee
+		const argument = message.content.substring(command.length + 1).trim();
 		onMessage(argument, message, htmlRenderer);
 		break; // dont run other commands
 	}

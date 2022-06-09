@@ -35,3 +35,8 @@ export function stNdRdTh(n: number) {
 	else if (mod == 3) return n + "rd";
 	else return n + "th";
 }
+
+export function plural(n: number, single: string, plural) {
+	if (n == 1 || n == -1) return n + " " + single;
+	else return n + " " + plural;
+}

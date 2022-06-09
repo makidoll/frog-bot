@@ -3,7 +3,7 @@ import { Message } from "discord.js";
 import * as path from "path";
 import { Command } from "../command";
 import { Services } from "../services/services";
-import { stNdRdTh } from "../utils";
+import { plural, stNdRdTh } from "../utils";
 
 export const DalleCommand: Command = {
 	command: "dalle",
@@ -18,6 +18,8 @@ export const DalleCommand: Command = {
 		{ htmlRenderer, dalleQueue }: Services,
 	) => {
 		const serverName = "maki's server, dalle mega fp16";
+		const numberOfImages = 6;
+		const timePerImage = 10; // seconds
 
 		let workingOnItMessage: Message;
 
@@ -27,7 +29,7 @@ export const DalleCommand: Command = {
 					method: "post",
 					url: "http://192.168.1.10:41773/dalle",
 					timeout: 1000 * 60 * 5, // 5 minutes
-					data: { num_images: 9, text: prompt },
+					data: { num_images: numberOfImages, text: prompt },
 				});
 
 				const buffer = await htmlRenderer.renderHtml(
@@ -39,7 +41,7 @@ export const DalleCommand: Command = {
 						);
 						await page.setViewport({
 							width: 256 * 3,
-							height: 256 * 3,
+							height: 256 * 2,
 						});
 					},
 				);
@@ -61,10 +63,12 @@ export const DalleCommand: Command = {
 
 		const queue = dalleQueue.queueTask(dalleTask) + 1;
 
+		const waitMinutes = (timePerImage * numberOfImages * queue) / 60;
+
 		workingOnItMessage = await message.reply(
 			"ribbit! generating images... might take up to **" +
-				1.5 * queue +
-				" minutes, " +
+				plural(waitMinutes, "minute", "minutes") +
+				", " +
 				stNdRdTh(queue) +
 				" in queue**\n*using: " +
 				serverName +

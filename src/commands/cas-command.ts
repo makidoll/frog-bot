@@ -105,7 +105,7 @@ async function makeGif(frames: Buffer[], fps: number, quality: number) {
 
 export const CasCommand: Command = {
 	command: "cas",
-	shortCommand: "fas",
+	shortCommand: "fras",
 	help: {
 		arguments: "<attached image>",
 		description: "😎 makes a funny content aware scaling gif",
@@ -115,25 +115,27 @@ export const CasCommand: Command = {
 		message: Message,
 		htmlRenderer: HtmlRenderer,
 	) => {
+		const attachment = message.attachments.at(0);
+
+		if (attachment == null) {
+			message.reply("ribbit! please send an image");
+			return;
+		}
+
+		if (
+			!["image/png", "image/jpeg", "image/webp"].includes(
+				attachment.contentType,
+			)
+		) {
+			message.reply("ribbit! png or jpg please");
+			return;
+		}
+
+		const workingOnItMessage = await message.reply(
+			"ribbit! im working on it, please wait",
+		);
+
 		try {
-			const attachment = message.attachments.at(0);
-
-			if (attachment == null) {
-				message.channel.send("ribbit! please send an image");
-				return;
-			}
-
-			if (
-				!["image/png", "image/jpeg", "image/webp"].includes(
-					attachment.contentType,
-				)
-			) {
-				message.channel.send("ribbit! png or jpg please");
-				return;
-			}
-
-			message.channel.send("ribbit! im working on it, please wait");
-
 			const inputBuffer = await downloadToBuffer(attachment.url);
 
 			const original = await getWidthHeight(inputBuffer);
@@ -159,7 +161,7 @@ export const CasCommand: Command = {
 
 			const outputBuffer = await makeGif(frames, 30, 80);
 
-			message.channel.send({
+			await message.reply({
 				files: [
 					{
 						attachment: outputBuffer,
@@ -168,8 +170,10 @@ export const CasCommand: Command = {
 				],
 			});
 		} catch (error) {
-			message.channel.send("ribbit! it failed sorry :(");
+			message.reply("aw ribbit... it failed sorry :(");
 			console.error(error);
 		}
+
+		workingOnItMessage.delete().catch(() => {});
 	},
 };

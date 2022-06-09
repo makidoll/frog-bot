@@ -9,7 +9,7 @@ axiosRetry(axios, { retries: 6 });
 
 export const DalleCommand: Command = {
 	command: "dalle",
-	shortCommand: "falle",
+	shortCommand: "fralle",
 	help: {
 		arguments: "<prompt>",
 		description: "🎨 generate 9 images from text using ai",
@@ -19,7 +19,7 @@ export const DalleCommand: Command = {
 		message: Message,
 		htmlRenderer: HtmlRenderer,
 	) => {
-		message.channel.send(
+		const workingOnIt = await message.reply(
 			"ribbit! generating images... might take up to 2 minutes",
 		);
 
@@ -45,13 +45,15 @@ export const DalleCommand: Command = {
 				},
 			);
 
-			message.channel.send({
+			await message.reply({
 				content: 'here is "' + prompt + '"',
 				files: [buffer],
 			});
 		} catch (error) {
-			message.channel.send("aw ribbit... sorry there was an error :(");
+			message.reply("aw ribbit... sorry there was an error :(");
 			console.error(error);
 		}
+
+		workingOnIt.delete().catch(() => {});
 	},
 };

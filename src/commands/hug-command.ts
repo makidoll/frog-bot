@@ -50,12 +50,12 @@ export const HugCommand: Command = {
 		// ];
 
 		if (usersHugging.length == 1) {
-			message.channel.send("ribbit! pls mention someone or multiple");
+			message.reply("ribbit! pls mention someone or multiple");
 			return;
 		}
 
 		if (!Object.keys(frogHugInfo).includes(String(usersHugging.length))) {
-			message.channel.send("ribbit! too many people sorry :(");
+			message.reply("ribbit! too many people sorry :(");
 			return;
 		}
 
@@ -121,6 +121,6 @@ export const HugCommand: Command = {
 			},
 		);
 
-		message.channel.send({ files: [buffer] });
+		message.reply({ files: [buffer] });
 	},
 };

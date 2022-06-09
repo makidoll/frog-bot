@@ -3,7 +3,7 @@ import { availableCommands, commandPrefix } from "../main";
 
 export const HelpCommand: Command = {
 	command: "help",
-	shortCommand: "felp",
+	shortCommand: "frelp",
 	help: {
 		arguments: "",
 		description: "📚 shows this!",
@@ -23,6 +23,6 @@ export const HelpCommand: Command = {
 				"\n";
 		}
 
-		message.channel.send(out);
+		message.reply(out);
 	},
 };

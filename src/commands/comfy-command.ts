@@ -42,6 +42,6 @@ export const ComfyCommand: Command = {
 			},
 		);
 
-		message.channel.send({ files: [buffer] });
+		message.reply({ files: [buffer] });
 	},
 };

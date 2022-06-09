@@ -65,6 +65,6 @@ export const CouchCommand: Command = {
 			},
 		);
 
-		message.channel.send({ files: [buffer] });
+		message.reply({ files: [buffer] });
 	},
 };

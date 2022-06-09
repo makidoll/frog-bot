@@ -1,6 +1,5 @@
 import { Message } from "discord.js";
 import { Command } from "../command.js";
-import { HtmlRenderer } from "../html-renderer.js";
 import { downloadToBuffer } from "../utils.js";
 import * as fs from "fs/promises";
 import * as path from "path";
@@ -8,6 +7,7 @@ import * as tmp from "tmp-promise";
 import * as os from "os";
 import * as execa from "execa";
 import { fitBox } from "fit-box";
+import { Services } from "../services/services.js";
 
 function getMagickPath(tool: string) {
 	return os.platform() == "win32"
@@ -133,7 +133,7 @@ export const CasCommand: Command = {
 	onMessage: async (
 		argument: string,
 		message: Message,
-		htmlRenderer: HtmlRenderer,
+		{ htmlRenderer }: Services,
 	) => {
 		const attachment = message.attachments.at(0);
 

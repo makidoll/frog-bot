@@ -1,5 +1,5 @@
 import { Message } from "discord.js";
-import { HtmlRenderer } from "./html-renderer";
+import { Services } from "./services/services";
 
 export interface Command {
 	command: string;
@@ -8,9 +8,5 @@ export interface Command {
 		arguments: string;
 		description: string;
 	};
-	onMessage: (
-		argument: string,
-		message: Message,
-		htmlRenderer: HtmlRenderer,
-	) => any;
+	onMessage: (argument: string, message: Message, services: Services) => any;
 }

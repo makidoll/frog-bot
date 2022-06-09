@@ -27,3 +27,11 @@ export async function getUsernameAndAvatarURL(user: User, guild: Guild) {
 		avatarURL: member?.displayAvatarURL() ?? user.avatarURL(),
 	};
 }
+
+export function stNdRdTh(n: number) {
+	const mod = n % 10;
+	if (mod == 1) return n + "st";
+	else if (mod == 2) return n + "nd";
+	else if (mod == 3) return n + "rd";
+	else return n + "th";
+}

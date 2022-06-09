@@ -1,8 +1,8 @@
 import { Message } from "discord.js";
-import { HtmlRenderer } from "../html-renderer";
 import * as path from "path";
 import { downloadToDataUri, getUsernameAndAvatarURL } from "../utils";
 import { Command } from "../command";
+import { Services } from "../services/services";
 
 export const CouchCommand: Command = {
 	command: "couch",
@@ -14,7 +14,7 @@ export const CouchCommand: Command = {
 	onMessage: async (
 		argument: string,
 		message: Message,
-		htmlRenderer: HtmlRenderer,
+		{ htmlRenderer }: Services,
 	) => {
 		const messages = Array.from(
 			(await message.channel.messages.fetch({ limit: 5 })).values(),

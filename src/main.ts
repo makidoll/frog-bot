@@ -1,7 +1,8 @@
 import "dotenv/config"; // loads .env file to process.env
 
 import { Client, Intents } from "discord.js";
-import { HtmlRenderer } from "./html-renderer";
+import { HtmlRenderer } from "./services/html-renderer";
+import { Services } from "./services/services";
 import { initReactionRoles } from "./reaction-roles";
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { REST } from "@discordjs/rest";
@@ -13,9 +14,14 @@ import { CouchCommand } from "./commands/couch-command";
 import { HugCommand } from "./commands/hug-command";
 import { CasCommand } from "./commands/cas-command";
 import { HelpCommand } from "./commands/help-command";
+import { DalleQueue } from "./services/dalle-queue";
 
-const htmlRenderer = new HtmlRenderer();
-htmlRenderer.launch();
+const services: Services = {
+	htmlRenderer: new HtmlRenderer(),
+	dalleQueue: new DalleQueue(),
+};
+
+services.htmlRenderer.launch();
 
 export const commandPrefix = "frog ";
 export const availableCommands: Command[] = [
@@ -101,7 +107,7 @@ client.on("messageCreate", async message => {
 		if (commandLength == 0) continue;
 
 		const argument = message.content.substring(command.length + 1).trim();
-		onMessage(argument, message, htmlRenderer);
+		onMessage(argument, message, services);
 		break; // dont run other commands
 	}
 });

@@ -118,7 +118,11 @@ export const CasCommand: Command = {
 				return;
 			}
 
-			if (!["image/png", "image/jpeg"].includes(attachment.contentType)) {
+			if (
+				!["image/png", "image/jpeg", "image/webp"].includes(
+					attachment.contentType,
+				)
+			) {
 				message.channel.send("ribbit! png or jpg please");
 				return;
 			}

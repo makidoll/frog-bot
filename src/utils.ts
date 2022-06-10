@@ -1,4 +1,6 @@
 import axios from "axios";
+import * as os from "os";
+import * as path from "path";
 import { Guild, User } from "discord.js";
 
 export async function downloadToBuffer(url: string) {
@@ -39,4 +41,25 @@ export function stNdRdTh(n: number) {
 export function plural(n: number, single: string, plural) {
 	if (n == 1 || n == -1) return n + " " + single;
 	else return n + " " + plural;
+}
+
+export function getMagickPath(tool: string) {
+	return os.platform() == "win32"
+		? { path: "magick", args: [tool] }
+		: { path: tool, args: [] };
+}
+
+export function getGifskiPath() {
+	const platform = os.platform();
+	if (platform == "win32") {
+		return path.resolve(
+			__dirname,
+			"..//node_modules/gifski/bin/windows/gifski.exe",
+		);
+	} else {
+		return path.resolve(
+			__dirname,
+			"..//node_modules/gifski/bin/debian/gifski",
+		);
+	}
 }

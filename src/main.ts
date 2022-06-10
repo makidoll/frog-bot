@@ -15,6 +15,7 @@ import { HugCommand } from "./commands/hug-command";
 import { CasCommand } from "./commands/cas-command";
 import { HelpCommand } from "./commands/help-command";
 import { DalleQueue } from "./services/dalle-queue";
+import { DeepfryCommand } from "./commands/deepfry-command";
 
 const services: Services = {
 	htmlRenderer: new HtmlRenderer(),
@@ -31,6 +32,7 @@ export const availableCommands: Command[] = [
 	ComfyCommand,
 	DalleCommand,
 	CasCommand,
+	DeepfryCommand,
 ];
 
 const client = new Client({

@@ -1,34 +1,11 @@
 import { Message } from "discord.js";
 import { Command } from "../command.js";
-import { downloadToBuffer } from "../utils.js";
+import { downloadToBuffer, getGifskiPath, getMagickPath } from "../utils.js";
 import * as fs from "fs/promises";
-import * as path from "path";
 import * as tmp from "tmp-promise";
-import * as os from "os";
 import * as execa from "execa";
 import { fitBox } from "fit-box";
 import { Services } from "../services/services.js";
-
-function getMagickPath(tool: string) {
-	return os.platform() == "win32"
-		? { path: "magick", args: [tool] }
-		: { path: tool, args: [] };
-}
-
-function getGifskiPath() {
-	const platform = os.platform();
-	if (platform == "win32") {
-		return path.resolve(
-			__dirname,
-			"../../node_modules/gifski/bin/windows/gifski.exe",
-		);
-	} else {
-		return path.resolve(
-			__dirname,
-			"../../node_modules/gifski/bin/debian/gifski",
-		);
-	}
-}
 
 async function getWidthHeight(image: Buffer) {
 	const magick = getMagickPath("identify");

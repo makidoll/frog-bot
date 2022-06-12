@@ -46,7 +46,11 @@ export const DalleCommand: Command = {
 
 				await interaction.followUp({
 					content:
-						'here is "' + prompt + '", *using: ' + serverName + "*",
+						'here is **"' +
+						prompt +
+						'"**, *using: ' +
+						serverName +
+						"*",
 					files: [buffer],
 				});
 			} catch (error) {
@@ -62,9 +66,9 @@ export const DalleCommand: Command = {
 		const waitMinutes = (timePerImage * numberOfImages * queue) / 60;
 
 		await interaction.reply(
-			'ribbit! generating images for "' +
+			'ribbit! generating images for **"' +
 				prompt +
-				'"...\nmight take up to **' +
+				'"...**\nmight take up to **' +
 				plural(waitMinutes, "minute", "minutes") +
 				", " +
 				stNdRdTh(queue) +

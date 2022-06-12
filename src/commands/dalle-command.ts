@@ -44,13 +44,13 @@ export const DalleCommand: Command = {
 					},
 				);
 
-				await interaction.editReply({
+				await interaction.followUp({
 					content:
 						'here is "' + prompt + '", *using: ' + serverName + "*",
 					files: [buffer],
 				});
 			} catch (error) {
-				interaction.editReply(
+				interaction.followUp(
 					"aw ribbit... sorry there was an error :(",
 				);
 				console.error(error);

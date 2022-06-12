@@ -1,8 +1,7 @@
-import { Message } from "discord.js";
 import * as path from "path";
 import { downloadToDataUri, getUsernameAndAvatarURL } from "../utils";
 import { Command } from "../command";
-import { Services } from "../services/services";
+import { SlashCommandBuilder } from "@discordjs/builders";
 
 const frogHugInfo = {
 	"2": { variations: 3 },
@@ -23,39 +22,68 @@ function removeDuplicates(input: any[]) {
 }
 
 export const HugCommand: Command = {
-	command: "hug",
-	shortCommand: "frug",
-	help: {
-		arguments: "<mention(s)>",
-		description:
+	// command: "hug",
+	command: new SlashCommandBuilder()
+		.setName("frug")
+		.setDescription(
 			"🫂 does a frog hug with frens, or more. yes, 2, 3, 4, 5 or 6 (find me a pic for more lol)",
-	},
-	onMessage: async (
-		argument: string,
-		message: Message,
-		{ htmlRenderer }: Services,
-	) => {
+		)
+		.addUserOption(option =>
+			option
+				.setName("friend")
+				.setDescription("for a 2 frog hug")
+				.setRequired(true),
+		)
+		.addUserOption(option =>
+			option
+				.setName("friend2")
+				.setDescription("for a 3 frog hug")
+				.setRequired(false),
+		)
+		.addUserOption(option =>
+			option
+				.setName("friend3")
+				.setDescription("for a 4 frog hug")
+				.setRequired(false),
+		)
+		.addUserOption(option =>
+			option
+				.setName("friend4")
+				.setDescription("for a 5 frog hug")
+				.setRequired(false),
+		)
+		.addUserOption(option =>
+			option
+				.setName("friend5")
+				.setDescription("for a 6 frog hug")
+				.setRequired(false),
+		),
+	onInteraction: async (interaction, { htmlRenderer }) => {
 		const usersHugging = removeDuplicates([
-			message.author,
-			...message.mentions.users.values(),
-		]);
+			interaction.user,
+			interaction.options.getUser("friend"),
+			interaction.options.getUser("friend2"),
+			interaction.options.getUser("friend3"),
+			interaction.options.getUser("friend4"),
+			interaction.options.getUser("friend5"),
+		]).filter(user => user != null);
 
 		// const usersHugging = [
-		// 	message.author,
-		// 	message.author,
-		// 	message.author,
-		// 	message.author,
-		// 	message.author,
-		// 	message.author,
+		// 	interaction.author,
+		// 	interaction.author,
+		// 	interaction.author,
+		// 	interaction.author,
+		// 	interaction.author,
+		// 	interaction.author,
 		// ];
 
 		if (usersHugging.length == 1) {
-			message.reply("ribbit! pls mention someone or multiple");
+			interaction.reply("ribbit! pls mention someone or multiple");
 			return;
 		}
 
 		if (!Object.keys(frogHugInfo).includes(String(usersHugging.length))) {
-			message.reply("ribbit! too many people sorry :(");
+			interaction.reply("ribbit! too many people sorry :(");
 			return;
 		}
 
@@ -78,7 +106,7 @@ export const HugCommand: Command = {
 					const { username, avatarURL } =
 						await getUsernameAndAvatarURL(
 							usersHugging[i],
-							message.guild,
+							interaction.guild,
 						);
 					await page.$eval(
 						"#name-" + i,
@@ -121,6 +149,6 @@ export const HugCommand: Command = {
 			},
 		);
 
-		message.reply({ files: [buffer] });
+		interaction.reply({ files: [buffer] });
 	},
 };

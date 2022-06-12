@@ -1,23 +1,23 @@
-import { Message } from "discord.js";
+import { CommandInteraction, Message } from "discord.js";
 import * as path from "path";
 import { downloadToDataUri, getUsernameAndAvatarURL } from "../utils";
 import { Command } from "../command";
 import { Services } from "../services/services";
+import { SlashCommandBuilder } from "@discordjs/builders";
 
 export const CouchCommand: Command = {
-	command: "couch",
-	shortCommand: "frouch",
-	help: {
-		arguments: "",
-		description: "🛋️ puts the last 4 messages on the frog couch",
-	},
-	onMessage: async (
-		argument: string,
-		message: Message,
+	command: new SlashCommandBuilder()
+		.setName("couch")
+		.setDescription("🛋️ puts the last 4 messages on the frog couch"),
+	onInteraction: async (
+		interaction: CommandInteraction,
+
 		{ htmlRenderer }: Services,
 	) => {
+		interaction.deferReply();
+
 		const messages = Array.from(
-			(await message.channel.messages.fetch({ limit: 5 })).values(),
+			(await interaction.channel.messages.fetch({ limit: 5 })).values(),
 		)
 			.reverse()
 			.slice(0, 4);
@@ -33,7 +33,7 @@ export const CouchCommand: Command = {
 					const { username, avatarURL } =
 						await getUsernameAndAvatarURL(
 							messages[i].author,
-							message.guild,
+							interaction.guild,
 						);
 					await page.$eval(
 						"#username-" + i,
@@ -65,6 +65,6 @@ export const CouchCommand: Command = {
 			},
 		);
 
-		message.reply({ files: [buffer] });
+		interaction.editReply({ files: [buffer] });
 	},
 };

@@ -1,6 +1,7 @@
 import * as execa from "execa";
 import { Command } from "../command";
 import { downloadToBuffer, getMagickPath } from "../utils";
+import { SlashCommandBuilder } from "@discordjs/builders";
 
 async function magick(
 	image: Buffer,
@@ -42,19 +43,17 @@ function scale(image: Buffer, percentage: number) {
 }
 
 export const DeepfryCommand: Command = {
-	command: "deepfry",
-	shortCommand: "freepfry",
-	help: {
-		arguments: "<attached image>",
-		description: "🍟 do you ever just make image",
-	},
-	onMessage: async (argument, message) => {
-		const attachment = message.attachments.at(0);
-
-		if (attachment == null && !argument.startsWith("http")) {
-			message.reply("ribbit! please send an image");
-			return;
-		}
+	command: new SlashCommandBuilder()
+		.setName("deepfry")
+		.setDescription("🍟 do you ever just make image")
+		.addAttachmentOption(option =>
+			option
+				.setName("image")
+				.setDescription("image to freepfry")
+				.setRequired(true),
+		),
+	onInteraction: async interaction => {
+		const attachment = interaction.options.getAttachment("image", true);
 
 		if (
 			attachment &&
@@ -62,14 +61,14 @@ export const DeepfryCommand: Command = {
 				attachment.contentType,
 			)
 		) {
-			message.reply("ribbit! png or jpg please");
+			interaction.reply("ribbit! png or jpg please");
 			return;
 		}
 
+		interaction.deferReply();
+
 		try {
-			const inputBuffer = await downloadToBuffer(
-				attachment == null ? argument : attachment.url,
-			);
+			const inputBuffer = await downloadToBuffer(attachment.url);
 
 			let outputBuffer = inputBuffer;
 
@@ -87,11 +86,11 @@ export const DeepfryCommand: Command = {
 			outputBuffer = await scale(outputBuffer, 200);
 			outputBuffer = await jpeg(outputBuffer);
 
-			await message.reply({
+			await interaction.editReply({
 				files: [outputBuffer],
 			});
 		} catch (error) {
-			message.reply("aw ribbit... it failed sorry :(");
+			interaction.editReply("aw ribbit... it failed sorry :(");
 			console.error(error);
 		}
 	},

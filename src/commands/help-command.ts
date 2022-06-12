@@ -1,28 +1,18 @@
 import { Command } from "../command";
-import { availableCommands, commandPrefix } from "../main";
+import { availableCommands } from "../main";
+import { SlashCommandBuilder } from "@discordjs/builders";
 
 export const HelpCommand: Command = {
-	command: "help",
-	shortCommand: "frelp",
-	help: {
-		arguments: "",
-		description: "📚 shows this!",
-	},
-	onMessage: (argument, message) => {
-		let out = "ribbit! here are my commands\n";
+	command: new SlashCommandBuilder()
+		.setName("help")
+		.setDescription("📚 shows frog bot help!"),
+	onInteraction: interaction => {
+		let out = "ribbit! here are my commands!\n";
 
-		for (const command of availableCommands) {
-			out +=
-				"**" +
-				commandPrefix +
-				command.command +
-				(command.shortCommand ? ", " + command.shortCommand : "") +
-				(command.help.arguments ? " " + command.help.arguments : "") +
-				"** - " +
-				command.help.description +
-				"\n";
+		for (const { command } of availableCommands) {
+			out += "**/" + command.name + "** - " + command.description + "\n";
 		}
 
-		message.reply(out);
+		interaction.reply(out);
 	},
 };

@@ -1,12 +1,13 @@
-import { Message } from "discord.js";
+import { CommandInteraction, Interaction, Message } from "discord.js";
 import { Services } from "./services/services";
+import {
+	SlashCommandBuilder,
+	SlashCommandSubcommandsOnlyBuilder,
+} from "@discordjs/builders";
 
 export interface Command {
-	command: string;
-	shortCommand?: string;
-	help: {
-		arguments: string;
-		description: string;
-	};
-	onMessage: (argument: string, message: Message, services: Services) => any;
+	command:
+		| Omit<SlashCommandBuilder, "addSubcommandGroup" | "addSubcommand">
+		| SlashCommandSubcommandsOnlyBuilder;
+	onInteraction: (interaction: CommandInteraction, services: Services) => any;
 }

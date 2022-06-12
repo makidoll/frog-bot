@@ -1,11 +1,10 @@
-import { Message } from "discord.js";
 import { Command } from "../command.js";
 import { downloadToBuffer, getGifskiPath, getMagickPath } from "../utils.js";
 import * as fs from "fs/promises";
 import * as tmp from "tmp-promise";
 import * as execa from "execa";
 import { fitBox } from "fit-box";
-import { Services } from "../services/services.js";
+import { SlashCommandBuilder } from "@discordjs/builders";
 
 async function getWidthHeight(image: Buffer) {
 	const magick = getMagickPath("identify");
@@ -101,21 +100,22 @@ async function makeGif(frames: Buffer[], fps: number, quality: number) {
 }
 
 export const CasCommand: Command = {
-	command: "cas",
-	shortCommand: "fras",
-	help: {
-		arguments: "<attached image>",
-		description: "🎆 makes a funny content aware scaling zoomy gif",
-	},
-	onMessage: async (
-		argument: string,
-		message: Message,
-		{ htmlRenderer }: Services,
-	) => {
-		const attachment = message.attachments.at(0);
+	command: new SlashCommandBuilder()
+		.setName("cas") // fras
+		.setDescription("🎆 makes a funny content aware scaling zoomy gif")
+		.addAttachmentOption(option =>
+			option
+				.setName("image")
+				.setDescription("do thing with")
+				.setRequired(true),
+		),
 
-		if (attachment == null && !argument.startsWith("http")) {
-			message.reply("ribbit! please send an image");
+	onInteraction: async interaction => {
+		const attachment = interaction.options.getAttachment("image");
+
+		// if (attachment == null && !argument.startsWith("http")) {
+		if (attachment == null) {
+			interaction.reply("ribbit! please send an image");
 			return;
 		}
 
@@ -125,17 +125,16 @@ export const CasCommand: Command = {
 				attachment.contentType,
 			)
 		) {
-			message.reply("ribbit! png or jpg please");
+			interaction.reply("ribbit! png or jpg please");
 			return;
 		}
 
-		const workingOnItMessage = await message.reply(
-			"ribbit! im working on it, please wait",
-		);
+		interaction.deferReply();
 
 		try {
 			const originalInputBuffer = await downloadToBuffer(
-				attachment == null ? argument : attachment.url,
+				// attachment == null ? argument : attachment.url,
+				attachment.url,
 			);
 
 			const { width, height } = fitBox({
@@ -167,7 +166,7 @@ export const CasCommand: Command = {
 
 			const outputBuffer = await makeGif(frames, 30, 80);
 
-			await message.reply({
+			interaction.editReply({
 				files: [
 					{
 						attachment: outputBuffer,
@@ -176,10 +175,8 @@ export const CasCommand: Command = {
 				],
 			});
 		} catch (error) {
-			message.reply("aw ribbit... it failed sorry :(");
+			interaction.editReply("aw ribbit... it failed sorry :(");
 			console.error(error);
 		}
-
-		workingOnItMessage.delete().catch(() => {});
 	},
 };

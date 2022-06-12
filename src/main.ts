@@ -4,7 +4,6 @@ import { Client, Intents } from "discord.js";
 import { HtmlRenderer } from "./services/html-renderer";
 import { Services } from "./services/services";
 import { initReactionRoles } from "./reaction-roles";
-import { SlashCommandBuilder } from "@discordjs/builders";
 import { REST } from "@discordjs/rest";
 import { Routes } from "discord-api-types/v9";
 import { Command } from "./command";
@@ -59,40 +58,28 @@ client.on("ready", async () => {
 
 	initReactionRoles(client);
 
-	// const command = new SlashCommandBuilder()
-	// 	.setName("gif")
-	// 	.setDescription("Sends a random gif!")
-	// 	.addStringOption(option =>
-	// 		option
-	// 			.setName("category")
-	// 			.setDescription("The gif category")
-	// 			.setRequired(true)
-	// 			.addChoices({
-	// 				name: "Funny",
-	// 				value: "gif_funny",
-	// 			})
-	// 			.addChoices({
-	// 				name: "Meme",
-	// 				value: "gif_meme",
-	// 			})
-	// 			.addChoices({
-	// 				name: "Movie",
-	// 				value: "gif_movie",
-	// 			}),
-	// 	);
-
 	const rest = new REST({ version: "9" }).setToken(process.env.BOT_TOKEN);
 
 	rest.put(Routes.applicationCommands(client.user.id), {
-		body: [],
+		body: availableCommands.map(command => command.command.toJSON()),
 	});
 });
 
-// client.on("interactionCreate", interaction => {
-// 	if (!interaction.isCommand()) return;
-// 	console.log(interaction);
-// });
+client.on("interactionCreate", interaction => {
+	if (!interaction.isCommand()) return;
 
+	const command = availableCommands.find(
+		command => command.command.name == interaction.commandName,
+	);
+
+	if (command) {
+		try {
+			command.onInteraction(interaction, services);
+		} catch (error) {}
+	}
+});
+
+/*
 client.on("messageCreate", async message => {
 	if (message.author.bot) return;
 
@@ -113,6 +100,7 @@ client.on("messageCreate", async message => {
 		break; // dont run other commands
 	}
 });
+*/
 
 client.on("error", error => {
 	console.error(error);

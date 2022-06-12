@@ -1,24 +1,28 @@
-import { Message } from "discord.js";
+import { ClientUser } from "discord.js";
 import * as path from "path";
 import { downloadToDataUri, getUsernameAndAvatarURL } from "../utils";
 import { Command } from "../command";
-import { Services } from "../services/services";
+import { SlashCommandBuilder } from "@discordjs/builders";
 
 export const ComfyCommand: Command = {
-	command: "comfy",
-	shortCommand: "fromfy",
-	help: {
-		arguments: "[optional mention]",
-		description: "🧶 put you or fren in comfy frog",
-	},
-	onMessage: async (
-		argument: string,
-		message: Message,
-		{ htmlRenderer }: Services,
-	) => {
+	command: new SlashCommandBuilder()
+		.setName("comfy") // fromfy
+		.setDescription("🧶 put you or frend in comfy frog")
+		.addUserOption(option =>
+			option
+				.setName("friend")
+				.setDescription("need frog fren")
+				.setRequired(false),
+		),
+	onInteraction: async (interaction, { htmlRenderer }) => {
+		const user: ClientUser = interaction.options.getUser(
+			"friend",
+			false,
+		) as any;
+
 		const { avatarURL } = await getUsernameAndAvatarURL(
-			message.mentions.users.first() ?? message.author,
-			message.guild,
+			user ? user : interaction.user,
+			interaction.guild,
 		);
 
 		const buffer = await htmlRenderer.renderHtml(
@@ -42,6 +46,6 @@ export const ComfyCommand: Command = {
 			},
 		);
 
-		message.reply({ files: [buffer] });
+		interaction.reply({ files: [buffer] });
 	},
 };

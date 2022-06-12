@@ -1,27 +1,25 @@
 import axios from "axios";
-import { Message } from "discord.js";
 import * as path from "path";
 import { Command } from "../command";
-import { Services } from "../services/services";
 import { plural, stNdRdTh } from "../utils";
+import { SlashCommandBuilder } from "@discordjs/builders";
 
 export const DalleCommand: Command = {
-	command: "dalle",
-	shortCommand: "fralle",
-	help: {
-		arguments: "<prompt>",
-		description: "🎨 generate 9 images from text using ai",
-	},
-	onMessage: async (
-		prompt: string,
-		message: Message,
-		{ htmlRenderer, dalleQueue }: Services,
-	) => {
+	command: new SlashCommandBuilder()
+		.setName("dalle")
+		.setDescription("🎨 generate 6 images from text using ai")
+		.addStringOption(option =>
+			option
+				.setName("prompt")
+				.setDescription("what to tell the ai to make")
+				.setRequired(true),
+		),
+	onInteraction: async (interaction, { htmlRenderer, dalleQueue }) => {
 		const serverName = "maki's server, dalle mega fp16";
 		const numberOfImages = 6;
 		const timePerImage = 10; // seconds
 
-		let workingOnItMessage: Message;
+		const prompt = interaction.options.getString("prompt", true);
 
 		const dalleTask = async () => {
 			try {
@@ -46,18 +44,16 @@ export const DalleCommand: Command = {
 					},
 				);
 
-				await message.reply({
+				await interaction.editReply({
 					content:
 						'here is "' + prompt + '", *using: ' + serverName + "*",
 					files: [buffer],
 				});
 			} catch (error) {
-				message.reply("aw ribbit... sorry there was an error :(");
+				interaction.editReply(
+					"aw ribbit... sorry there was an error :(",
+				);
 				console.error(error);
-			}
-
-			if (workingOnItMessage) {
-				workingOnItMessage.delete().catch(() => {});
 			}
 		};
 
@@ -65,12 +61,14 @@ export const DalleCommand: Command = {
 
 		const waitMinutes = (timePerImage * numberOfImages * queue) / 60;
 
-		workingOnItMessage = await message.reply(
-			"ribbit! generating images... might take up to **" +
+		await interaction.reply(
+			'ribbit! generating images for "' +
+				prompt +
+				'"...\nmight take up to **' +
 				plural(waitMinutes, "minute", "minutes") +
 				", " +
 				stNdRdTh(queue) +
-				" in queue**\n*using: " +
+				" in queue**. *using: " +
 				serverName +
 				"*",
 		);

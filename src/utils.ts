@@ -1,7 +1,7 @@
 import axios from "axios";
 import * as os from "os";
 import * as path from "path";
-import { Guild, User } from "discord.js";
+import { ClientUser, Guild, User } from "discord.js";
 
 export async function downloadToBuffer(url: string) {
 	try {
@@ -22,7 +22,10 @@ export async function downloadToDataUri(url: string) {
 	}
 }
 
-export async function getUsernameAndAvatarURL(user: User, guild: Guild) {
+export async function getUsernameAndAvatarURL(
+	user: User | ClientUser,
+	guild: Guild,
+) {
 	const member = await guild.members.fetch({ user });
 	return {
 		username: member?.displayName ?? user.username,

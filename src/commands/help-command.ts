@@ -13,6 +13,8 @@ export const HelpCommand: Command = {
 			out += "**/" + command.name + "** - " + command.description + "\n";
 		}
 
+		out += "see me hoppy! https://github.com/makifoxgirl/frog-bot";
+
 		interaction.reply(out);
 	},
 };

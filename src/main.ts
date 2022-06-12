@@ -49,7 +49,7 @@ client.on("ready", async () => {
 	client.user.setPresence({
 		activities: [
 			{
-				name: "you type: frog help",
+				name: "you hoppy ribbit",
 				type: "WATCHING",
 				url: "https://maki.cafe",
 			},

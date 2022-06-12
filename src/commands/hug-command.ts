@@ -150,6 +150,14 @@ export const HugCommand: Command = {
 			},
 		);
 
-		interaction.reply({ files: [buffer] });
+		interaction.reply({
+			content:
+				`<@${usersHugging[0].id}> hugged ` +
+				usersHugging
+					.slice(1)
+					.map(user => `<@${user.id}>`)
+					.join(" and "),
+			files: [buffer],
+		});
 	},
 };

@@ -59,14 +59,15 @@ export const HugCommand: Command = {
 				.setRequired(false),
 		),
 	onInteraction: async (interaction, { htmlRenderer }) => {
-		const usersHugging = removeDuplicates([
+		// const usersHugging = removeDuplicates([
+		const usersHugging = [
 			interaction.user,
 			interaction.options.getUser("friend"),
 			interaction.options.getUser("friend2"),
 			interaction.options.getUser("friend3"),
 			interaction.options.getUser("friend4"),
 			interaction.options.getUser("friend5"),
-		]).filter(user => user != null);
+		].filter(user => user != null);
 
 		// const usersHugging = [
 		// 	interaction.author,

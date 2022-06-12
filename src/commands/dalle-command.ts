@@ -45,12 +45,7 @@ export const DalleCommand: Command = {
 				);
 
 				await interaction.followUp({
-					content:
-						'here is **"' +
-						prompt +
-						'"**, *using: ' +
-						serverName +
-						"*",
+					content: 'here is **"' + prompt + '"**',
 					files: [buffer],
 				});
 			} catch (error) {

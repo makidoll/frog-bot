@@ -7,25 +7,31 @@ import {
 	rescale,
 } from "../utils.js";
 import * as execa from "execa";
+import * as fs from "fs/promises";
 import { fitBox } from "fit-box";
 import { SlashCommandBuilder } from "@discordjs/builders";
 
-async function liquidRescale(
+async function centerCompositeScale(
 	image: Buffer,
-	percentage: number,
-	outputWidth: number,
-	outputHeight: number,
+	imageWidth: number,
+	imageHeight: number,
+	scaleX: number,
+	scaleY: number,
 ): Promise<Buffer> {
 	const magick = getMagickPath("convert");
 	const { stdout } = await execa(
 		magick.path,
 		[
 			...magick.args,
+			"-size",
+			`${imageWidth}x${imageHeight}`,
+			"xc:none",
 			"-",
-			"-liquid-rescale",
-			`${percentage}x${percentage}%!`,
-			"-resize",
-			`${outputWidth}x${outputHeight}!`,
+			"-gravity",
+			"center",
+			"-geometry",
+			`${imageWidth * scaleX}x${imageHeight * scaleY}+0+0!`,
+			"-composite",
 			"png:-",
 		],
 		{ input: image, encoding: null },
@@ -33,10 +39,10 @@ async function liquidRescale(
 	return stdout as any;
 }
 
-export const CasCommand: Command = {
+export const SquishyCommand: Command = {
 	command: new SlashCommandBuilder()
-		.setName("cas") // fras
-		.setDescription("🎆 makes a funny content aware scaling zoomy gif")
+		.setName("squishy")
+		.setDescription("🦆 make image into squishy gif")
 		.addAttachmentOption(option =>
 			option
 				.setName("image")
@@ -66,39 +72,58 @@ export const CasCommand: Command = {
 		interaction.deferReply();
 
 		try {
-			const originalInputBuffer = await downloadToBuffer(
+			let inputBuffer = await downloadToBuffer(
 				// attachment == null ? argument : attachment.url,
 				attachment.url,
 			);
 
-			const { width, height } = fitBox({
-				boundary: { width: 400, height: 300 },
-				box: await getWidthHeight(originalInputBuffer),
-			});
+			let { width, height } = await getWidthHeight(inputBuffer);
+			if (width > 400 || height > 300) {
+				let newSize = fitBox({
+					boundary: { width: 400, height: 300 },
+					box: { width, height },
+				});
+				width = newSize.width;
+				height = newSize.height;
+				inputBuffer = await rescale(inputBuffer, width, height);
+			}
 
-			// downscale first or otherwise it will take forever
-			const inputBuffer = await rescale(
-				originalInputBuffer,
-				width,
-				height,
-			);
-
-			// 100 to smallest
-			const smallestSize = 10;
+			const squishyLength = 0.6; // seconds
+			const squishyFps = 50; // ms. highest for gif
+			const squishyAmountX = 0.6; // smallest size
+			const squishyAmountY = 0.6; // smallest size
 
 			const frames = await Promise.all(
-				new Array(100 - smallestSize + 1).fill(null).map((_, i) => {
-					const percentage = 100 - i;
-					return liquidRescale(
+				new Array(squishyFps * squishyLength).fill(null).map((_, i) => {
+					const time = i / (squishyLength * squishyFps);
+
+					const scaleX =
+						1 -
+						(1 -
+							(Math.sin(time * (Math.PI * 2) + Math.PI / 2) *
+								0.5 +
+								0.5)) *
+							(1 - squishyAmountX);
+
+					const scaleY =
+						1 -
+						(1 -
+							(Math.cos(time * (Math.PI * 2) + Math.PI / 2) *
+								0.5 +
+								0.5)) *
+							(1 - squishyAmountY);
+
+					return centerCompositeScale(
 						inputBuffer,
-						percentage,
 						width,
 						height,
+						scaleX,
+						scaleY,
 					);
 				}),
 			);
 
-			const outputBuffer = await makeGif(frames, 30, 80);
+			const outputBuffer = await makeGif(frames, squishyFps, 80);
 
 			interaction.editReply({
 				files: [

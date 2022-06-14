@@ -1,6 +1,9 @@
 import axios from "axios";
 import * as os from "os";
 import * as path from "path";
+import * as fs from "fs/promises";
+import * as execa from "execa";
+import * as tmp from "tmp-promise";
 import { ClientUser, Guild, User } from "discord.js";
 
 export async function downloadToBuffer(url: string) {
@@ -65,4 +68,74 @@ export function getGifskiPath() {
 			"..//node_modules/gifski/bin/debian/gifski",
 		);
 	}
+}
+
+export async function getWidthHeight(image: Buffer) {
+	const magick = getMagickPath("identify");
+	const { stdout } = await execa(
+		magick.path,
+		[...magick.args, "-format", "%wx%h", "-"],
+		{
+			input: image,
+		},
+	);
+	const [widthStr, heightStr] = stdout.split("x");
+	return { width: parseInt(widthStr), height: parseInt(heightStr) };
+}
+
+export async function rescale(
+	image: Buffer,
+	outputWidth: number,
+	outputHeight: number,
+): Promise<Buffer> {
+	const magick = getMagickPath("convert");
+	const { stdout } = await execa(
+		magick.path,
+		[
+			...magick.args,
+			"-",
+			"-resize",
+			`${outputWidth}x${outputHeight}!`,
+			"png:-",
+		],
+		{ input: image, encoding: null },
+	);
+	return stdout as any;
+}
+
+export async function makeGif(frames: Buffer[], fps: number, quality: number) {
+	const framePaths = await Promise.all(
+		frames.map(async frame => {
+			const filePath = await tmp.file({ postfix: ".png" });
+			await fs.writeFile(filePath.path, frame);
+			return filePath;
+		}),
+	);
+
+	const outputPath = await tmp.file({ postfix: ".gif" });
+
+	await execa(getGifskiPath(), [
+		"--output",
+		outputPath.path,
+		"--fps",
+		fps.toString(),
+		"--quality",
+		quality.toString(),
+		"--nosort",
+		...framePaths.map(p => p.path),
+	]);
+
+	const outputBuffer = await fs.readFile(outputPath.path);
+
+	// remove all temp files
+
+	for (const framePath of framePaths) {
+		await framePath.cleanup();
+	}
+
+	outputPath.cleanup();
+
+	// ok done
+
+	return outputBuffer;
 }

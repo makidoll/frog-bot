@@ -14,11 +14,11 @@
 
 			#prompt {
 				width: calc(768px - 16px);
-				height: 96px;
+				height: 64px;
 				background-color: #fff;
 				padding: 0 8px;
 				font-family: "Littlefox";
-				font-size: 80px;
+				font-size: 48px;
 				display: flex;
 				align-items: center;
 				justify-content: center;
@@ -50,15 +50,10 @@
 
 				document.getElementById("prompt").textContent = prompt;
 				textFit(document.getElementById("prompt"), {
-					maxFontSize: 80,
+					maxFontSize: 48,
 					alignVertWithFlexbox: true,
 				});
 			}
-
-			textFit(document.getElementById("prompt"), {
-				maxFontSize: 80,
-				alignVertWithFlexbox: true,
-			});
 		</script>
 	</body>
 </html>

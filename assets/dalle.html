@@ -1,0 +1,64 @@
+<html>
+	<head>
+		<style>
+			@font-face {
+				font-family: "Littlefox";
+				font-style: normal;
+				font-weight: 400;
+				src: url(./Littlefox-Regular.woff2) format("woff2");
+			}
+
+			* {
+				margin: 0;
+			}
+
+			#prompt {
+				width: calc(768px - 16px);
+				height: 96px;
+				background-color: #fff;
+				padding: 0 8px;
+				font-family: "Littlefox";
+				font-size: 80px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				text-align: center;
+			}
+
+			#images {
+				width: 768px;
+				height: 512px;
+			}
+
+			#images img {
+				width: 256px;
+				height: 256px;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="prompt"></div>
+		<div id="images"></div>
+		<script src="./textFit.min.js"></script>
+		<script>
+			function addImages(images, prompt) {
+				for (const base64 of images) {
+					const img = document.createElement("img");
+					img.src = "data:image/png;base64," + base64;
+					document.getElementById("images").appendChild(img);
+				}
+
+				document.getElementById("prompt").textContent = prompt;
+				textFit(document.getElementById("prompt"), {
+					maxFontSize: 80,
+					alignVertWithFlexbox: true,
+				});
+			}
+
+			textFit(document.getElementById("prompt"), {
+				maxFontSize: 80,
+				alignVertWithFlexbox: true,
+			});
+		</script>
+	</body>
+</html>

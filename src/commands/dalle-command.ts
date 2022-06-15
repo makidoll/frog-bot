@@ -32,20 +32,24 @@ export const DalleCommand: Command = {
 
 				const buffer = await htmlRenderer.renderHtml(
 					"file://" +
-						path.resolve(__dirname, "../../assets/dalle-mini.html"),
+						path.resolve(__dirname, "../../assets/dalle.html"),
 					async page => {
 						await page.evaluate(
-							"addImages(" + JSON.stringify(res.data) + ")",
+							"addImages(" +
+								JSON.stringify(res.data) +
+								"," +
+								JSON.stringify(prompt) +
+								")",
 						);
 						await page.setViewport({
 							width: 256 * 3,
-							height: 256 * 2,
+							height: 256 * 2 + 96,
 						});
 					},
 				);
 
 				await interaction.followUp({
-					content: 'here is **"' + prompt + '"**',
+					// content: 'here is **"' + prompt + '"**',
 					files: [buffer],
 				});
 			} catch (error) {

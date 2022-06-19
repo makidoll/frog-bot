@@ -49,10 +49,12 @@
 				}
 
 				document.getElementById("prompt").textContent = prompt;
-				textFit(document.getElementById("prompt"), {
-					maxFontSize: 48,
-					alignVertWithFlexbox: true,
-				});
+				setTimeout(() => {
+					textFit(document.getElementById("prompt"), {
+						maxFontSize: 48,
+						alignVertWithFlexbox: true,
+					});
+				}, 10);
 			}
 		</script>
 	</body>

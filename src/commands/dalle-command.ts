@@ -34,6 +34,10 @@ export const DalleCommand: Command = {
 					"file://" +
 						path.resolve(__dirname, "../../assets/dalle.html"),
 					async page => {
+						await page.setViewport({
+							width: 256 * 3,
+							height: 256 * 2 + 96,
+						});
 						await page.evaluate(
 							"addImages(" +
 								JSON.stringify(res.data) +
@@ -41,9 +45,8 @@ export const DalleCommand: Command = {
 								JSON.stringify(prompt) +
 								")",
 						);
-						await page.setViewport({
-							width: 256 * 3,
-							height: 256 * 2 + 96,
+						await new Promise(resolve => {
+							setTimeout(resolve, 20);
 						});
 					},
 				);

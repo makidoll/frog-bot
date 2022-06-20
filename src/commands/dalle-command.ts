@@ -1,6 +1,7 @@
 import axios from "axios";
 import * as path from "path";
 import * as fs from "fs/promises";
+import slugify from "slugify";
 import { Command } from "../command";
 import { plural, stNdRdTh } from "../utils";
 import { SlashCommandBuilder } from "@discordjs/builders";
@@ -55,7 +56,10 @@ export const DalleCommand: Command = {
 				const filePath = path.resolve(
 					__dirname,
 					"../../dalle-saved/",
-					Date.now() + ".png",
+					slugify(prompt) +
+						"-" +
+						Math.floor(Date.now() / 1000) +
+						".png",
 				);
 
 				// dont await

@@ -1,5 +1,6 @@
 import axios from "axios";
 import * as path from "path";
+import * as fs from "fs/promises";
 import { Command } from "../command";
 import { plural, stNdRdTh } from "../utils";
 import { SlashCommandBuilder } from "@discordjs/builders";
@@ -51,9 +52,23 @@ export const DalleCommand: Command = {
 					},
 				);
 
+				const filePath = path.resolve(
+					__dirname,
+					"../../dalle-saved/",
+					Date.now() + ".png",
+				);
+
+				// dont await
+				fs.writeFile(filePath, buffer);
+
 				await interaction.followUp({
 					// content: 'here is **"' + prompt + '"**',
-					files: [buffer],
+					files: [
+						{
+							attachment: buffer,
+							name: "dalle.png",
+						},
+					],
 				});
 			} catch (error) {
 				interaction.followUp(

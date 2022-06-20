@@ -36,7 +36,7 @@ export const DalleCommand: Command = {
 					async page => {
 						await page.setViewport({
 							width: 256 * 3,
-							height: 256 * 2 + 96,
+							height: 256 * 2 + 64,
 						});
 						await page.evaluate(
 							"addImages(" +
@@ -46,7 +46,7 @@ export const DalleCommand: Command = {
 								")",
 						);
 						await new Promise(resolve => {
-							setTimeout(resolve, 20);
+							setTimeout(resolve, 200);
 						});
 					},
 				);

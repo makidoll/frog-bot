@@ -6,6 +6,9 @@ import { Command } from "../command";
 import { plural, stNdRdTh } from "../utils";
 import { SlashCommandBuilder } from "@discordjs/builders";
 
+const dalleSavedPath = path.resolve(__dirname, "../../dalle-saved/");
+fs.mkdir(dalleSavedPath).catch(() => {});
+
 export const DalleCommand: Command = {
 	command: new SlashCommandBuilder()
 		.setName("dalle")
@@ -54,8 +57,7 @@ export const DalleCommand: Command = {
 				);
 
 				const filePath = path.resolve(
-					__dirname,
-					"../../dalle-saved/",
+					dalleSavedPath,
 					slugify(prompt) +
 						"-" +
 						Math.floor(Date.now() / 1000) +

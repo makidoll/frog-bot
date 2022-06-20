@@ -17,7 +17,7 @@ export const DalleCommand: Command = {
 	onInteraction: async (interaction, { htmlRenderer, dalleQueue }) => {
 		const serverName = "maki's server, dalle mega fp32";
 		const numberOfImages = 6;
-		const timePerImage = 10; // seconds
+		const timePerImage = 12; // seconds
 
 		const prompt = interaction.options.getString("prompt", true);
 

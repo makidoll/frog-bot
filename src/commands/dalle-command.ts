@@ -15,7 +15,7 @@ export const DalleCommand: Command = {
 				.setRequired(true),
 		),
 	onInteraction: async (interaction, { htmlRenderer, dalleQueue }) => {
-		const serverName = "maki's server, dalle mega fp16";
+		const serverName = "maki's server, dalle mega fp32";
 		const numberOfImages = 6;
 		const timePerImage = 10; // seconds
 

@@ -25,8 +25,6 @@ export const OmgHiCommand: Command = {
 			interaction.guild,
 		);
 
-		console.log(username, avatarURL);
-
 		const buffer = await htmlRenderer.renderHtml(
 			"file://" +
 				path.resolve(__dirname, "../../assets/omg-hi/omg-hi.html"),

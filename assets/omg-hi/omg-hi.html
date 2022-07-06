@@ -1,0 +1,78 @@
+<html>
+	<head>
+		<style>
+			@font-face {
+				font-family: "HelveticaNeue-Bold";
+				font-style: normal;
+				font-weight: 400;
+				src: url(../HelveticaNeue-Bold.woff) format("woff");
+			}
+
+			* {
+				margin: 0;
+			}
+
+			body {
+				font-family: "HelveticaNeue-Bold";
+				overflow: hidden;
+				transform: scale(0.5);
+				transform-origin: 0 0;
+			}
+
+			.background {
+				width: 986px;
+				height: 1158px;
+				background-image: url(./omg-hi.jpg);
+				background-position: 0 0;
+				background-size: 100% 100%;
+			}
+
+			#avatar {
+				width: 160px;
+				height: 226px;
+				position: absolute;
+				margin: auto;
+				top: 668px;
+				left: 76px;
+				/* background-color: red; */
+				background-position: center;
+				background-size: cover;
+			}
+
+			#name {
+				position: absolute;
+				margin: auto;
+				top: 685px;
+				left: 570px;
+				font-size: 44px;
+				text-align: center;
+				width: 335px;
+				height: 60px;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="background">
+			<div id="avatar"></div>
+			<div id="name"></div>
+		</div>
+		<script src="../textFit.min.js"></script>
+		<script>
+			function setNameAndAvatar(name, avatar) {
+				document.getElementById(
+					"avatar",
+				).style.backgroundImage = `url(${avatar})`;
+
+				document.getElementById("name").textContent = name;
+				setTimeout(() => {
+					textFit(document.getElementById("name"), {
+						maxFontSize: 44,
+						alignVertWithFlexbox: true,
+					});
+				}, 100);
+			}
+
+			setNameAndAvatar("maki so cute omg");
+		</script>
+	</body>
+</html>

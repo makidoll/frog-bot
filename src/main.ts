@@ -16,6 +16,7 @@ import { HelpCommand } from "./commands/help-command";
 import { DalleQueue } from "./services/dalle-queue";
 import { DeepfryCommand } from "./commands/deepfry-command";
 import { SquishyCommand } from "./commands/squishy-command";
+import { OmgHiCommand } from "./commands/omg-hi-command";
 
 const services: Services = {
 	htmlRenderer: new HtmlRenderer(),
@@ -24,7 +25,7 @@ const services: Services = {
 
 services.htmlRenderer.launch();
 
-export const commandPrefix = "frog ";
+// export const commandPrefix = "frog ";
 export const availableCommands: Command[] = [
 	HelpCommand,
 	CouchCommand,
@@ -34,6 +35,7 @@ export const availableCommands: Command[] = [
 	CasCommand,
 	DeepfryCommand,
 	SquishyCommand,
+	OmgHiCommand,
 ];
 
 const client = new Client({

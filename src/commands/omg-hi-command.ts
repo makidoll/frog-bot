@@ -7,7 +7,7 @@ import * as path from "path";
 export const OmgHiCommand: Command = {
 	command: new SlashCommandBuilder()
 		.setName("omghi")
-		.setDescription("😔 omg hi a frend")
+		.setDescription("😔 im so depressed, but omg hi!! a frend!")
 		.addUserOption(option =>
 			option
 				.setName("friend")

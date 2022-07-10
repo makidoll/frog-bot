@@ -12,7 +12,7 @@ import { downloadToBuffer } from "../utils.js";
 export const SquishyCommand: Command = {
 	command: new SlashCommandBuilder()
 		.setName("squishy")
-		.setDescription("🦆 make image into squishy gif")
+		.setDescription("🦆 make picture into squishy gif")
 		.addAttachmentOption(option =>
 			option
 				.setName("image")

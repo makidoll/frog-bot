@@ -39,7 +39,7 @@ function scale(image: Buffer, percentage: number) {
 export const DeepfryCommand: Command = {
 	command: new SlashCommandBuilder()
 		.setName("deepfry")
-		.setDescription("🍟 do you ever just make image")
+		.setDescription("🍟 do you ever just make image fried")
 		.addAttachmentOption(option =>
 			option
 				.setName("image")

@@ -92,7 +92,7 @@ async function petpetFrame(
 export const PetpetCommand: Command = {
 	command: new SlashCommandBuilder()
 		.setName("petpet")
-		.setDescription("👋 petpet a frend")
+		.setDescription("👋 pet pet a frend giffy")
 		.addUserOption(option =>
 			option
 				.setName("friend")

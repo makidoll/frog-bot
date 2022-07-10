@@ -10,7 +10,7 @@ import { Command } from "./command";
 import { DalleCommand } from "./commands/dalle-command";
 import { ComfyCommand } from "./commands/comfy-command";
 import { CouchCommand } from "./commands/couch-command";
-import { HugCommand } from "./commands/hug-command";
+import { FrugCommand } from "./commands/frug-command";
 import { CasCommand } from "./commands/cas-command";
 import { HelpCommand } from "./commands/help-command";
 import { DalleQueue } from "./services/dalle-queue";
@@ -30,7 +30,7 @@ services.htmlRenderer.launch();
 export const availableCommands: Command[] = [
 	HelpCommand,
 	CouchCommand,
-	HugCommand,
+	FrugCommand,
 	ComfyCommand,
 	DalleCommand,
 	CasCommand,

@@ -1,45 +1,39 @@
-import * as execa from "execa";
-import { Command } from "../command";
-import { downloadToBuffer, getMagickPath } from "../utils";
 import { SlashCommandBuilder } from "@discordjs/builders";
-
-async function magick(
-	image: Buffer,
-	args: string[],
-	jpg = false,
-): Promise<Buffer> {
-	const magick = getMagickPath("convert");
-	const { stdout } = await execa(
-		magick.path,
-		[...magick.args, "-", ...args, jpg ? "jpg:-" : "png:-"],
-		{ input: image, encoding: null },
-	);
-	return stdout as any;
-}
+import { Command } from "../command";
+import { magick } from "../im-utils";
+import { downloadToBuffer } from "../utils";
 
 // https://gist.github.com/44100hertz/ec0af5c47b4620966b732e72adad33dc
 
 function saturate(image: Buffer) {
-	return magick(image, [
+	return magick(image, "convert", [
 		"-modulate",
 		"100,150,100", // brightness, saturation, hue
 	]);
 }
 
 function sharpen(image: Buffer) {
-	return magick(image, ["-unsharp", "0x10", "-quality", "15"]);
+	return magick(image, "convert", ["-unsharp", "0x10", "-quality", "15"]);
 }
 
 function jpeg(image: Buffer) {
-	return magick(image, ["-quality", "10"], true);
+	return magick(image, "convert", ["-quality", "10", "jpg:-"]);
 }
 
 function contrast(image: Buffer) {
-	return magick(image, ["-sigmoidal-contrast", "3x50%", "-quality", "15"]);
+	return magick(image, "convert", [
+		"-sigmoidal-contrast",
+		"3x50%",
+		"-quality",
+		"15",
+	]);
 }
 
 function scale(image: Buffer, percentage: number) {
-	return magick(image, ["-resize", percentage + "x" + percentage + "%"]);
+	return magick(image, "convert", [
+		"-resize",
+		percentage + "x" + percentage + "%",
+	]);
 }
 
 export const DeepfryCommand: Command = {

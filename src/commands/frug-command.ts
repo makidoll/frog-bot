@@ -13,15 +13,15 @@ const frogHugInfo = {
 
 const alphabet = "abcdefghijklmnopqrstuvwxyz";
 
-function removeDuplicates(input: any[]) {
-	let unique = [];
-	for (const item of input) {
-		if (!unique.includes(item)) unique.push(item);
-	}
-	return unique;
-}
+// function removeDuplicates(input: any[]) {
+// 	let unique = [];
+// 	for (const item of input) {
+// 		if (!unique.includes(item)) unique.push(item);
+// 	}
+// 	return unique;
+// }
 
-export const HugCommand: Command = {
+export const FrugCommand: Command = {
 	// command: "hug",
 	command: new SlashCommandBuilder()
 		.setName("frug")
@@ -59,6 +59,8 @@ export const HugCommand: Command = {
 				.setRequired(false),
 		),
 	onInteraction: async (interaction, { htmlRenderer }) => {
+		await interaction.deferReply();
+
 		// const usersHugging = removeDuplicates([
 		const usersHugging = [
 			interaction.user,
@@ -150,7 +152,7 @@ export const HugCommand: Command = {
 			},
 		);
 
-		interaction.reply({
+		interaction.editReply({
 			content:
 				`<@${usersHugging[0].id}> hugged ` +
 				usersHugging

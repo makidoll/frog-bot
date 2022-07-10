@@ -1,37 +1,13 @@
+import { SlashCommandBuilder } from "@discordjs/builders";
+import { fitBox } from "fit-box";
 import { Command } from "../command.js";
 import {
-	downloadToBuffer,
-	makeGif,
-	getMagickPath,
 	getWidthHeight,
+	liquidRescale,
+	makeGif,
 	rescale,
-} from "../utils.js";
-import * as execa from "execa";
-import { fitBox } from "fit-box";
-import { SlashCommandBuilder } from "@discordjs/builders";
-
-async function liquidRescale(
-	image: Buffer,
-	percentage: number,
-	outputWidth: number,
-	outputHeight: number,
-): Promise<Buffer> {
-	const magick = getMagickPath("convert");
-	const { stdout } = await execa(
-		magick.path,
-		[
-			...magick.args,
-			"-",
-			"-liquid-rescale",
-			`${percentage}x${percentage}%!`,
-			"-resize",
-			`${outputWidth}x${outputHeight}!`,
-			"png:-",
-		],
-		{ input: image, encoding: null },
-	);
-	return stdout as any;
-}
+} from "../im-utils.js";
+import { downloadToBuffer } from "../utils.js";
 
 export const CasCommand: Command = {
 	command: new SlashCommandBuilder()

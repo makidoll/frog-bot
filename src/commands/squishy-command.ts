@@ -1,43 +1,13 @@
+import { SlashCommandBuilder } from "@discordjs/builders";
+import { fitBox } from "fit-box";
 import { Command } from "../command.js";
 import {
-	downloadToBuffer,
-	makeGif,
-	getMagickPath,
+	centerCompositeScale,
 	getWidthHeight,
+	makeGif,
 	rescale,
-} from "../utils.js";
-import * as execa from "execa";
-import * as fs from "fs/promises";
-import { fitBox } from "fit-box";
-import { SlashCommandBuilder } from "@discordjs/builders";
-
-async function centerCompositeScale(
-	image: Buffer,
-	imageWidth: number,
-	imageHeight: number,
-	scaleX: number,
-	scaleY: number,
-): Promise<Buffer> {
-	const magick = getMagickPath("convert");
-	const { stdout } = await execa(
-		magick.path,
-		[
-			...magick.args,
-			"-size",
-			`${imageWidth}x${imageHeight}`,
-			"xc:none",
-			"-",
-			"-gravity",
-			"Center",
-			"-geometry",
-			`${imageWidth * scaleX}x${imageHeight * scaleY}+0+0!`,
-			"-composite",
-			"png:-",
-		],
-		{ input: image, encoding: null },
-	);
-	return stdout as any;
-}
+} from "../im-utils.js";
+import { downloadToBuffer } from "../utils.js";
 
 export const SquishyCommand: Command = {
 	command: new SlashCommandBuilder()

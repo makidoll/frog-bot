@@ -5,13 +5,8 @@ import * as fs from "fs/promises";
 import * as path from "path";
 import { Writable } from "stream";
 import { Command } from "../command.js";
-import {
-	downloadToBuffer,
-	getMagickPath,
-	getUsernameAndAvatarURL,
-	getWidthHeight,
-	makeGif,
-} from "../utils.js";
+import { circleCrop, getMagickPath, makeGif } from "../im-utils.js";
+import { downloadToBuffer, getUsernameAndAvatarURL } from "../utils.js";
 
 const options = {
 	squish: 1.25,
@@ -37,31 +32,6 @@ const offsets = [
 	w: ~~((options.spriteWidth + offset.w * options.squish) * options.scale),
 	h: ~~((options.spriteHeight + offset.h * options.squish) * options.scale),
 }));
-
-async function circleCrop(image: Buffer): Promise<Buffer> {
-	const magick = getMagickPath("convert");
-	const { width, height } = await getWidthHeight(image);
-	const { stdout } = await execa(
-		magick.path,
-		[
-			...magick.args,
-			"-size",
-			`${width}x${height}`,
-			"xc:none",
-			"-fill",
-			"-",
-			"-draw",
-			`arc 0,0 ${width - 1},${height - 1} 0,360`,
-			"png:-",
-		],
-		{
-			input: image,
-			encoding: null,
-		},
-	);
-
-	return stdout as any;
-}
 
 async function petpetFrame(
 	frame: number,

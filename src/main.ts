@@ -17,6 +17,7 @@ import { DalleQueue } from "./services/dalle-queue";
 import { DeepfryCommand } from "./commands/deepfry-command";
 import { SquishyCommand } from "./commands/squishy-command";
 import { OmgHiCommand } from "./commands/omg-hi-command";
+import { PetpetCommand } from "./commands/petpet-command";
 
 const services: Services = {
 	htmlRenderer: new HtmlRenderer(),
@@ -36,6 +37,7 @@ export const availableCommands: Command[] = [
 	DeepfryCommand,
 	SquishyCommand,
 	OmgHiCommand,
+	PetpetCommand,
 ];
 
 const client = new Client({

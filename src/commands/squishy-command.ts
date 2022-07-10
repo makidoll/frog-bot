@@ -28,7 +28,7 @@ async function centerCompositeScale(
 			"xc:none",
 			"-",
 			"-gravity",
-			"center",
+			"Center",
 			"-geometry",
 			`${imageWidth * scaleX}x${imageHeight * scaleY}+0+0!`,
 			"-composite",
@@ -89,7 +89,7 @@ export const SquishyCommand: Command = {
 			}
 
 			const squishyLength = 0.6; // seconds
-			const squishyFps = 50; // ms. highest for gif
+			const squishyFps = 50; // highest for gif
 			const squishyAmountX = 0.6; // smallest size
 			const squishyAmountY = 0.6; // smallest size
 

@@ -1,11 +1,12 @@
-import { CommandInteraction, Message } from "discord.js";
-import * as path from "path";
-import { downloadToDataUri, getUsernameAndAvatarURL } from "../utils";
-import { Command } from "../command";
-import { Services } from "../services/services";
 import { SlashCommandBuilder } from "@discordjs/builders";
+import { CommandInteraction } from "discord.js";
+import * as path from "path";
+import { Categories, Command } from "../command";
+import { Services } from "../services/services";
+import { downloadToDataUri, getUsernameAndAvatarURL } from "../utils";
 
 export const CouchCommand: Command = {
+	category: Categories.frends,
 	command: new SlashCommandBuilder()
 		.setName("couch")
 		.setDescription("🛋️ puts the last 4 messages on the frog couch"),

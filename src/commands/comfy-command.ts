@@ -1,10 +1,11 @@
+import { SlashCommandBuilder } from "@discordjs/builders";
 import { ClientUser } from "discord.js";
 import * as path from "path";
+import { Categories, Command } from "../command";
 import { downloadToDataUri, getUsernameAndAvatarURL } from "../utils";
-import { Command } from "../command";
-import { SlashCommandBuilder } from "@discordjs/builders";
 
 export const ComfyCommand: Command = {
+	category: Categories.memes,
 	command: new SlashCommandBuilder()
 		.setName("comfy") // fromfy
 		.setDescription("🧶 put you or frend in comfy frog")

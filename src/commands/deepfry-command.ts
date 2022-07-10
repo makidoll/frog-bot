@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { Command } from "../command";
+import { Categories, Command } from "../command";
 import { magick } from "../im-utils";
 import { downloadToBuffer } from "../utils";
 
@@ -37,6 +37,7 @@ function scale(image: Buffer, percentage: number) {
 }
 
 export const DeepfryCommand: Command = {
+	category: Categories.memes,
 	command: new SlashCommandBuilder()
 		.setName("deepfry")
 		.setDescription("🍟 do you ever just make image fried")

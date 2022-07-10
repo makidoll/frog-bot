@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { fitBox } from "fit-box";
-import { Command } from "../command.js";
+import { Categories, Command } from "../command.js";
 import {
 	getWidthHeight,
 	liquidRescale,
@@ -10,6 +10,7 @@ import {
 import { downloadToBuffer } from "../utils.js";
 
 export const CasCommand: Command = {
+	category: Categories.memesGifs,
 	command: new SlashCommandBuilder()
 		.setName("cas") // fras
 		.setDescription("🎆 makes a funny content aware scaling zoomy gif")
@@ -19,7 +20,6 @@ export const CasCommand: Command = {
 				.setDescription("do thing with")
 				.setRequired(true),
 		),
-
 	onInteraction: async interaction => {
 		const attachment = interaction.options.getAttachment("image");
 

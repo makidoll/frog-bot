@@ -1,10 +1,11 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { ClientUser } from "discord.js";
-import { Command } from "../command";
-import { downloadToDataUri, getUsernameAndAvatarURL } from "../utils";
 import * as path from "path";
+import { Categories, Command } from "../command";
+import { downloadToDataUri, getUsernameAndAvatarURL } from "../utils";
 
 export const OmgHiCommand: Command = {
+	category: Categories.memes,
 	command: new SlashCommandBuilder()
 		.setName("omghi")
 		.setDescription("😔 im so depressed, but omg hi!! a frend!")

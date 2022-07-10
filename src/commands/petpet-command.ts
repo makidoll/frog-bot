@@ -4,7 +4,7 @@ import * as execa from "execa";
 import * as fs from "fs/promises";
 import * as path from "path";
 import { Writable } from "stream";
-import { Command } from "../command.js";
+import { Categories, Command } from "../command.js";
 import { circleCrop, getMagickPath, makeGif } from "../im-utils.js";
 import { downloadToBuffer, getUsernameAndAvatarURL } from "../utils.js";
 
@@ -90,6 +90,7 @@ async function petpetFrame(
 }
 
 export const PetpetCommand: Command = {
+	category: Categories.memesGifs,
 	command: new SlashCommandBuilder()
 		.setName("petpet")
 		.setDescription("👋 pet pet a frend giffy")

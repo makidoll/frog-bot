@@ -1,7 +1,7 @@
-import * as path from "path";
-import { downloadToDataUri, getUsernameAndAvatarURL } from "../utils";
-import { Command } from "../command";
 import { SlashCommandBuilder } from "@discordjs/builders";
+import * as path from "path";
+import { Categories, Command } from "../command";
+import { downloadToDataUri, getUsernameAndAvatarURL } from "../utils";
 
 const frogHugInfo = {
 	"2": { variations: 3 },
@@ -22,7 +22,7 @@ const alphabet = "abcdefghijklmnopqrstuvwxyz";
 // }
 
 export const FrugCommand: Command = {
-	// command: "hug",
+	category: Categories.frends,
 	command: new SlashCommandBuilder()
 		.setName("frug")
 		.setDescription(

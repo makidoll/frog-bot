@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { fitBox } from "fit-box";
-import { Command } from "../command.js";
+import { Categories, Command } from "../command.js";
 import {
 	centerCompositeScale,
 	getWidthHeight,
@@ -10,6 +10,7 @@ import {
 import { downloadToBuffer } from "../utils.js";
 
 export const SquishyCommand: Command = {
+	category: Categories.memesGifs,
 	command: new SlashCommandBuilder()
 		.setName("squishy")
 		.setDescription("🦆 make picture into squishy gif")

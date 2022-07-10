@@ -1,15 +1,16 @@
-import axios from "axios";
-import * as path from "path";
-import * as fs from "fs/promises";
-import slugify from "slugify";
-import { Command } from "../command";
-import { plural, stNdRdTh } from "../utils";
 import { SlashCommandBuilder } from "@discordjs/builders";
+import axios from "axios";
+import * as fs from "fs/promises";
+import * as path from "path";
+import slugify from "slugify";
+import { Categories, Command } from "../command";
+import { plural, stNdRdTh } from "../utils";
 
 const dalleSavedPath = path.resolve(__dirname, "../../dalle-saved/");
 fs.mkdir(dalleSavedPath).catch(() => {});
 
 export const DalleCommand: Command = {
+	category: Categories.other,
 	command: new SlashCommandBuilder()
 		.setName("dalle")
 		.setDescription("🎨 generate 6 images from text using ai")

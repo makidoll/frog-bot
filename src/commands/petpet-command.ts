@@ -140,8 +140,6 @@ export const PetpetCommand: Command = {
 			interaction.guild,
 		);
 
-		interaction.deferReply();
-
 		try {
 			let avatarImage = await circleCrop(
 				await downloadToBuffer(avatarURL),
@@ -165,7 +163,7 @@ export const PetpetCommand: Command = {
 				100, // quality
 			);
 
-			interaction.editReply({
+			interaction.reply({
 				files: [
 					{
 						attachment: outputBuffer,
@@ -174,7 +172,7 @@ export const PetpetCommand: Command = {
 				],
 			});
 		} catch (error) {
-			interaction.editReply("aw ribbit... it failed sorry :(");
+			interaction.reply("aw ribbit... it failed sorry :(");
 			console.error(error);
 		}
 	},

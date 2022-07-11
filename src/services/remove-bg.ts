@@ -98,6 +98,7 @@ async function removeBg(pathToModel: string, sharpInput: sharp.Sharp) {
 
 	// https://github.com/danielgatis/rembg/blob/main/rembg/bg.py#L43
 	// my implementation isn't correct but it will do for now
+	// TODO: understand and add binary erosion
 
 	// const foregroundThreshold = 240;
 	// const backgroundThreshold = 10;

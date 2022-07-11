@@ -130,7 +130,7 @@ export const PetpetCommand: Command = {
 				const avatarImageSharp = await removeBg.removeBg(
 					sharp(avatarImage),
 				);
-				avatarImage = await avatarImageSharp.png().toBuffer();
+				avatarImage = await avatarImageSharp.trim().png().toBuffer();
 			}
 
 			const petpetSpriteImage = await fs.readFile(

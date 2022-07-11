@@ -13,6 +13,7 @@ import { FrugCommand } from "./commands/frug-command";
 import { HelpCommand } from "./commands/help-command";
 import { OmgHiCommand } from "./commands/omg-hi-command";
 import { PetpetCommand } from "./commands/petpet-command";
+import { RemoveBgCommand } from "./commands/remove-bg-command";
 import { SquishyCommand } from "./commands/squishy-command";
 import { initReactionRoles } from "./reaction-roles";
 import { DalleQueue } from "./services/dalle-queue";
@@ -40,6 +41,7 @@ export const availableCommands: Command[] = [
 	SquishyCommand,
 	OmgHiCommand,
 	PetpetCommand,
+	RemoveBgCommand,
 ];
 
 const client = new Client({

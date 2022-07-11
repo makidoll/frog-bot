@@ -3,6 +3,7 @@ import { ClientUser } from "discord.js";
 import * as execa from "execa";
 import * as fs from "fs/promises";
 import * as path from "path";
+import * as sharp from "sharp";
 import { Writable } from "stream";
 import { Categories, Command } from "../command.js";
 import { circleCrop, getMagickPath, makeGif } from "../im-utils.js";
@@ -99,12 +100,21 @@ export const PetpetCommand: Command = {
 				.setName("friend")
 				.setDescription("for a 2 frog hug")
 				.setRequired(true),
+		)
+		.addBooleanOption(option =>
+			option
+				.setName("just-circle-crop")
+				.setDescription("dont do ai please")
+				.setRequired(false),
 		),
-	onInteraction: async interaction => {
+	onInteraction: async (interaction, { removeBg }) => {
 		const user: ClientUser = interaction.options.getUser(
 			"friend",
 			false,
 		) as any;
+
+		const justCircleCrop =
+			interaction.options.getBoolean("just-circle-crop");
 
 		const { avatarURL } = await getUsernameAndAvatarURL(
 			user ? user : interaction.user,
@@ -112,11 +122,18 @@ export const PetpetCommand: Command = {
 		);
 
 		try {
-			let avatarImage = await circleCrop(
-				await downloadToBuffer(avatarURL),
-			);
+			let avatarImage: Buffer = await downloadToBuffer(avatarURL);
 
-			let petpetSpriteImage = await fs.readFile(
+			if (justCircleCrop) {
+				avatarImage = await circleCrop(avatarImage);
+			} else {
+				const avatarImageSharp = await removeBg.removeBg(
+					sharp(avatarImage),
+				);
+				avatarImage = await avatarImageSharp.png().toBuffer();
+			}
+
+			const petpetSpriteImage = await fs.readFile(
 				path.resolve(__dirname, "../../assets/petpet-sprite.png"),
 			);
 

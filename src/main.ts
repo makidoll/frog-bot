@@ -1,27 +1,29 @@
 import "dotenv/config"; // loads .env file to process.env
 
-import { Client, Intents } from "discord.js";
-import { HtmlRenderer } from "./services/html-renderer";
-import { Services } from "./services/services";
-import { initReactionRoles } from "./reaction-roles";
 import { REST } from "@discordjs/rest";
 import { Routes } from "discord-api-types/v9";
+import { Client, Intents } from "discord.js";
 import { Command } from "./command";
-import { DalleCommand } from "./commands/dalle-command";
+import { CasCommand } from "./commands/cas-command";
 import { ComfyCommand } from "./commands/comfy-command";
 import { CouchCommand } from "./commands/couch-command";
-import { FrugCommand } from "./commands/frug-command";
-import { CasCommand } from "./commands/cas-command";
-import { HelpCommand } from "./commands/help-command";
-import { DalleQueue } from "./services/dalle-queue";
+import { DalleCommand } from "./commands/dalle-command";
 import { DeepfryCommand } from "./commands/deepfry-command";
-import { SquishyCommand } from "./commands/squishy-command";
+import { FrugCommand } from "./commands/frug-command";
+import { HelpCommand } from "./commands/help-command";
 import { OmgHiCommand } from "./commands/omg-hi-command";
 import { PetpetCommand } from "./commands/petpet-command";
+import { SquishyCommand } from "./commands/squishy-command";
+import { initReactionRoles } from "./reaction-roles";
+import { DalleQueue } from "./services/dalle-queue";
+import { HtmlRenderer } from "./services/html-renderer";
+import { RemoveBg } from "./services/remove-bg";
+import { Services } from "./services/services";
 
 const services: Services = {
 	htmlRenderer: new HtmlRenderer(),
 	dalleQueue: new DalleQueue(),
+	removeBg: new RemoveBg(),
 };
 
 services.htmlRenderer.launch();

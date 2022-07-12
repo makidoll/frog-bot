@@ -716,9 +716,10 @@ semver@^7.3.5, semver@^7.3.7:
   dependencies:
     lru-cache "^6.0.0"
 
-sharp@lovell/sharp#e0d3c6e05dc6e4caacb4b3b2160178fb7e6f5ca2:
+sharp@^0.30.7:
   version "0.30.7"
-  resolved "https://codeload.github.com/lovell/sharp/tar.gz/e0d3c6e05dc6e4caacb4b3b2160178fb7e6f5ca2"
+  resolved "https://registry.yarnpkg.com/sharp/-/sharp-0.30.7.tgz#7862bda98804fdd1f0d5659c85e3324b90d94c7c"
+  integrity sha512-G+MY2YW33jgflKPTXXptVO28HvNOo9G3j0MybYAHeEmby+QuD2U98dT6ueht9cv/XDqZspSpIhoSW+BAKJ7Hig==
   dependencies:
     color "^4.2.3"
     detect-libc "^2.0.1"

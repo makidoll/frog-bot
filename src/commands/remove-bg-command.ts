@@ -21,7 +21,7 @@ export const RemoveBgCommand: Command = {
 				.setRequired(false),
 		),
 
-	onInteraction: async (interaction, { removeBg }) => {
+	onInteraction: async (interaction, { remBg }) => {
 		const attachment = interaction.options.getAttachment("image");
 		const dontTrim = interaction.options.getBoolean("dont-trim");
 
@@ -45,7 +45,7 @@ export const RemoveBgCommand: Command = {
 		try {
 			const inputBuffer = await downloadToBuffer(attachment.url);
 
-			const outputSharp = await removeBg.removeBg(sharp(inputBuffer));
+			const outputSharp = await remBg.remove(sharp(inputBuffer));
 			if (!dontTrim) outputSharp.trim();
 
 			const outputBuffer = await outputSharp.png().toBuffer();

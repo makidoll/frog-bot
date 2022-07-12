@@ -3,6 +3,7 @@ import "dotenv/config"; // loads .env file to process.env
 import { REST } from "@discordjs/rest";
 import { Routes } from "discord-api-types/v9";
 import { Client, Intents } from "discord.js";
+import { RemBg } from "rembg-node";
 import { Command } from "./command";
 import { CasCommand } from "./commands/cas-command";
 import { ComfyCommand } from "./commands/comfy-command";
@@ -18,13 +19,12 @@ import { SquishyCommand } from "./commands/squishy-command";
 import { initReactionRoles } from "./reaction-roles";
 import { DalleQueue } from "./services/dalle-queue";
 import { HtmlRenderer } from "./services/html-renderer";
-import { RemoveBg } from "./services/remove-bg";
 import { Services } from "./services/services";
 
 const services: Services = {
 	htmlRenderer: new HtmlRenderer(),
 	dalleQueue: new DalleQueue(),
-	removeBg: new RemoveBg(),
+	remBg: new RemBg(),
 };
 
 services.htmlRenderer.launch();

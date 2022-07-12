@@ -37,6 +37,9 @@ const MESSAGES_TO_ROLES = {
 		"🤖": "🤖",
 		"🧚": "🧚",
 	},
+	"988551997298978836": {
+		"🎮": "🎮 gaymer",
+	},
 };
 
 function manageRoleFromMessageReaction(

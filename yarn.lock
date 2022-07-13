@@ -697,10 +697,10 @@ readable-stream@^3.1.1, readable-stream@^3.4.0:
     string_decoder "^1.1.1"
     util-deprecate "^1.0.1"
 
-rembg-node@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/rembg-node/-/rembg-node-2.0.0.tgz#fb0b078e0855a879db1ce76cad2a30c8b9251eb4"
-  integrity sha512-BTsbiacroeBH8xNRa6UijGpU2C8d3696P/YXAjyXEaeILyyzLcpx/JNS4zuPaenc+wNHoyIOPjQ7wBLb4R4vYg==
+rembg-node@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/rembg-node/-/rembg-node-2.0.1.tgz#d2f7597039039a5d8685a1efb82d9a02cd304d46"
+  integrity sha512-5Jkx63n8y3bUmbvhr1wIMShw6jsLySAUwUTBYC2Ym+pBWwGRP5xZzfCuJKldRzyYQq9czt3QQH/BBfRvUFLmpQ==
   dependencies:
     onnxruntime-node "^1.11.0"
 

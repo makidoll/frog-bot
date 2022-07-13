@@ -3,7 +3,7 @@ import "dotenv/config"; // loads .env file to process.env
 import { REST } from "@discordjs/rest";
 import { Routes } from "discord-api-types/v9";
 import { Client, Intents } from "discord.js";
-import { RemBg } from "rembg-node";
+import { Rembg } from "rembg-node";
 import { Command } from "./command";
 import { CasCommand } from "./commands/cas-command";
 import { ComfyCommand } from "./commands/comfy-command";
@@ -24,7 +24,7 @@ import { Services } from "./services/services";
 const services: Services = {
 	htmlRenderer: new HtmlRenderer(),
 	dalleQueue: new DalleQueue(),
-	remBg: new RemBg(),
+	rembg: new Rembg(),
 };
 
 services.htmlRenderer.launch();

@@ -107,7 +107,7 @@ export const PetpetCommand: Command = {
 				.setDescription("dont do ai please")
 				.setRequired(false),
 		),
-	onInteraction: async (interaction, { remBg }) => {
+	onInteraction: async (interaction, { rembg }) => {
 		const user: ClientUser = interaction.options.getUser(
 			"friend",
 			false,
@@ -127,7 +127,7 @@ export const PetpetCommand: Command = {
 			if (justCircleCrop) {
 				avatarImage = await circleCrop(avatarImage);
 			} else {
-				const avatarImageSharp = await remBg.remove(sharp(avatarImage));
+				const avatarImageSharp = await rembg.remove(sharp(avatarImage));
 				avatarImage = await avatarImageSharp.trim().png().toBuffer();
 			}
 

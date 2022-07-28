@@ -20,6 +20,7 @@ import { initReactionRoles } from "./reaction-roles";
 import { DalleQueue } from "./services/dalle-queue";
 import { HtmlRenderer } from "./services/html-renderer";
 import { Services } from "./services/services";
+import { WebServer } from "./web-server";
 
 const services: Services = {
 	htmlRenderer: new HtmlRenderer(),
@@ -28,6 +29,9 @@ const services: Services = {
 };
 
 services.htmlRenderer.launch();
+
+const webServer = new WebServer();
+webServer.start();
 
 // export const commandPrefix = "frog ";
 export const availableCommands: Command[] = [

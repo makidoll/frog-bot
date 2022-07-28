@@ -1,0 +1,53 @@
+<html>
+	<head>
+		<title>frog bot - all dalles</title>
+		<style>
+			@font-face {
+				font-family: "Littlefox";
+				font-style: normal;
+				font-weight: 400;
+				src: url(../Littlefox-Regular.woff2) format("woff2");
+			}
+
+			body {
+				margin: 0;
+			}
+
+			.title {
+				font-family: "Littlefox";
+				font-weight: 400;
+				text-align: center;
+				font-size: 3rem;
+				margin-top: 32px;
+				margin-bottom: 32px;
+			}
+
+			.dalles {
+				display: grid;
+				justify-content: center;
+				grid-template-columns: repeat(auto-fill, 350px);
+				grid-gap: 16px;
+				margin: 8px 8px;
+			}
+
+			.dalles img {
+				width: 100%;
+				border-radius: 8px;
+				box-shadow: 0 0 16px rgba(0, 0, 0, 0.15);
+			}
+		</style>
+	</head>
+	<body>
+		<h1 class="title">frog bot - all dalles</h1>
+		<div class="dalles"></div>
+		<script>
+			const dalles = [dalles];
+			const el = document.querySelector(".dalles");
+			for (const dalle of dalles) {
+				const img = document.createElement("img");
+				img.src = "/dalle-saved/" + dalle;
+				el.appendChild(img);
+			}
+		</script>
+	</body>
+</html>

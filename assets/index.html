@@ -1,6 +1,6 @@
 <html>
 	<head>
-		<title>frog bot - all dalles</title>
+		<title>frog bot - 0 dalles generated</title>
 		<style>
 			@font-face {
 				font-family: "Littlefox";
@@ -44,19 +44,24 @@
 				padding: 12px 24px;
 				font-size: 1.5em;
 				color: #fff;
-				margin-top: 32px;
+				margin: 32px 0;
 				cursor: pointer;
 			}
 		</style>
 	</head>
 	<body>
-		<h1 class="title">frog bot - all dalles</h1>
+		<h1 class="title">
+			frog bot - <span class="total">0</span> dalles generated
+		</h1>
 		<div class="dalles"></div>
 		<div style="display: flex; justify-content: center">
 			<div class="load-more">load more</div>
 		</div>
 		<script>
 			const dalles = [dalles];
+
+			document.querySelector(".total").textContent = dalles.length;
+			document.title = document.title.replace("0", dalles.length);
 
 			let loaded = 0;
 			const loadAtATime = 16;

@@ -13,7 +13,9 @@ export const DalleCommand: Command = {
 	category: Categories.other,
 	command: new SlashCommandBuilder()
 		.setName("dalle")
-		.setDescription("🎨 generate 6 images from text using ai")
+		.setDescription(
+			"🎨 generate images from text with ai. see all: https://frog-bot.cutelab.space",
+		)
 		.addStringOption(option =>
 			option
 				.setName("prompt")

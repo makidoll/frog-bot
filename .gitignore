@@ -4,4 +4,5 @@ tsconfig.tsbuildinfo
 yarn-error.log
 .env
 dalle-saved
+stable-diffusion-saved
 .vscode

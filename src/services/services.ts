@@ -1,9 +1,9 @@
 import { Rembg } from "rembg-node";
-import { DalleQueue } from "./dalle-queue";
+import { StableDiffusionQueue } from "./stable-diffusion-queue";
 import { HtmlRenderer } from "./html-renderer";
 
 export interface Services {
 	htmlRenderer: HtmlRenderer;
-	dalleQueue: DalleQueue;
+	stableDiffusionQueue: StableDiffusionQueue;
 	rembg: Rembg;
 }

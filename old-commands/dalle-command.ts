@@ -3,8 +3,8 @@ import axios from "axios";
 import * as fs from "fs/promises";
 import * as path from "path";
 import slugify from "slugify";
-import { Categories, Command } from "../command";
-import { plural, stNdRdTh } from "../utils";
+import { Categories, Command } from "../src/command";
+import { plural, stNdRdTh } from "../src/utils";
 
 const dalleSavedPath = path.resolve(__dirname, "../../dalle-saved/");
 fs.mkdir(dalleSavedPath).catch(() => {});
@@ -13,9 +13,7 @@ export const DalleCommand: Command = {
 	category: Categories.other,
 	command: new SlashCommandBuilder()
 		.setName("dalle")
-		.setDescription(
-			"🎨 generate images from text with ai. see all: https://frog-bot.cutelab.space",
-		)
+		.setDescription("🎨 generate 6 images from text using ai")
 		.addStringOption(option =>
 			option
 				.setName("prompt")

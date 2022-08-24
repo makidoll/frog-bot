@@ -8,7 +8,6 @@ import { Command } from "./command";
 import { CasCommand } from "./commands/cas-command";
 import { ComfyCommand } from "./commands/comfy-command";
 import { CouchCommand } from "./commands/couch-command";
-import { DalleCommand } from "./commands/dalle-command";
 import { DeepfryCommand } from "./commands/deepfry-command";
 import { FrugCommand } from "./commands/frug-command";
 import { HelpCommand } from "./commands/help-command";
@@ -16,15 +15,16 @@ import { OmgHiCommand } from "./commands/omg-hi-command";
 import { PetpetCommand } from "./commands/petpet-command";
 import { RemoveBgCommand } from "./commands/remove-bg-command";
 import { SquishyCommand } from "./commands/squishy-command";
+import { StableDiffusionCommand } from "./commands/stable-diffusion-command";
 import { initReactionRoles } from "./reaction-roles";
-import { DalleQueue } from "./services/dalle-queue";
 import { HtmlRenderer } from "./services/html-renderer";
 import { Services } from "./services/services";
 import { WebServer } from "./web-server";
+import { StableDiffusionQueue } from "./services/stable-diffusion-queue";
 
 const services: Services = {
 	htmlRenderer: new HtmlRenderer(),
-	dalleQueue: new DalleQueue(),
+	stableDiffusionQueue: new StableDiffusionQueue(),
 	rembg: new Rembg(),
 };
 
@@ -39,7 +39,7 @@ export const availableCommands: Command[] = [
 	CouchCommand,
 	FrugCommand,
 	ComfyCommand,
-	DalleCommand,
+	StableDiffusionCommand,
 	CasCommand,
 	DeepfryCommand,
 	SquishyCommand,

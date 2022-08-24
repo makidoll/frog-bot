@@ -60,7 +60,7 @@ export const StableDiffusionCommand: Command = {
 					async page => {
 						await page.setViewport({
 							width: 512 * 3,
-							height: 512 * 1 + 64,
+							height: 512 * 1 + 128,
 						});
 						await page.evaluate(
 							"addImages(" +

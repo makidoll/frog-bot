@@ -41,7 +41,7 @@ export const StableDiffusionCommand: Command = {
 					method: "post",
 					// url: "http://127.0.0.1:5000/api/generate/oneoff",
 					url: "http://192.168.1.10:57467/api/generate/oneoff",
-					timeout: 1000 * 60 * 5, // 5 minutes
+					timeout: 1000 * 60 * 1, // 1 minute
 					data: {
 						prompt,
 						seed: -1,

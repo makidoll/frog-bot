@@ -19,7 +19,6 @@ import { StableDiffusionCommand } from "./commands/stable-diffusion-command";
 import { initReactionRoles } from "./reaction-roles";
 import { HtmlRenderer } from "./services/html-renderer";
 import { Services } from "./services/services";
-import { WebServer } from "./web-server";
 import { StableDiffusionQueue } from "./services/stable-diffusion-queue";
 
 const services: Services = {
@@ -29,9 +28,6 @@ const services: Services = {
 };
 
 services.htmlRenderer.launch();
-
-const webServer = new WebServer();
-webServer.start();
 
 // export const commandPrefix = "frog ";
 export const availableCommands: Command[] = [

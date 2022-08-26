@@ -2,6 +2,14 @@
 	<head>
 		<style>
 			@font-face {
+				font-family: "Inter";
+				font-style: normal;
+				font-weight: 200;
+				font-display: swap;
+				src: url("./Inter-ExtraLight.woff2?v=3.19") format("woff2");
+			}
+
+			@font-face {
 				font-family: "Littlefox";
 				font-style: normal;
 				font-weight: 400;
@@ -10,6 +18,10 @@
 
 			* {
 				margin: 0;
+			}
+
+			body {
+				background-color: black;
 			}
 
 			#prompt {
@@ -23,16 +35,49 @@
 				align-items: center;
 				justify-content: center;
 				text-align: center;
+				background-color: white;
 			}
 
 			#images {
 				width: calc(512px * 3);
 				height: 512px;
+				display: flex;
+				flex-direction: row;
 			}
 
-			#images img {
+			#images .image {
 				width: 512px;
 				height: 512px;
+				overflow: hidden;
+				position: relative;
+			}
+
+			#images .image img {
+				width: 512px;
+				height: 512px;
+			}
+
+			#images .image.unsafe img {
+				filter: blur(128px);
+				opacity: 0.333;
+			}
+
+			#images .image.unsafe p {
+				position: absolute;
+				top: 0;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				margin: auto;
+				height: 160px;
+				color: #fff;
+				font-family: "Inter", sans-serif;
+				font-weight: 200;
+				font-size: 80px;
+				text-align: center;
+				line-height: 80px;
+				letter-spacing: -4px;
+				opacity: 0.15;
 			}
 		</style>
 	</head>
@@ -41,21 +86,56 @@
 		<div id="images"></div>
 		<script src="./textFit.min.js"></script>
 		<script>
-			function addImages(images, prompt) {
-				for (const dataUri of images) {
-					const img = document.createElement("img");
-					img.src = dataUri;
-					document.getElementById("images").appendChild(img);
-				}
+			const sleep = time =>
+				new Promise(resolve => {
+					setTimeout(() => {
+						resolve();
+					}, time);
+				});
+
+			async function addImages(prompt, images, unsafe) {
+				// set prompt first to give it more time to textfit?, idk
 
 				document.getElementById("prompt").textContent = prompt;
-				setTimeout(() => {
-					textFit(document.getElementById("prompt"), {
-						maxFontSize: 96,
-						alignVertWithFlexbox: true,
-					});
-				}, 100);
+
+				await sleep(100);
+
+				textFit(document.getElementById("prompt"), {
+					maxFontSize: 96,
+					alignVertWithFlexbox: true,
+				});
+
+				await sleep(100);
+
+				for (const i in images) {
+					const is_unsafe = unsafe[i];
+
+					const div = document.createElement("div");
+					div.className = "image" + (is_unsafe ? " unsafe" : "");
+
+					const img = document.createElement("img");
+					img.src = images[i];
+					div.appendChild(img);
+
+					if (is_unsafe) {
+						const p = document.createElement("p");
+						p.innerHTML = "marked as<br />unsafe :(";
+						div.appendChild(p);
+					}
+
+					document.getElementById("images").appendChild(div);
+				}
 			}
+
+			// addImages(
+			// 	"bichon maltese pizza",
+			// 	[
+			// 		"https://picsum.photos/128?1",
+			// 		"https://picsum.photos/128?2",
+			// 		"https://picsum.photos/128?3",
+			// 	],
+			// 	[true, true, true],
+			// );
 		</script>
 	</body>
 </html>

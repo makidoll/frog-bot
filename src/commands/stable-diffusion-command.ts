@@ -39,15 +39,11 @@ export const StableDiffusionCommand: Command = {
 			try {
 				const res = await axios({
 					method: "post",
-					// url: "http://127.0.0.1:5000/api/generate/oneoff",
-					url: "http://192.168.1.10:57467/api/generate/oneoff",
+					url: "http://127.0.0.1:5000/api/generate/oneoff",
+					// url: "http://192.168.1.10:57467/api/generate/oneoff",
 					timeout: 1000 * 60 * 1, // 1 minute
 					data: {
 						prompt,
-						seed: -1,
-						inferenceSteps: 50,
-						width: 512,
-						height: 512,
 					},
 				});
 
@@ -64,13 +60,15 @@ export const StableDiffusionCommand: Command = {
 						});
 						await page.evaluate(
 							"addImages(" +
+								JSON.stringify(prompt) +
+								"," +
 								JSON.stringify(res.data.images) +
 								"," +
-								JSON.stringify(prompt) +
+								JSON.stringify(res.data.unsafe) +
 								")",
 						);
 						await new Promise(resolve => {
-							setTimeout(resolve, 2000);
+							setTimeout(resolve, 1000);
 						});
 					},
 				);

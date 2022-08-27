@@ -39,7 +39,7 @@ export const StableDiffusionCommand: Command = {
 			try {
 				const res = await axios({
 					method: "post",
-					// url: "http://127.0.0.1:5000/api/generate/oneoff",
+					// url: "http://maki-pc.local:5000/api/generate/oneoff",
 					url: "http://192.168.1.10:57467/api/generate/oneoff",
 					timeout: 1000 * 60 * 1, // 1 minute
 					data: {

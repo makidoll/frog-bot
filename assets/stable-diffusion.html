@@ -58,25 +58,26 @@
 			}
 
 			#images .image.unsafe img {
-				filter: blur(64px);
-				opacity: 0.333;
+				filter: blur(32px);
+				opacity: 0.75;
 			}
 
 			#images .image.unsafe p {
 				position: absolute;
-				top: 0;
+				/* top: 0; */
 				left: 0;
 				right: 0;
-				bottom: 0;
+				bottom: 4px;
 				margin: auto;
-				height: 160px;
+				/* height: 160px; */
 				color: #fff;
 				font-family: "Inter", sans-serif;
 				font-weight: 200;
-				font-size: 80px;
+				/* font-size: 80px; */
+				font-size: 64px;
 				text-align: center;
 				line-height: 80px;
-				letter-spacing: -4px;
+				letter-spacing: -3px;
 				opacity: 0.15;
 			}
 		</style>
@@ -119,7 +120,8 @@
 
 					if (is_unsafe) {
 						const p = document.createElement("p");
-						p.innerHTML = "marked as<br />unsafe :(";
+						// p.innerHTML = "marked as<br />unsafe :(";
+						p.innerHTML = "marked as unsafe";
 						div.appendChild(p);
 					}
 
@@ -127,15 +129,15 @@
 				}
 			}
 
-			// addImages(
-			// 	"bichon maltese pizza",
-			// 	[
-			// 		"https://picsum.photos/128?1",
-			// 		"https://picsum.photos/128?2",
-			// 		"https://picsum.photos/128?3",
-			// 	],
-			// 	[true, true, true],
-			// );
+			addImages(
+				"bichon maltese pizza",
+				[
+					"https://m.media-amazon.com/images/I/61iRquzveOL._AC_SL1000_.jpg",
+					"https://m.media-amazon.com/images/I/61iRquzveOL._AC_SL1000_.jpg",
+					"https://m.media-amazon.com/images/I/61iRquzveOL._AC_SL1000_.jpg",
+				],
+				[true, false, false],
+			);
 		</script>
 	</body>
 </html>

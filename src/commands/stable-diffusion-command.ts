@@ -28,7 +28,7 @@ export const StableDiffusionCommand: Command = {
 		{ htmlRenderer, stableDiffusionQueue },
 	) => {
 		const serverName = "maki's server, sd v1.4 fp32";
-		const timePerImage = 10; // seconds
+		const timePerImage = 4; // seconds
 		const numberOfImages = 3;
 
 		const prompt = interaction.options.getString("prompt", true);

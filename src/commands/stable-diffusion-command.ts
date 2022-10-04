@@ -126,7 +126,9 @@ export const StableDiffusionCommand: Command = {
 						interaction.editReply(
 							'ribbit! generating images for **"' +
 								prompt +
-								'"...**\nsomeone **outside of discord is generating**, please wait. *using: ' +
+								'"...** with sampler *' +
+								sampler +
+								"*\nsomeone **outside of discord is generating**, please wait. *using: " +
 								serverName +
 								"*",
 						);

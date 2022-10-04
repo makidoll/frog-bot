@@ -98,9 +98,9 @@ export const StableDiffusionCommand: Command = {
 					content:
 						'ribbit! here is **"' +
 						prompt +
-						'"** using sampler *' +
+						'"** using *' +
 						sampler +
-						"*",
+						"* sampler",
 					files: [
 						{
 							attachment: buffer,
@@ -126,9 +126,9 @@ export const StableDiffusionCommand: Command = {
 						interaction.editReply(
 							'ribbit! generating images for **"' +
 								prompt +
-								'"...** with sampler *' +
+								'"...** using *' +
 								sampler +
-								"*\nsomeone **outside of discord is generating**, please wait. *using: " +
+								"* sampler\nsomeone **outside of discord is generating**, please wait. *using: " +
 								serverName +
 								"*",
 						);

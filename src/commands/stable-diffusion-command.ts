@@ -95,12 +95,7 @@ export const StableDiffusionCommand: Command = {
 				fs.writeFile(filePath, buffer);
 
 				await interaction.followUp({
-					content:
-						'ribbit! here is **"' +
-						prompt +
-						'"** using *' +
-						sampler +
-						"* sampler",
+					content: "ribbit! using *" + sampler + "*",
 					files: [
 						{
 							attachment: buffer,
@@ -128,7 +123,7 @@ export const StableDiffusionCommand: Command = {
 								prompt +
 								'"...** using *' +
 								sampler +
-								"* sampler\nsomeone **outside of discord is generating**, please wait. *using: " +
+								"*\nsomeone **outside of discord is generating**, please wait. *using: " +
 								serverName +
 								"*",
 						);

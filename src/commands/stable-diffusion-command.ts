@@ -152,7 +152,9 @@ export const StableDiffusionCommand: Command = {
 		await interaction.reply(
 			'ribbit! generating images for **"' +
 				prompt +
-				'"...**\nmight take up to **' +
+				'"...** using *' +
+				sampler +
+				"*\nmight take up to **" +
 				plural(waitMinutes, "minute", "minutes") +
 				", " +
 				stNdRdTh(queue) +

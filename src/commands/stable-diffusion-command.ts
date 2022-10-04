@@ -22,6 +22,12 @@ export const StableDiffusionCommand: Command = {
 				.setName("prompt")
 				.setDescription("what to tell the ai to make")
 				.setRequired(true),
+		)
+		.addBooleanOption(option =>
+			option
+				.setName("ancestral")
+				.setDescription("uses k_euler_a instead of k_euler")
+				.setRequired(false),
 		),
 	onInteraction: async (
 		interaction,
@@ -32,6 +38,9 @@ export const StableDiffusionCommand: Command = {
 		const numberOfImages = 3;
 
 		const prompt = interaction.options.getString("prompt", true);
+		const ancestral = interaction.options.getBoolean("ancestral", false);
+
+		const sampler = ancestral ? "k_euler_a" : "k_euler";
 
 		let generatingOutsideOfDiscord = false;
 
@@ -44,6 +53,7 @@ export const StableDiffusionCommand: Command = {
 					timeout: 1000 * 60 * 1, // 1 minute
 					data: {
 						prompt,
+						sampler,
 					},
 				});
 
@@ -85,7 +95,12 @@ export const StableDiffusionCommand: Command = {
 				fs.writeFile(filePath, buffer);
 
 				await interaction.followUp({
-					// content: 'here is **"' + prompt + '"**',
+					content:
+						'ribbit! here is **"' +
+						prompt +
+						'"** using sampler *' +
+						sampler +
+						"*",
 					files: [
 						{
 							attachment: buffer,

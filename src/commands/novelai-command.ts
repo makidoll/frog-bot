@@ -66,6 +66,7 @@ export const NovelAiCommand: Command = {
 							"nai-animefull-final-pruned.ckpt [925997e9]",
 						CLIP_stop_at_last_layers: 2,
 						eta_noise_seed_delta: 31337,
+						sd_hypernetwork: "anime(1145414c)",
 					},
 				});
 

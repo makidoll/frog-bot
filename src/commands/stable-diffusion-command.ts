@@ -64,7 +64,7 @@ export const StableDiffusionCommand: Command = {
 							"../../assets/stable-diffusion.html",
 						),
 					async page => {
-						await page.setViewport({
+						await page.setViewportSize({
 							width: 512 * 3,
 							height: 512 * 1 + 128,
 						});

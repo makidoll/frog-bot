@@ -30,7 +30,7 @@ export const OmgHiCommand: Command = {
 			"file://" +
 				path.resolve(__dirname, "../../assets/omg-hi/omg-hi.html"),
 			async page => {
-				await page.setViewport({
+				await page.setViewportSize({
 					width: 493,
 					height: 579,
 				});

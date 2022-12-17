@@ -131,14 +131,14 @@ export const FrugCommand: Command = {
 				await page.evaluate("postProcess()");
 
 				// get image width and height
-				const width = await page.evaluate(
+				const width: number = await page.evaluate(
 					"document.querySelector('.image').getBoundingClientRect().width",
 				);
-				const height = await page.evaluate(
+				const height: number = await page.evaluate(
 					"document.querySelector('.image').getBoundingClientRect().height",
 				);
 
-				await page.setViewport({
+				await page.setViewportSize({
 					width: Math.floor(width),
 					height: Math.floor(height),
 				});

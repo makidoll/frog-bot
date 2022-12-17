@@ -40,7 +40,7 @@ export const ComfyCommand: Command = {
 					},
 					await downloadToDataUri(avatarURL),
 				);
-				await page.setViewport({
+				await page.setViewportSize({
 					width: 128,
 					height: 127,
 				});

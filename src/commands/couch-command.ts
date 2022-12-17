@@ -58,7 +58,7 @@ export const CouchCommand: Command = {
 						await downloadToDataUri(avatarURL),
 					);
 				}
-				await page.setViewport({
+				await page.setViewportSize({
 					width: 600,
 					height: 500,
 				});

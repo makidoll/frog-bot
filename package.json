@@ -3,7 +3,8 @@
 	"private": true,
 	"scripts": {
 		"start": "tsc -w",
-		"build": "tsc"
+		"build": "tsc",
+		"install-deps": "playwright install-deps"
 	},
 	"dependencies": {
 		"@discordjs/builders": "^0.15.0",

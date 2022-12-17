@@ -15,7 +15,7 @@ export const NovelAiCommand: Command = {
 	category: Categories.other,
 	command: new SlashCommandBuilder()
 		.setName("novelai")
-		.setDescription("⛩️ generate anime images from text using ai")
+		.setDescription("🍣 generate anime images from text using ai")
 		.addStringOption(option =>
 			option
 				.setName("prompt")

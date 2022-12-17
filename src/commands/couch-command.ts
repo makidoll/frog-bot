@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from "@discordjs/builders";
 import { CommandInteraction } from "discord.js";
 import * as path from "path";
 import { Categories, Command } from "../command";
-import { Services } from "../services/services";
+import { Services } from "../main";
 import { downloadToDataUri, getUsernameAndAvatarURL } from "../utils";
 
 export const CouchCommand: Command = {

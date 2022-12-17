@@ -1,9 +1,9 @@
-import { CommandInteraction, Interaction, Message } from "discord.js";
-import { Services } from "./services/services";
 import {
 	SlashCommandBuilder,
 	SlashCommandSubcommandsOnlyBuilder,
 } from "@discordjs/builders";
+import { CommandInteraction } from "discord.js";
+import { Services } from "./main";
 
 export enum Categories {
 	other = "🎀 other",

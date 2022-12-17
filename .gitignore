@@ -5,4 +5,5 @@ yarn-error.log
 .env
 dalle-saved
 stable-diffusion-saved
+novelai-saved
 .vscode

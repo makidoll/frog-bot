@@ -18,13 +18,21 @@ import { SquishyCommand } from "./commands/squishy-command";
 import { StableDiffusionCommand } from "./commands/stable-diffusion-command";
 import { initReactionRoles } from "./reaction-roles";
 import { HtmlRenderer } from "./services/html-renderer";
-import { Services } from "./services/services";
-import { StableDiffusionQueue } from "./services/stable-diffusion-queue";
+import { TaskQueue } from "./services/task-queue";
+import { NovelAiCommand } from "./commands/novelai-command";
+
+export interface Services {
+	htmlRenderer: HtmlRenderer;
+	rembg: Rembg;
+	stableDiffusionQueue: TaskQueue;
+	novelAiQueue: TaskQueue;
+}
 
 const services: Services = {
 	htmlRenderer: new HtmlRenderer(),
-	stableDiffusionQueue: new StableDiffusionQueue(),
 	rembg: new Rembg(),
+	stableDiffusionQueue: new TaskQueue(),
+	novelAiQueue: new TaskQueue(),
 };
 
 services.htmlRenderer.launch();
@@ -35,7 +43,8 @@ export const availableCommands: Command[] = [
 	CouchCommand,
 	FrugCommand,
 	ComfyCommand,
-	StableDiffusionCommand,
+	// StableDiffusionCommand,
+	NovelAiCommand,
 	CasCommand,
 	DeepfryCommand,
 	SquishyCommand,

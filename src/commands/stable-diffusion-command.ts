@@ -10,6 +10,7 @@ const stableDiffusionSavedPath = path.resolve(
 	__dirname,
 	"../../stable-diffusion-saved/",
 );
+
 fs.mkdir(stableDiffusionSavedPath).catch(() => {});
 
 export const StableDiffusionCommand: Command = {

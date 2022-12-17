@@ -1,4 +1,4 @@
-export class StableDiffusionQueue {
+export class TaskQueue {
 	private queue: (() => Promise<any>)[] = [];
 	private working = false;
 

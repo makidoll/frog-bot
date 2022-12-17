@@ -41,9 +41,8 @@ export const NovelAiCommand: Command = {
 	) => {
 		const serverName = "maki's server, novel ai leak fp32";
 
-		// const timePerImage = 4; // seconds
-		// const numberOfImages = 3;
-		const timePerBatch = 7; // seconds, on a 3090 ti
+		const timePerBatch = 15; // seconds, on a 3090 ti
+		const steps = 50;
 
 		const prompt = interaction.options.getString("prompt", true);
 		const resolution =
@@ -80,7 +79,7 @@ export const NovelAiCommand: Command = {
 						prompt: "Masterpiece, best quality, " + prompt,
 						width,
 						height,
-						steps: 20,
+						steps,
 						cfg_scale: 12,
 						n_iter: 1,
 						batch_size: 3,

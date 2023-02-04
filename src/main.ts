@@ -20,22 +20,29 @@ import { initReactionRoles } from "./reaction-roles";
 import { HtmlRenderer } from "./services/html-renderer";
 import { TaskQueue } from "./services/task-queue";
 import { NovelAiCommand } from "./commands/novelai-command";
+import { PlayCommand } from "./commands/play-command";
+import { MusicQueue } from "./services/music-queue";
+import { StopCommand } from "./commands/stop-command";
+import { SkipCommand } from "./commands/skip-command";
 
 export interface Services {
 	htmlRenderer: HtmlRenderer;
 	rembg: Rembg;
 	stableDiffusionQueue: TaskQueue;
-	novelAiQueue: TaskQueue;
+	// novelAiQueue: TaskQueue;
+	musicQueue: MusicQueue;
 }
 
 const services: Services = {
 	htmlRenderer: new HtmlRenderer(),
 	rembg: new Rembg(),
 	stableDiffusionQueue: new TaskQueue(),
-	novelAiQueue: new TaskQueue(),
+	// novelAiQueue: new TaskQueue(),
+	musicQueue: new MusicQueue(),
 };
 
 services.htmlRenderer.launch();
+services.musicQueue.ensureToolsInstalled();
 
 // export const commandPrefix = "frog ";
 export const availableCommands: Command[] = [
@@ -44,13 +51,16 @@ export const availableCommands: Command[] = [
 	FrugCommand,
 	ComfyCommand,
 	// StableDiffusionCommand,
-	NovelAiCommand,
+	// NovelAiCommand,
 	CasCommand,
 	DeepfryCommand,
 	SquishyCommand,
 	OmgHiCommand,
 	PetpetCommand,
 	RemoveBgCommand,
+	PlayCommand,
+	StopCommand,
+	SkipCommand,
 ];
 
 const client = new Client({
@@ -58,6 +68,7 @@ const client = new Client({
 		Intents.FLAGS.GUILDS,
 		Intents.FLAGS.GUILD_MESSAGES,
 		Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+		Intents.FLAGS.GUILD_VOICE_STATES,
 	],
 	partials: ["MESSAGE", "CHANNEL", "REACTION"],
 });

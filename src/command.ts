@@ -10,6 +10,7 @@ export enum Categories {
 	frends = "🤗 frends",
 	memes = "😂 memes",
 	memesGifs = "🎞️ memes but gifs",
+	music = "🎵 music",
 }
 
 export interface Command {

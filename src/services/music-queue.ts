@@ -184,7 +184,12 @@ export class MusicQueue {
 		const connection = await this.ensureConnection(channel);
 		const player = await this.ensurePlayer(channel, connection);
 
-		const audioResource = createAudioResource(url, { metadata: { title } });
+		const audioResource = createAudioResource(url, {
+			metadata: { title },
+			inlineVolume: true,
+		});
+
+		audioResource.volume.setVolume(0.5);
 
 		if (this.audioQueue[channel.id] != null) {
 			// already a queue available, so add song

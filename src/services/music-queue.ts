@@ -189,7 +189,7 @@ export class MusicQueue {
 			inlineVolume: true,
 		});
 
-		audioResource.volume.setVolume(0.5);
+		audioResource.volume.setVolume(0.25);
 
 		if (this.audioQueue[channel.id] != null) {
 			// already a queue available, so add song

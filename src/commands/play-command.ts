@@ -6,7 +6,7 @@ export const PlayCommand: Command = {
 	category: Categories.music,
 	command: new SlashCommandBuilder()
 		.setName("play")
-		.setDescription("▶️ add song to queue in vc")
+		.setDescription("▶️ add youtube search/url to queue in vc")
 		.addStringOption(option =>
 			option
 				.setName("search")
@@ -24,23 +24,23 @@ export const PlayCommand: Command = {
 			return;
 		}
 
-		await interaction.reply("ribbit, searching for: **" + search + "**");
-
-		let title: string, url: string;
+		await interaction.reply("🔍 ribbit, searching for: **" + search + "**");
 
 		try {
-			const info = await musicQueue.getYoutubeInfo(search);
-			title = info.title;
-			url = info.url;
+			const { title, url, duration_string } =
+				await musicQueue.getYoutubeInfo(search);
+
+			await interaction.followUp(
+				"🎶 ribbit, found: **" +
+					title +
+					"**\nit's **" +
+					duration_string +
+					"** long, froggy adding to queue...",
+			);
+
+			musicQueue.addToQueue(channel, url, title);
 		} catch (error) {
 			interaction.followUp("aw ribbit... something went wrong :(");
-			return;
 		}
-
-		await interaction.followUp(
-			"ribbit, found: **" + title + "**\nfroggy adding to queue...",
-		);
-
-		musicQueue.addToQueue(channel, url, title);
 	},
 };

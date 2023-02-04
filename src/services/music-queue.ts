@@ -106,9 +106,11 @@ export class MusicQueue {
 			);
 		});
 
-		const { title, url } = JSON.parse(json);
+		// fs.writeFile("test.json", json);
 
-		return { title, url };
+		const { title, url, duration_string } = JSON.parse(json);
+
+		return { title, url, duration_string };
 	}
 
 	private async ensureConnection(

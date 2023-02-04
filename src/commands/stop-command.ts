@@ -18,6 +18,6 @@ export const StopCommand: Command = {
 
 		await musicQueue.disconnectAndCleanup(channel);
 
-		await interaction.reply("ribbit, tried stopped playing");
+		await interaction.reply("⏹️ ribbit, tried stopped playing");
 	},
 };

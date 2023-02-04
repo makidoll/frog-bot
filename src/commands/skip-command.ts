@@ -19,7 +19,7 @@ export const SkipCommand: Command = {
 		const skipped = await musicQueue.skipCurrentSong(channel);
 
 		if (skipped) {
-			await interaction.reply("ribbit, skipped current song");
+			await interaction.reply("⏭️ ribbit, skipped current song");
 		} else {
 			await interaction.reply("aw ribbit, couldn't skip current song");
 		}

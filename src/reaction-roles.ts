@@ -36,10 +36,12 @@ const MESSAGES_TO_ROLES = {
 		"👽": "👽",
 		"🤖": "🤖",
 		"🧚": "🧚",
+		"<:5021biblicalangel:1064639190010175579>": "😇",
 	},
 	"988551997298978836": {
 		"🎮": "🎮 gaymer",
 		"🎧": "🎧 vc friends",
+		"🦋": "🦋 moths",
 	},
 };
 
@@ -54,7 +56,17 @@ function manageRoleFromMessageReaction(
 	const emojiToRoleName = MESSAGES_TO_ROLES[reaction.message.id];
 	if (emojiToRoleName == null) return;
 
-	const roleName = emojiToRoleName[reaction.emoji.name];
+	// console.log(reaction.emoji.id); // 01928309123
+	// console.log(reaction.emoji.identifier); // name:01928309123
+	// console.log(reaction.emoji.name); // name
+
+	let roleName = emojiToRoleName[reaction.emoji.name];
+	if (roleName == null) {
+		roleName = (Object.entries(emojiToRoleName).find(entry =>
+			entry[0].includes(reaction.emoji.identifier),
+		) ?? [null, null])[1];
+	}
+
 	if (roleName == null) return;
 
 	const role = reaction.message.guild.roles.cache.find(

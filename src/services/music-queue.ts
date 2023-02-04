@@ -57,6 +57,10 @@ export class MusicQueue {
 		await fs.writeFile(this.ytDlpPath, ytDlpRequest.data);
 
 		await fs.writeFile(this.ytDlpVersion, version);
+
+		if (os.platform() != "win32") {
+			child_process.execFile("chmod", ["+x", this.ytDlpPath]);
+		}
 	}
 
 	async ensureToolsInstalled() {

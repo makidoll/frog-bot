@@ -1,4 +1,5 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
+import { MessageFlags } from "discord-api-types/v10";
 import { GuildMember } from "discord.js";
 import { Categories, Command } from "../command";
 
@@ -6,7 +7,7 @@ export const PlayCommand: Command = {
 	category: Categories.music,
 	command: new SlashCommandBuilder()
 		.setName("play")
-		.setDescription("▶️ add youtube search/url to queue in vc")
+		.setDescription("▶️ add youtube (and many more) songs to queue in vc")
 		.addStringOption(option =>
 			option
 				.setName("search")
@@ -24,21 +25,59 @@ export const PlayCommand: Command = {
 			return;
 		}
 
-		await interaction.reply("🔍 ribbit, searching for: **" + search + "**");
+		await interaction.reply({
+			content: "🔍 ribbit, searching for: **" + search + "**",
+			flags: MessageFlags.SuppressEmbeds,
+		});
 
 		try {
-			const { title, url, duration_string } =
-				await musicQueue.getYoutubeInfo(search);
+			const info = await musicQueue.getInfo(search);
+
+			// await interaction.followUp(
+			// 	"🎶 ribbit, found: **" +
+			// 		title +
+			// 		"**\nit's **" +
+			// 		duration_string +
+			// 		"** long, froggy adding to queue...",
+			// );
+
+			// const embed = new EmbedBuilder()
+			// 	.setColor(0x0099ff)
+			// 	.setTitle(info.title)
+			// 	.setURL(info.webpage_url)
+			// 	.setAuthor({
+			// 		name: info.uploader,
+			// 		// iconURL: "",
+			// 		url: info.uploader_url,
+			// 	})
+			// 	.setImage(info.thumbnail)
+			// 	.setFields({
+			// 		name: "Duration",
+			// 		value: info.duration_string,
+			// 		inline: true,
+			// 	});
+
+			// await interaction.followUp({
+			// 	content: "🎶 ribbit found song! froggy adding to queue...",
+			// 	embeds: [embed.data],
+			// });
+
+			// await interaction.followUp(
+			// 	"🎶 ribbit, found: **" +
+			// 		title +
+			// 		"**\nit's **" +
+			// 		duration_string +
+			// 		"** long, froggy adding to queue...",
+			// );
 
 			await interaction.followUp(
-				"🎶 ribbit, found: **" +
-					title +
-					"**\nit's **" +
-					duration_string +
-					"** long, froggy adding to queue...",
+				"🎶 ribbit, found song!\nit's **" +
+					info.duration_string +
+					"** long, froggy adding to queue...\n" +
+					info.webpage_url,
 			);
 
-			musicQueue.addToQueue(channel, url, title);
+			musicQueue.addToQueue(channel, info.url, info.title);
 		} catch (error) {
 			interaction.followUp("aw ribbit... something went wrong :(");
 		}

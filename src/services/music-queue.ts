@@ -12,7 +12,7 @@ import {
 } from "@discordjs/voice";
 import axios from "axios";
 import * as child_process from "child_process";
-import { VoiceBasedChannel, VoiceChannel } from "discord.js";
+import { VoiceBasedChannel } from "discord.js";
 import * as fs from "fs/promises";
 import * as os from "os";
 import * as path from "path";
@@ -82,7 +82,7 @@ export class MusicQueue {
 		}
 	}
 
-	async getYoutubeInfo(search: string) {
+	async getInfo(search: string) {
 		const isUrl = /^https?:\/\//i.test(search);
 
 		const isUrlWithoutHttp =
@@ -110,11 +110,27 @@ export class MusicQueue {
 			);
 		});
 
-		// fs.writeFile("test.json", json);
+		// fs.writeFile("info.json", json);
 
-		const { title, url, duration_string } = JSON.parse(json);
+		const {
+			title,
+			url,
+			duration_string,
+			// thumbnail,
+			// uploader,
+			// uploader_url,
+			webpage_url,
+		} = JSON.parse(json);
 
-		return { title, url, duration_string };
+		return {
+			title,
+			url,
+			duration_string,
+			// thumbnail,
+			// uploader,
+			// uploader_url,
+			webpage_url,
+		};
 	}
 
 	private async ensureConnection(

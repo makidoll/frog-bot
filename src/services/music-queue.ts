@@ -182,12 +182,13 @@ export class MusicQueue {
 	}
 
 	async disconnectAndCleanup(channel: VoiceBasedChannel) {
-		if (this.voiceConnections[channel.id]) {
+		if (this.voiceConnections[channel.id] != null) {
+			this.voiceConnections[channel.id].removeAllListeners();
 			this.voiceConnections[channel.id].disconnect();
 			this.voiceConnections[channel.id] = null;
 		}
 
-		if (this.audioPlayers[channel.id]) {
+		if (this.audioPlayers[channel.id] != null) {
 			this.audioPlayers[channel.id].removeAllListeners();
 			this.audioPlayers[channel.id].stop(); // not necessary
 			this.audioPlayers[channel.id] = null;
@@ -219,16 +220,17 @@ export class MusicQueue {
 		player.play(audioResource);
 
 		player.on("stateChange", (oldState, newState) => {
-			// only when song finished
-			if (newState.status != AudioPlayerStatus.Idle) return;
-
-			if (this.audioQueue[channel.id].length == 0) {
-				// disconnect if empty
-				this.disconnectAndCleanup(channel);
-			} else {
-				// shift song and play
-				const audioResource = this.audioQueue[channel.id].shift();
-				player.play(audioResource);
+			console.log("state changed, old " + oldState + ", new " + newState);
+			if (newState.status == AudioPlayerStatus.Idle) {
+				// only when song finished
+				if (this.audioQueue[channel.id].length == 0) {
+					// disconnect if empty
+					this.disconnectAndCleanup(channel);
+				} else {
+					// shift song and play
+					const audioResource = this.audioQueue[channel.id].shift();
+					player.play(audioResource);
+				}
 			}
 		});
 	}

@@ -7,6 +7,7 @@ import {
 	entersState,
 	joinVoiceChannel,
 	NoSubscriberBehavior,
+	StreamType,
 	VoiceConnection,
 	VoiceConnectionStatus,
 } from "@discordjs/voice";
@@ -16,6 +17,7 @@ import { VoiceBasedChannel } from "discord.js";
 import * as fs from "fs/promises";
 import * as os from "os";
 import * as path from "path";
+import { FFmpeg } from "prism-media";
 
 const ext = os.platform() == "win32" ? ".exe" : "";
 
@@ -133,6 +135,39 @@ export class MusicQueue {
 		};
 	}
 
+	urlToFfmpegStream(url: string) {
+		// https://github.com/skick1234/DisTube/blob/stable/src/core/DisTubeStream.ts
+
+		const args = [
+			// fixes youtube links from stopping
+			"-reconnect",
+			"1",
+			"-reconnect_streamed",
+			"1",
+			"-reconnect_delay_max",
+			"5",
+			// input
+			"-i",
+			url,
+			// https://github.com/discordjs/voice/blob/main/src/audio/TransformerGraph.ts
+			"-analyzeduration",
+			"0",
+			"-loglevel",
+			"0",
+			"-ar",
+			"48000",
+			"-ac",
+			"2",
+			// format
+			"-f",
+			"opus",
+			"-acodec",
+			"libopus",
+		];
+
+		return new FFmpeg({ args, shell: false });
+	}
+
 	private async ensureConnection(
 		channel: VoiceBasedChannel,
 	): Promise<VoiceConnection> {
@@ -201,9 +236,10 @@ export class MusicQueue {
 		const connection = await this.ensureConnection(channel);
 		const player = await this.ensurePlayer(channel, connection);
 
-		const audioResource = createAudioResource(url, {
+		const audioResource = createAudioResource(this.urlToFfmpegStream(url), {
+			inputType: StreamType.OggOpus,
+			inlineVolume: true, // still works with ffmpeg stream
 			metadata: { title },
-			inlineVolume: true,
 		});
 
 		audioResource.volume.setVolume(0.25);
@@ -220,17 +256,16 @@ export class MusicQueue {
 		player.play(audioResource);
 
 		player.on("stateChange", (oldState, newState) => {
-			console.log("state changed, old " + oldState + ", new " + newState);
-			if (newState.status == AudioPlayerStatus.Idle) {
-				// only when song finished
-				if (this.audioQueue[channel.id].length == 0) {
-					// disconnect if empty
-					this.disconnectAndCleanup(channel);
-				} else {
-					// shift song and play
-					const audioResource = this.audioQueue[channel.id].shift();
-					player.play(audioResource);
-				}
+			// only when song finished
+			if (newState.status != AudioPlayerStatus.Idle) return;
+
+			if (this.audioQueue[channel.id].length == 0) {
+				// disconnect if empty
+				this.disconnectAndCleanup(channel);
+			} else {
+				// shift song and play
+				const audioResource = this.audioQueue[channel.id].shift();
+				player.play(audioResource);
 			}
 		});
 	}

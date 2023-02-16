@@ -117,6 +117,12 @@ export async function initReactionRoles(client: Client) {
 			}
 		}
 	} catch (error) {
-		console.error(error);
+		if (error.code == 50001) {
+			console.log(
+				"Init reaction roles is missing access, intented if developing",
+			);
+		} else {
+			console.error(error);
+		}
 	}
 }

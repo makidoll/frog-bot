@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { MessageFlags } from "discord-api-types/v10";
 import { GuildMember } from "discord.js";
-import { Categories, Command } from "../command";
+import { Categories, Command } from "../../command";
 
 export const PlayCommand: Command = {
 	category: Categories.music,

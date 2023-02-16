@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import * as path from "path";
-import { Categories, Command } from "../command";
-import { downloadToDataUri, getUsernameAndAvatarURL } from "../utils";
+import { Categories, Command } from "../../command";
+import { downloadToDataUri, getUsernameAndAvatarURL } from "../../utils";
 
 const frogHugInfo = {
 	"2": { variations: 3 },

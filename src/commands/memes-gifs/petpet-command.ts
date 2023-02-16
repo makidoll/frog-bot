@@ -5,9 +5,9 @@ import * as fs from "fs/promises";
 import * as path from "path";
 import * as sharp from "sharp";
 import { Writable } from "stream";
-import { Categories, Command } from "../command.js";
-import { circleCrop, getMagickPath, makeGif } from "../im-utils.js";
-import { downloadToBuffer, getUsernameAndAvatarURL } from "../utils.js";
+import { Categories, Command } from "../../command.js";
+import { circleCrop, getMagickPath, makeGif } from "../../im-utils.js";
+import { downloadToBuffer, getUsernameAndAvatarURL } from "../../utils.js";
 
 const options = {
 	squish: 1.25,

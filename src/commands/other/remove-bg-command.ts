@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import * as sharp from "sharp";
-import { Categories, Command } from "../command.js";
-import { downloadToBuffer } from "../utils.js";
+import { Categories, Command } from "../../command.js";
+import { downloadToBuffer } from "../../utils.js";
 
 export const RemoveBgCommand: Command = {
 	category: Categories.other,

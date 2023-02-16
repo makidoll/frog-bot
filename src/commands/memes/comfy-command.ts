@@ -1,8 +1,8 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { ClientUser } from "discord.js";
 import * as path from "path";
-import { Categories, Command } from "../command";
-import { downloadToDataUri, getUsernameAndAvatarURL } from "../utils";
+import { Categories, Command } from "../../command";
+import { downloadToDataUri, getUsernameAndAvatarURL } from "../../utils";
 
 export const ComfyCommand: Command = {
 	category: Categories.memes,

@@ -1,13 +1,13 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { fitBox } from "fit-box";
-import { Categories, Command } from "../command.js";
+import { Categories, Command } from "../../command.js";
 import {
 	centerCompositeScale,
 	getWidthHeight,
 	makeGif,
 	rescale,
-} from "../im-utils.js";
-import { downloadToBuffer } from "../utils.js";
+} from "../../im-utils.js";
+import { downloadToBuffer } from "../../utils.js";
 
 export const SquishyCommand: Command = {
 	category: Categories.memesGifs,

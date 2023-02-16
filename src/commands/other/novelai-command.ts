@@ -3,8 +3,8 @@ import axios from "axios";
 import * as fs from "fs/promises";
 import * as path from "path";
 import slugify from "slugify";
-import { Categories, Command } from "../command";
-import { plural, stNdRdTh } from "../utils";
+import { Categories, Command } from "../../command";
+import { plural, stNdRdTh } from "../../utils";
 import { formatDistance } from "date-fns";
 
 const novelAiSavedPath = path.resolve(__dirname, "../../novelai-saved/");

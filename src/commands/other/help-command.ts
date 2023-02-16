@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { Categories, Command } from "../command";
-import { availableCommands } from "../main";
+import { Categories, Command } from "../../command";
+import { availableCommands } from "../../main";
 
 export const HelpCommand: Command = {
 	category: Categories.other,

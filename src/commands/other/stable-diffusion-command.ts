@@ -3,8 +3,8 @@ import axios from "axios";
 import * as fs from "fs/promises";
 import * as path from "path";
 import slugify from "slugify";
-import { Categories, Command } from "../command";
-import { plural, stNdRdTh } from "../utils";
+import { Categories, Command } from "../../command";
+import { plural, stNdRdTh } from "../../utils";
 
 const stableDiffusionSavedPath = path.resolve(
 	__dirname,

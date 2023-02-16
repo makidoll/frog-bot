@@ -19,7 +19,7 @@ export const VapourHoldCommand: Command = {
 		) as any;
 
 		const { avatarURL } = await getUsernameAndAvatarURL(
-			user ? user : interaction.user,
+			user,
 			interaction.guild,
 		);
 
@@ -45,6 +45,9 @@ export const VapourHoldCommand: Command = {
 			},
 		);
 
-		interaction.reply({ files: [buffer] });
+		interaction.reply({
+			content: `<@${user.id}>`,
+			files: [buffer],
+		});
 	},
 };

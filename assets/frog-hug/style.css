@@ -28,6 +28,7 @@ body {
 
 .avatar {
 	border-radius: 999px;
+	background-color: #1d1f21;
 	width: 275px;
 	height: 275px;
 }

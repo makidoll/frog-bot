@@ -62,7 +62,7 @@ export const StableDiffusionCommand: Command = {
 					"file://" +
 						path.resolve(
 							__dirname,
-							"../../assets/stable-diffusion.html",
+							"../../../assets/stable-diffusion.html",
 						),
 					async page => {
 						await page.setViewportSize({

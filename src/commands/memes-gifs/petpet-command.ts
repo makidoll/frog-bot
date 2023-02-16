@@ -132,7 +132,7 @@ export const PetpetCommand: Command = {
 			}
 
 			const petpetSpriteImage = await fs.readFile(
-				path.resolve(__dirname, "../../assets/petpet-sprite.png"),
+				path.resolve(__dirname, "../../../assets/petpet-sprite.png"),
 			);
 
 			const frames = await Promise.all(

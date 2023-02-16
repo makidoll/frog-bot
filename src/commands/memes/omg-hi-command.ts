@@ -28,7 +28,7 @@ export const OmgHiCommand: Command = {
 
 		const buffer = await htmlRenderer.renderHtml(
 			"file://" +
-				path.resolve(__dirname, "../../assets/omg-hi/omg-hi.html"),
+				path.resolve(__dirname, "../../../assets/omg-hi/omg-hi.html"),
 			async page => {
 				await page.setViewportSize({
 					width: 493,

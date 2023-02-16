@@ -102,7 +102,7 @@ export const FrugCommand: Command = {
 			"file://" +
 				path.resolve(
 					__dirname,
-					"../../assets/frog-hug/" + filename + ".html",
+					"../../../assets/frog-hug/" + filename + ".html",
 				),
 			async page => {
 				for (let i = 0; i < usersHugging.length; i++) {

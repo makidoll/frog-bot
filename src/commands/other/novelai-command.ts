@@ -96,7 +96,7 @@ export const NovelAiCommand: Command = {
 
 				const buffer = await htmlRenderer.renderHtml(
 					"file://" +
-						path.resolve(__dirname, "../../assets/novelai.html"),
+						path.resolve(__dirname, "../../../assets/novelai.html"),
 					async page => {
 						await page.setViewportSize({
 							width: width * 3,

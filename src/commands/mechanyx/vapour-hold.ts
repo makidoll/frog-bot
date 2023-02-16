@@ -4,20 +4,17 @@ import * as path from "path";
 import { Categories, Command } from "../../command";
 import { downloadToDataUri, getUsernameAndAvatarURL } from "../../utils";
 
-export const ComfyCommand: Command = {
-	category: Categories.memes,
+export const VapourHoldCommand: Command = {
+	category: Categories.mechanyx,
 	command: new SlashCommandBuilder()
-		.setName("comfy") // fromfy
-		.setDescription("🧶 put you or frend in comfy frog")
+		.setName("vapourhold")
+		.setDescription("😥 beware")
 		.addUserOption(option =>
-			option
-				.setName("friend")
-				.setDescription("need frog fren")
-				.setRequired(false),
+			option.setName("foe").setDescription("need foe").setRequired(true),
 		),
 	onInteraction: async (interaction, { htmlRenderer }) => {
 		const user: ClientUser = interaction.options.getUser(
-			"friend",
+			"foe",
 			false,
 		) as any;
 
@@ -30,19 +27,20 @@ export const ComfyCommand: Command = {
 			"file://" +
 				path.resolve(
 					__dirname,
-					"../../../assets/frog-comfy/frog-comfy.html",
+					"../../../assets/vapour-hold/vapour-hold.html",
 				),
 			async page => {
-				await page.$eval(
-					"#avatar",
-					(el, avatar) => {
-						(el as any).src = avatar;
-					},
-					await downloadToDataUri(avatarURL),
-				);
 				await page.setViewportSize({
-					width: 128,
-					height: 127,
+					width: 990,
+					height: 645,
+				});
+				await page.evaluate(
+					"setAvatar(" +
+						JSON.stringify(await downloadToDataUri(avatarURL)) +
+						")",
+				);
+				await new Promise(resolve => {
+					setTimeout(resolve, 200);
 				});
 			},
 		);

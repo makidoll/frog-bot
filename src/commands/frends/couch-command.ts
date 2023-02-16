@@ -27,7 +27,7 @@ export const CouchCommand: Command = {
 			"file://" +
 				path.resolve(
 					__dirname,
-					"../../assets/frog-couch/frog-couch.html",
+					"../../../assets/frog-couch/frog-couch.html",
 				),
 			async page => {
 				for (let i = 0; i < 4; i++) {

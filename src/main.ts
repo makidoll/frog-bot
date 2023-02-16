@@ -4,9 +4,10 @@ import { REST } from "@discordjs/rest";
 import { Routes } from "discord-api-types/v9";
 import { Client, Intents } from "discord.js";
 import { Rembg } from "rembg-node";
-import { Command } from "./command";
+import { Command, ServerExclusiveCategories } from "./command";
 import { CouchCommand } from "./commands/frends/couch-command";
 import { FrugCommand } from "./commands/frends/frug-command";
+import { VapourHoldCommand } from "./commands/mechanyx/vapour-hold";
 import { CasCommand } from "./commands/memes-gifs/cas-command";
 import { PetpetCommand } from "./commands/memes-gifs/petpet-command";
 import { SquishyCommand } from "./commands/memes-gifs/squishy-command";
@@ -44,21 +45,28 @@ services.musicQueue.ensureToolsInstalled();
 
 // export const commandPrefix = "frog ";
 export const availableCommands: Command[] = [
+	// > other
 	HelpCommand,
+	// NovelAiCommand,
+	RemoveBgCommand,
+	// StableDiffusionCommand,
+	// > frends
 	CouchCommand,
 	FrugCommand,
+	// > memes
 	ComfyCommand,
-	// StableDiffusionCommand,
-	// NovelAiCommand,
-	CasCommand,
 	DeepfryCommand,
-	SquishyCommand,
 	OmgHiCommand,
+	// > memes gifs
+	CasCommand,
 	PetpetCommand,
-	RemoveBgCommand,
+	SquishyCommand,
+	// > music
 	PlayCommand,
 	StopCommand,
 	SkipCommand,
+	// > mechanyx
+	VapourHoldCommand,
 ];
 
 const client = new Client({
@@ -88,9 +96,55 @@ client.on("ready", async () => {
 
 	const rest = new REST({ version: "9" }).setToken(process.env.BOT_TOKEN);
 
-	rest.put(Routes.applicationCommands(client.user.id), {
-		body: availableCommands.map(command => command.command.toJSON()),
-	});
+	if (process.env.DEV != null) {
+		console.log(
+			"DEV env set to true, ignoring server exclusive categories",
+		);
+
+		// if dev just do all
+		rest.put(Routes.applicationCommands(client.user.id), {
+			body: availableCommands.map(command => command.command.toJSON()),
+		});
+	} else {
+		// all non server exclusive categories
+
+		rest.put(Routes.applicationCommands(client.user.id), {
+			body: availableCommands
+				.filter(
+					command =>
+						ServerExclusiveCategories[command.category] == null,
+				)
+				.map(command => command.command.toJSON()),
+		});
+
+		// all server exclusive categories
+
+		for (const [category, guildIds] of Object.entries(
+			ServerExclusiveCategories,
+		)) {
+			const body = availableCommands
+				.filter(command => command.category == category)
+				.map(command => command.command.toJSON());
+
+			for (const guildId of guildIds) {
+				rest.put(
+					Routes.applicationGuildCommands(client.user.id, guildId),
+					{
+						body,
+					},
+				).catch(error => {
+					if (error.code == 50001) {
+						console.error(
+							"Missing access to server for exclusive category: \n> Category: " +
+								category +
+								"\n> Server ID: " +
+								guildId,
+						);
+					}
+				});
+			}
+		}
+	}
 });
 
 client.on("interactionCreate", interaction => {

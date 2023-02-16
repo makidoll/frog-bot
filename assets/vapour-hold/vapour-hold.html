@@ -1,0 +1,77 @@
+<html>
+	<head>
+		<style>
+			* {
+				margin: 0;
+			}
+
+			body {
+				overflow: hidden;
+				/* background-color: #222222; */
+			}
+
+			.container {
+				display: flex;
+				/* align-items: center; */
+				/* justify-content: center; */
+				flex-direction: row;
+			}
+
+			.vapour-hold {
+				position: relative;
+			}
+
+			.vapour-hold .bottom,
+			.vapour-hold .top {
+				position: absolute;
+				top: 0;
+				left: 0;
+
+				background-size: 100% 100%;
+				width: 650px;
+				height: 645px;
+			}
+
+			.vapour-hold .bottom {
+				background-image: url(vapour-hold-bottom-but-vapour-chamber.png);
+			}
+
+			.vapour-hold .top {
+				background-image: url(vapour-hold-top.png);
+			}
+
+			.vapour-hold .avatar {
+				width: 240px;
+				height: 240px;
+				border-radius: 999px;
+				background-color: #1d1f21;
+				position: absolute;
+				margin: auto;
+				top: 0px;
+				left: 190px;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<img src="vapour-hold.png" height="645" />
+			<div class="vapour-hold">
+				<div class="bottom"></div>
+				<img class="avatar" />
+				<div class="top"></div>
+			</div>
+		</div>
+
+		<script>
+			function setAvatar(avatar) {
+				document.querySelector(".avatar").src = avatar;
+			}
+
+			function addExampleUsers() {
+				setAvatar("https://maki.cafe/icons/apple-touch-icon.png");
+			}
+
+			// addExampleUsers();
+		</script>
+	</body>
+</html>

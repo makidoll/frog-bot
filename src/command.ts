@@ -11,7 +11,16 @@ export enum Categories {
 	memes = "😂 memes",
 	memesGifs = "🎞️ memes but gifs",
 	music = "🎶 music",
+	mechanyx = "<:SteamHeart:472359081693413379> mechanyx",
 }
+
+export const ServerExclusiveCategories = {
+	[Categories.mechanyx]: [
+		"421658983414366210", // steamshell armoury
+		"976245585956978688", // vapour chamber
+		"699048789377417326", // workshop
+	],
+};
 
 export interface Command {
 	category: Categories;

@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { Categories, Command } from "../../command";
+import { Categories, Command, ServerExclusiveCategories } from "../../command";
 import { availableCommands } from "../../main";
 
 export const HelpCommand: Command = {
@@ -13,6 +13,15 @@ export const HelpCommand: Command = {
 		const perCategoryHelp = {};
 
 		for (const { command, category } of availableCommands) {
+			if (
+				ServerExclusiveCategories[category] != null &&
+				!ServerExclusiveCategories[category].includes(
+					interaction.guildId,
+				)
+			) {
+				continue;
+			}
+
 			if (perCategoryHelp[category] == null) {
 				perCategoryHelp[category] = "";
 			}

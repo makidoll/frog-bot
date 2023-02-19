@@ -26,6 +26,10 @@ import { MusicQueue } from "./services/music-queue";
 import { TaskQueue } from "./services/task-queue";
 import { froglog } from "./froglog";
 
+if (process.env.DEV != null) {
+	froglog.debug("Found DEV env");
+}
+
 export interface Services {
 	htmlRenderer: HtmlRenderer;
 	rembg: Rembg;
@@ -82,7 +86,7 @@ const client = new Client({
 });
 
 client.on("ready", async () => {
-	froglog.info(`Logged in as: ${client.user.tag}!`);
+	froglog.info(`Logged in as: ${client.user.tag}`);
 
 	client.user.setPresence({
 		activities: [

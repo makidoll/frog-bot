@@ -71,5 +71,9 @@ export function initReminders(client: Client) {
 		jobs.push(job);
 	}
 
-	froglog.info("Initialized reminders");
+	if (process.env.DEV != null) {
+		froglog.info("Initialized DEV reminders");
+	} else {
+		froglog.info("Initialized reminders");
+	}
 }

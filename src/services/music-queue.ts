@@ -18,6 +18,7 @@ import * as fs from "fs/promises";
 import * as os from "os";
 import * as path from "path";
 import { FFmpeg } from "prism-media";
+import { froglog } from "../froglog";
 
 const ext = os.platform() == "win32" ? ".exe" : "";
 
@@ -43,7 +44,7 @@ export class MusicQueue {
 	}
 
 	private async updateYtDlp(version: string) {
-		console.log("Installing yt-dlp " + version + "...");
+		froglog.info("Installing yt-dlp " + version + "...");
 
 		const ytDlpUrl =
 			"https://github.com/yt-dlp/yt-dlp/releases/download/" +
@@ -78,9 +79,9 @@ export class MusicQueue {
 
 		if (installedVersion != latestVersion) {
 			await this.updateYtDlp(latestVersion);
-			console.log("Installed latest yt-dlp!");
+			froglog.info("Installed latest yt-dlp!");
 		} else {
-			console.log("Latest yt-dlp already installed!");
+			froglog.info("Latest yt-dlp already installed!");
 		}
 	}
 

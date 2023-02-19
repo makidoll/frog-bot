@@ -1,6 +1,7 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import * as sharp from "sharp";
 import { Categories, Command } from "../../command.js";
+import { froglog } from "../../froglog.js";
 import { downloadToBuffer } from "../../utils.js";
 
 export const RemoveBgCommand: Command = {
@@ -61,7 +62,7 @@ export const RemoveBgCommand: Command = {
 			});
 		} catch (error) {
 			interaction.editReply("aw ribbit... it failed sorry :(");
-			console.error(error);
+			froglog.error(error);
 		}
 	},
 };

@@ -4,6 +4,7 @@ import * as fs from "fs/promises";
 import * as path from "path";
 import slugify from "slugify";
 import { Categories, Command } from "../../command";
+import { froglog } from "../../froglog";
 import { plural, stNdRdTh } from "../../utils";
 
 const stableDiffusionSavedPath = path.resolve(
@@ -142,7 +143,7 @@ export const StableDiffusionCommand: Command = {
 					"aw ribbit... sorry there was an error :(",
 				);
 
-				console.error(error);
+				froglog.error(error);
 			}
 		};
 

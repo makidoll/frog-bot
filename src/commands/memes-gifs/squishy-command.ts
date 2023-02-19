@@ -1,6 +1,7 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { fitBox } from "fit-box";
 import { Categories, Command } from "../../command.js";
+import { froglog } from "../../froglog.js";
 import {
 	centerCompositeScale,
 	getWidthHeight,
@@ -106,7 +107,7 @@ export const SquishyCommand: Command = {
 			});
 		} catch (error) {
 			interaction.editReply("aw ribbit... it failed sorry :(");
-			console.error(error);
+			froglog.error(error);
 		}
 	},
 };

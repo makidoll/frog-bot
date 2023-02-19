@@ -6,6 +6,7 @@ import * as path from "path";
 import * as sharp from "sharp";
 import { Writable } from "stream";
 import { Categories, Command } from "../../command.js";
+import { froglog } from "../../froglog.js";
 import { circleCrop, getMagickPath, makeGif } from "../../im-utils.js";
 import { downloadToBuffer, getUsernameAndAvatarURL } from "../../utils.js";
 
@@ -159,7 +160,7 @@ export const PetpetCommand: Command = {
 			});
 		} catch (error) {
 			interaction.reply("aw ribbit... it failed sorry :(");
-			console.error(error);
+			froglog.error(error);
 		}
 	},
 };

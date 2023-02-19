@@ -6,6 +6,7 @@ import {
 	TextChannel,
 	User,
 } from "discord.js";
+import { froglog } from "./froglog";
 
 const ROLES_CHANNEL = "976645075142594561";
 const MESSAGES_TO_ROLES = {
@@ -56,9 +57,9 @@ function manageRoleFromMessageReaction(
 	const emojiToRoleName = MESSAGES_TO_ROLES[reaction.message.id];
 	if (emojiToRoleName == null) return;
 
-	// console.log(reaction.emoji.id); // 01928309123
-	// console.log(reaction.emoji.identifier); // name:01928309123
-	// console.log(reaction.emoji.name); // name
+	// froglog.debug(reaction.emoji.id); // 01928309123
+	// froglog.debug(reaction.emoji.identifier); // name:01928309123
+	// froglog.debug(reaction.emoji.name); // name
 
 	let roleName = emojiToRoleName[reaction.emoji.name];
 	if (roleName == null) {
@@ -77,15 +78,15 @@ function manageRoleFromMessageReaction(
 	const member = reaction.message.guild.members.cache.get(user.id);
 	if (member == null) return;
 
-	console.log(member.displayName + " " + method + " " + role.name);
+	froglog.info(member.displayName + " " + method + " " + role.name);
 
 	if (method == "ADD") {
 		member.roles.add(role).catch(error => {
-			console.error(error);
+			froglog.error(error);
 		});
 	} else if (method == "REMOVE") {
 		member.roles.remove(role).catch(error => {
-			console.error(error);
+			froglog.error(error);
 		});
 	}
 }
@@ -117,14 +118,14 @@ export async function initReactionRoles(client: Client) {
 			}
 		}
 
-		console.log("Initialized reaction roles");
+		froglog.info("Initialized reaction roles");
 	} catch (error) {
 		if (error.code == 50001) {
-			console.log(
+			froglog.error(
 				"Failed to initialize reaction roles, missing access. Intented if developing",
 			);
 		} else {
-			console.error(error);
+			froglog.error(error);
 		}
 	}
 }

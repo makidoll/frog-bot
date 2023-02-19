@@ -1,5 +1,6 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { Categories, Command } from "../../command";
+import { froglog } from "../../froglog";
 import { magick } from "../../im-utils";
 import { downloadToBuffer } from "../../utils";
 
@@ -86,7 +87,7 @@ export const DeepfryCommand: Command = {
 			});
 		} catch (error) {
 			interaction.editReply("aw ribbit... it failed sorry :(");
-			console.error(error);
+			froglog.error(error);
 		}
 	},
 };

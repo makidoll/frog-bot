@@ -6,6 +6,7 @@ import slugify from "slugify";
 import { Categories, Command } from "../../command";
 import { plural, stNdRdTh } from "../../utils";
 import { formatDistance } from "date-fns";
+import { froglog } from "../../froglog";
 
 const novelAiSavedPath = path.resolve(__dirname, "../../novelai-saved/");
 
@@ -155,7 +156,7 @@ export const NovelAiCommand: Command = {
 					"aw ribbit... sorry there was an error :(",
 				);
 
-				console.error(error);
+				froglog.error(error);
 			}
 		};
 

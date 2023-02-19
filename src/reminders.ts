@@ -1,5 +1,6 @@
 import { CronJob } from "cron";
 import { Client, TextChannel } from "discord.js";
+import { froglog } from "./froglog";
 
 interface Reminder {
 	cron: string;
@@ -49,7 +50,7 @@ export function initReminders(client: Client) {
 
 					textChannel.send(reminder.message);
 
-					console.log(
+					froglog.info(
 						"Sent reminder!\n> Cron: " +
 							reminder.cron +
 							"\n> Message: " +
@@ -58,8 +59,8 @@ export function initReminders(client: Client) {
 							reminder.channelId,
 					);
 				} catch (error) {
-					console.error("Failed to send reminder");
-					console.error(error);
+					froglog.error("Failed to send reminder");
+					froglog.error(error);
 				}
 			},
 			null,
@@ -70,5 +71,5 @@ export function initReminders(client: Client) {
 		jobs.push(job);
 	}
 
-	console.log("Initialized reminders");
+	froglog.info("Initialized reminders");
 }

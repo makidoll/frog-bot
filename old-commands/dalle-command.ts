@@ -4,6 +4,7 @@ import * as fs from "fs/promises";
 import * as path from "path";
 import slugify from "slugify";
 import { Categories, Command } from "../src/command";
+import { froglog } from "../src/froglog";
 import { plural, stNdRdTh } from "../src/utils";
 
 const dalleSavedPath = path.resolve(__dirname, "../../dalle-saved/");
@@ -81,7 +82,7 @@ export const DalleCommand: Command = {
 				interaction.followUp(
 					"aw ribbit... sorry there was an error :(",
 				);
-				console.error(error);
+				froglog.error(error);
 			}
 		};
 

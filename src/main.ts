@@ -24,6 +24,7 @@ import { initReminders } from "./reminders";
 import { HtmlRenderer } from "./services/html-renderer";
 import { MusicQueue } from "./services/music-queue";
 import { TaskQueue } from "./services/task-queue";
+import { froglog } from "./froglog";
 
 export interface Services {
 	htmlRenderer: HtmlRenderer;
@@ -81,7 +82,7 @@ const client = new Client({
 });
 
 client.on("ready", async () => {
-	console.log(`Logged in as: ${client.user.tag}!`);
+	froglog.info(`Logged in as: ${client.user.tag}!`);
 
 	client.user.setPresence({
 		activities: [
@@ -100,7 +101,7 @@ client.on("ready", async () => {
 	const rest = new REST({ version: "9" }).setToken(process.env.BOT_TOKEN);
 
 	if (process.env.DEV != null) {
-		console.log(
+		froglog.info(
 			"DEV env set to true, ignoring server exclusive categories",
 		);
 
@@ -137,7 +138,7 @@ client.on("ready", async () => {
 					},
 				).catch(error => {
 					if (error.code == 50001) {
-						console.error(
+						froglog.error(
 							"Missing access to server for exclusive category: \n> Category: " +
 								category +
 								"\n> Server ID: " +
@@ -188,11 +189,11 @@ client.on("messageCreate", async message => {
 */
 
 client.on("error", error => {
-	console.error(error);
+	froglog.error(error);
 	process.exit(1);
 });
 
 client.login(process.env.BOT_TOKEN).catch(error => {
-	console.error(error);
+	froglog.error(error);
 	process.exit(1);
 });

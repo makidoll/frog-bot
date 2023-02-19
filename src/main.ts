@@ -20,6 +20,7 @@ import { StopCommand } from "./commands/music/stop-command";
 import { HelpCommand } from "./commands/other/help-command";
 import { RemoveBgCommand } from "./commands/other/remove-bg-command";
 import { initReactionRoles } from "./reaction-roles";
+import { initReminders } from "./reminders";
 import { HtmlRenderer } from "./services/html-renderer";
 import { MusicQueue } from "./services/music-queue";
 import { TaskQueue } from "./services/task-queue";
@@ -93,6 +94,8 @@ client.on("ready", async () => {
 	});
 
 	initReactionRoles(client);
+
+	initReminders(client);
 
 	const rest = new REST({ version: "9" }).setToken(process.env.BOT_TOKEN);
 

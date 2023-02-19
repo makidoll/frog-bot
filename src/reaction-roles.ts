@@ -116,10 +116,12 @@ export async function initReactionRoles(client: Client) {
 				message.react(emoji);
 			}
 		}
+
+		console.log("Initialized reaction roles");
 	} catch (error) {
 		if (error.code == 50001) {
 			console.log(
-				"Init reaction roles is missing access, intented if developing",
+				"Failed to initialize reaction roles, missing access. Intented if developing",
 			);
 		} else {
 			console.error(error);

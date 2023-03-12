@@ -27,7 +27,9 @@ export async function getUsernameAndAvatarURL(
 	const member = await guild.members.fetch({ user });
 	return {
 		username: member?.displayName ?? user.username,
-		avatarURL: member?.displayAvatarURL() ?? user.avatarURL(),
+		avatarURL:
+			member?.displayAvatarURL() ??
+			user.avatarURL({ format: "png", size: 1024, dynamic: false }),
 	};
 }
 

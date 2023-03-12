@@ -109,6 +109,8 @@ export const PetpetCommand: Command = {
 				.setRequired(false),
 		),
 	onInteraction: async (interaction, { rembg }) => {
+		interaction.deferReply();
+
 		const user: ClientUser = interaction.options.getUser(
 			"friend",
 			false,
@@ -128,8 +130,10 @@ export const PetpetCommand: Command = {
 			if (justCircleCrop) {
 				avatarImage = await circleCrop(avatarImage);
 			} else {
-				const avatarImageSharp = await rembg.remove(sharp(avatarImage));
-				avatarImage = await avatarImageSharp.trim().png().toBuffer();
+				// gifs dont do opacity so post process
+				// well, idk its prettier with dithered opacity so dont post process
+				avatarImage = await rembg.rembg(avatarImage, false);
+				avatarImage = await sharp(avatarImage).trim().png().toBuffer();
 			}
 
 			const petpetSpriteImage = await fs.readFile(
@@ -150,7 +154,7 @@ export const PetpetCommand: Command = {
 				100, // quality
 			);
 
-			interaction.reply({
+			interaction.editReply({
 				files: [
 					{
 						attachment: outputBuffer,
@@ -159,7 +163,7 @@ export const PetpetCommand: Command = {
 				],
 			});
 		} catch (error) {
-			interaction.reply("aw ribbit... it failed sorry :(");
+			interaction.editReply("aw ribbit... it failed sorry :(");
 			froglog.error(error);
 		}
 	},

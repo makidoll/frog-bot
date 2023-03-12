@@ -25,7 +25,6 @@
 		"ololog": "^1.1.175",
 		"playwright": "^1.29.0",
 		"prism-media": "^1.3.4",
-		"rembg-node": "^2.0.1",
 		"sharp": "^0.30.7",
 		"slugify": "^1.6.5",
 		"tmp-promise": "^3.0.3"

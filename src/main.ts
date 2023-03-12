@@ -3,7 +3,6 @@ import "dotenv/config"; // loads .env file to process.env
 import { REST } from "@discordjs/rest";
 import { Routes } from "discord-api-types/v9";
 import { Client, Intents } from "discord.js";
-import { Rembg } from "rembg-node";
 import { Command, ServerExclusiveCategories } from "./command";
 import { CouchCommand } from "./commands/frends/couch-command";
 import { FrugCommand } from "./commands/frends/frug-command";
@@ -19,12 +18,13 @@ import { SkipCommand } from "./commands/music/skip-command";
 import { StopCommand } from "./commands/music/stop-command";
 import { HelpCommand } from "./commands/other/help-command";
 import { RemoveBgCommand } from "./commands/other/remove-bg-command";
+import { froglog } from "./froglog";
 import { initReactionRoles } from "./reaction-roles";
 import { initReminders } from "./reminders";
 import { HtmlRenderer } from "./services/html-renderer";
 import { MusicQueue } from "./services/music-queue";
+import { Rembg } from "./services/rembg";
 import { TaskQueue } from "./services/task-queue";
-import { froglog } from "./froglog";
 
 if (process.env.DEV != null) {
 	froglog.debug("Found DEV env");

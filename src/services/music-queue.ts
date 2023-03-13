@@ -166,7 +166,13 @@ export class MusicQueue {
 			"libopus",
 		];
 
-		return new FFmpeg({ args, shell: false });
+		const stream = new FFmpeg({ args, shell: false });
+
+		// potentially fixes buffer memory issues
+		(stream as any)._readableState &&
+			((stream as any)._readableState.highWaterMark = 1 << 25);
+
+		return stream;
 	}
 
 	private async ensureConnection(

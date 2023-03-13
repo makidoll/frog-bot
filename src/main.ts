@@ -2,7 +2,12 @@ import "dotenv/config"; // loads .env file to process.env
 
 import { REST } from "@discordjs/rest";
 import { Routes } from "discord-api-types/v9";
-import { Client, Intents } from "discord.js";
+import {
+	ActivityType,
+	ChatInputCommandInteraction,
+	Client,
+	Partials,
+} from "discord.js";
 import { Command, ServerExclusiveCategories } from "./command";
 import { CouchCommand } from "./commands/frends/couch-command";
 import { FrugCommand } from "./commands/frends/frug-command";
@@ -77,12 +82,12 @@ export const availableCommands: Command[] = [
 
 const client = new Client({
 	intents: [
-		Intents.FLAGS.GUILDS,
-		Intents.FLAGS.GUILD_MESSAGES,
-		Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
-		Intents.FLAGS.GUILD_VOICE_STATES,
+		"Guilds",
+		"GuildMessages",
+		"GuildMessageReactions",
+		"GuildVoiceStates",
 	],
-	partials: ["MESSAGE", "CHANNEL", "REACTION"],
+	partials: [Partials.Message, Partials.Channel, Partials.Reaction],
 });
 
 client.on("ready", async () => {
@@ -92,7 +97,7 @@ client.on("ready", async () => {
 		activities: [
 			{
 				name: "you hoppy ribbit",
-				type: "WATCHING",
+				type: ActivityType.Watching,
 				url: "https://maki.cafe",
 			},
 		],
@@ -163,8 +168,12 @@ client.on("interactionCreate", interaction => {
 	);
 
 	if (command) {
+		// we're not using MessageContextMenu or UserContextMenu interactions
 		try {
-			command.onInteraction(interaction, services);
+			command.onInteraction(
+				interaction as ChatInputCommandInteraction,
+				services,
+			);
 		} catch (error) {}
 	}
 });

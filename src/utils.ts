@@ -29,7 +29,7 @@ export async function getUsernameAndAvatarURL(
 		username: member?.displayName ?? user.username,
 		avatarURL:
 			member?.displayAvatarURL() ??
-			user.avatarURL({ format: "png", size: 1024, dynamic: false }),
+			user.avatarURL({ extension: "png", size: 1024, forceStatic: true }),
 	};
 }
 

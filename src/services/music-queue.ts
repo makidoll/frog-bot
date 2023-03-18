@@ -11,79 +11,17 @@ import {
 	VoiceConnection,
 	VoiceConnectionStatus,
 } from "@discordjs/voice";
-import axios from "axios";
-import * as child_process from "child_process";
 import { VoiceBasedChannel } from "discord.js";
-import * as fs from "fs/promises";
-import * as os from "os";
-import * as path from "path";
+import * as execa from "execa";
 import { FFmpeg } from "prism-media";
-import { froglog } from "../froglog";
-
-const ext = os.platform() == "win32" ? ".exe" : "";
+import { ToolName, ToolsManager } from "../tools-manager";
 
 export class MusicQueue {
-	ytDlpPath = path.resolve(__dirname, "../../tools/yt-dlp") + ext;
-	ytDlpVersion = path.resolve(__dirname, "../../tools/yt-dlp") + ".txt";
-
 	voiceConnections: { [channelId: string]: VoiceConnection } = {};
 	audioPlayers: { [channelId: string]: AudioPlayer } = {};
 	audioQueue: { [channelId: string]: AudioResource[] } = {};
 
 	constructor() {}
-
-	private async getInstalledYtDlpVersion() {
-		try {
-			const version = await fs.readFile(this.ytDlpVersion, {
-				encoding: "utf8",
-			});
-			return version;
-		} catch (error) {
-			return null;
-		}
-	}
-
-	private async updateYtDlp(version: string) {
-		froglog.info("Installing yt-dlp " + version + "...");
-
-		const ytDlpUrl =
-			"https://github.com/yt-dlp/yt-dlp/releases/download/" +
-			version +
-			"/yt-dlp" +
-			ext;
-
-		const ytDlpRequest = await axios({
-			url: ytDlpUrl,
-			responseType: "arraybuffer",
-		});
-
-		await fs.writeFile(this.ytDlpPath, ytDlpRequest.data);
-
-		await fs.writeFile(this.ytDlpVersion, version);
-
-		if (os.platform() != "win32") {
-			child_process.execFile("chmod", ["+x", this.ytDlpPath]);
-		}
-	}
-
-	async ensureToolsInstalled() {
-		fs.mkdir(path.dirname(this.ytDlpPath), { recursive: true });
-
-		const releases = await axios(
-			"https://api.github.com/repos/yt-dlp/yt-dlp/releases/latest",
-		);
-
-		const latestVersion = releases.data.tag_name;
-
-		const installedVersion = await this.getInstalledYtDlpVersion();
-
-		if (installedVersion != latestVersion) {
-			await this.updateYtDlp(latestVersion);
-			froglog.info("Installed latest yt-dlp!");
-		} else {
-			froglog.info("Latest yt-dlp already installed!");
-		}
-	}
 
 	async getInfo(search: string) {
 		const isUrl = /^https?:\/\//i.test(search);
@@ -102,18 +40,12 @@ export class MusicQueue {
 				: "ytsearch1:" + search,
 		];
 
-		const json = await new Promise<string>((resolve, reject) => {
-			child_process.execFile(
-				this.ytDlpPath,
-				args,
-				(error, stdout, stderr) => {
-					if (error) return reject(stderr);
-					return resolve(stdout);
-				},
-			);
-		});
+		const { stdout } = await execa(
+			await ToolsManager.instance.getPath(ToolName.yt_dlp),
+			args,
+		);
 
-		// fs.writeFile("info.json", json);
+		// fs.writeFile("info.json", stdout);
 
 		const {
 			title,
@@ -123,7 +55,7 @@ export class MusicQueue {
 			// uploader,
 			// uploader_url,
 			webpage_url,
-		} = JSON.parse(json);
+		} = JSON.parse(stdout);
 
 		return {
 			title,

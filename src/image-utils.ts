@@ -1,28 +1,20 @@
 import * as execa from "execa";
 import * as fs from "fs/promises";
 import * as os from "os";
-import * as path from "path";
 import * as tmp from "tmp-promise";
+import { ToolName, ToolsManager, which } from "./tools-manager";
 
-export function getMagickPath(tool: string) {
+export async function getMagickPath(tool: string) {
+	// windows: magick convert ...
+	// linux: convert ...
+	// macos: convert ...
+
+	const magickPath = await ToolsManager.instance.getPath(ToolName.magick);
+
+	// TODO: tools manager should really do this
 	return os.platform() == "win32"
-		? { path: "magick", args: [tool] }
-		: { path: tool, args: [] };
-}
-
-export function getGifskiPath() {
-	const platform = os.platform();
-	if (platform == "win32") {
-		return path.resolve(
-			__dirname,
-			"..//node_modules/gifski/bin/windows/gifski.exe",
-		);
-	} else {
-		return path.resolve(
-			__dirname,
-			"..//node_modules/gifski/bin/debian/gifski",
-		);
-	}
+		? { path: magickPath, args: [tool] }
+		: { path: await which(tool), args: [] };
 }
 
 export async function magick(
@@ -30,7 +22,7 @@ export async function magick(
 	command: string,
 	args: string[],
 ): Promise<Buffer> {
-	const magick = getMagickPath(command);
+	const magick = await getMagickPath(command);
 	const { stdout } = await execa(
 		magick.path,
 		[
@@ -45,7 +37,7 @@ export async function magick(
 }
 
 export async function getWidthHeight(image: Buffer) {
-	const magick = getMagickPath("identify");
+	const magick = await getMagickPath("identify");
 	const { stdout } = await execa(
 		magick.path,
 		[...magick.args, "-format", "%wx%h", "-"],
@@ -79,7 +71,7 @@ export async function makeGif(frames: Buffer[], fps: number, quality: number) {
 
 	const outputPath = await tmp.file({ postfix: ".gif" });
 
-	await execa(getGifskiPath(), [
+	await execa(await ToolsManager.instance.getPath(ToolName.gifski), [
 		"--output",
 		outputPath.path,
 		"--fps",
@@ -150,4 +142,21 @@ export async function centerCompositeScale(
 		`${imageWidth * scaleX}x${imageHeight * scaleY}+0+0!`,
 		"-composite",
 	]);
+}
+
+export async function rembg(
+	file: Buffer,
+	postProcessMask: boolean = false,
+): Promise<Buffer> {
+	const { stdout } = await execa(
+		await ToolsManager.instance.getPath(ToolName.rembg),
+		["i", ...(postProcessMask ? ["-ppm"] : []), "-", "-"],
+		{
+			input: file,
+			encoding: null,
+			maxBuffer: 1024 * 1024 * 32, // 32 MB
+		},
+	);
+
+	return stdout as any;
 }

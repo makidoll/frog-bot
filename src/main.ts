@@ -28,31 +28,15 @@ import { initReactionRoles } from "./reaction-roles";
 import { initReminders } from "./reminders";
 import { HtmlRenderer } from "./services/html-renderer";
 import { MusicQueue } from "./services/music-queue";
-import { Rembg } from "./services/rembg";
 import { TaskQueue } from "./services/task-queue";
-
-if (process.env.DEV != null) {
-	froglog.debug("Found DEV env");
-}
+import { ToolsManager } from "./tools-manager";
 
 export interface Services {
 	htmlRenderer: HtmlRenderer;
-	rembg: Rembg;
 	stableDiffusionQueue: TaskQueue;
 	// novelAiQueue: TaskQueue;
 	musicQueue: MusicQueue;
 }
-
-const services: Services = {
-	htmlRenderer: new HtmlRenderer(),
-	rembg: new Rembg(),
-	stableDiffusionQueue: new TaskQueue(),
-	// novelAiQueue: new TaskQueue(),
-	musicQueue: new MusicQueue(),
-};
-
-services.htmlRenderer.launch();
-services.musicQueue.ensureToolsInstalled();
 
 // export const commandPrefix = "frog ";
 export const availableCommands: Command[] = [
@@ -80,133 +64,158 @@ export const availableCommands: Command[] = [
 	VapourHoldCommand,
 ];
 
-const client = new Client({
-	intents: [
-		"Guilds",
-		"GuildMessages",
-		"GuildMessageReactions",
-		"GuildVoiceStates",
-	],
-	partials: [Partials.Message, Partials.Channel, Partials.Reaction],
-});
+(async () => {
+	if (process.env.DEV != null) {
+		froglog.debug("Found DEV env");
+	}
 
-client.on("ready", async () => {
-	froglog.info(`Logged in as: ${client.user.tag}`);
+	// TODO: proper dependency injection or singletons please???
+	// TODO: also move ai services and commands to unused
 
-	client.user.setPresence({
-		activities: [
-			{
-				name: "you hoppy ribbit",
-				type: ActivityType.Watching,
-				url: "https://maki.cafe",
-			},
+	const services: Services = {
+		htmlRenderer: new HtmlRenderer(),
+		stableDiffusionQueue: new TaskQueue(),
+		// novelAiQueue: new TaskQueue(),
+		musicQueue: new MusicQueue(),
+	};
+
+	await ToolsManager.instance.checkForTools();
+
+	services.htmlRenderer.launch();
+
+	const client = new Client({
+		intents: [
+			"Guilds",
+			"GuildMessages",
+			"GuildMessageReactions",
+			"GuildVoiceStates",
 		],
+		partials: [Partials.Message, Partials.Channel, Partials.Reaction],
 	});
 
-	initReactionRoles(client);
+	client.on("ready", async () => {
+		froglog.info(`Logged in as: ${client.user.tag}`);
 
-	initReminders(client);
-
-	const rest = new REST({ version: "9" }).setToken(process.env.BOT_TOKEN);
-
-	if (process.env.DEV != null) {
-		froglog.info(
-			"DEV env set to true, ignoring server exclusive categories",
-		);
-
-		// if dev just do all
-		rest.put(Routes.applicationCommands(client.user.id), {
-			body: availableCommands.map(command => command.command.toJSON()),
-		});
-	} else {
-		// all non server exclusive categories
-
-		rest.put(Routes.applicationCommands(client.user.id), {
-			body: availableCommands
-				.filter(
-					command =>
-						ServerExclusiveCategories[command.category] == null,
-				)
-				.map(command => command.command.toJSON()),
+		client.user.setPresence({
+			activities: [
+				{
+					name: "you hoppy ribbit",
+					type: ActivityType.Watching,
+					url: "https://maki.cafe",
+				},
+			],
 		});
 
-		// all server exclusive categories
+		initReactionRoles(client);
 
-		for (const [category, guildIds] of Object.entries(
-			ServerExclusiveCategories,
-		)) {
-			const body = availableCommands
-				.filter(command => command.category == category)
-				.map(command => command.command.toJSON());
+		initReminders(client);
 
-			for (const guildId of guildIds) {
-				rest.put(
-					Routes.applicationGuildCommands(client.user.id, guildId),
-					{
-						body,
-					},
-				).catch(error => {
-					if (error.code == 50001) {
-						froglog.error(
-							"Missing access to server for exclusive category: \n> Category: " +
-								category +
-								"\n> Server ID: " +
-								guildId,
-						);
-					}
-				});
+		const rest = new REST({ version: "9" }).setToken(process.env.BOT_TOKEN);
+
+		if (process.env.DEV != null) {
+			froglog.info(
+				"DEV env set to true, ignoring server exclusive categories",
+			);
+
+			// if dev just do all
+			rest.put(Routes.applicationCommands(client.user.id), {
+				body: availableCommands.map(command =>
+					command.command.toJSON(),
+				),
+			});
+		} else {
+			// all non server exclusive categories
+
+			rest.put(Routes.applicationCommands(client.user.id), {
+				body: availableCommands
+					.filter(
+						command =>
+							ServerExclusiveCategories[command.category] == null,
+					)
+					.map(command => command.command.toJSON()),
+			});
+
+			// all server exclusive categories
+
+			for (const [category, guildIds] of Object.entries(
+				ServerExclusiveCategories,
+			)) {
+				const body = availableCommands
+					.filter(command => command.category == category)
+					.map(command => command.command.toJSON());
+
+				for (const guildId of guildIds) {
+					rest.put(
+						Routes.applicationGuildCommands(
+							client.user.id,
+							guildId,
+						),
+						{
+							body,
+						},
+					).catch(error => {
+						if (error.code == 50001) {
+							froglog.error(
+								"Missing access to server for exclusive category: \n> Category: " +
+									category +
+									"\n> Server ID: " +
+									guildId,
+							);
+						}
+					});
+				}
 			}
 		}
-	}
-});
+	});
 
-client.on("interactionCreate", interaction => {
-	if (!interaction.isCommand()) return;
+	client.on("interactionCreate", interaction => {
+		if (!interaction.isCommand()) return;
 
-	const command = availableCommands.find(
-		command => command.command.name == interaction.commandName,
-	);
+		const command = availableCommands.find(
+			command => command.command.name == interaction.commandName,
+		);
 
-	if (command) {
-		// we're not using MessageContextMenu or UserContextMenu interactions
-		try {
-			command.onInteraction(
-				interaction as ChatInputCommandInteraction,
-				services,
-			);
-		} catch (error) {}
-	}
-});
+		if (command) {
+			// we're not using MessageContextMenu or UserContextMenu interactions
+			try {
+				command.onInteraction(
+					interaction as ChatInputCommandInteraction,
+					services,
+				);
+			} catch (error) {}
+		}
+	});
 
-/*
-client.on("messageCreate", async message => {
-	if (message.author.bot) return;
+	/*
+	client.on("messageCreate", async message => {
+		if (message.author.bot) return;
 
-	const lowerContent = message.content.toLowerCase().trim();
+		const lowerContent = message.content.toLowerCase().trim();
 
-	for (let { command, shortCommand, onMessage } of availableCommands) {
-		let short = shortCommand;
-		let long = commandPrefix + command;
+		for (let { command, shortCommand, onMessage } of availableCommands) {
+			let short = shortCommand;
+			let long = commandPrefix + command;
 
-		let commandLength = 0;
-		if (lowerContent.startsWith(short)) commandLength = short.length;
-		else if (lowerContent.startsWith(long)) commandLength = long.length;
+			let commandLength = 0;
+			if (lowerContent.startsWith(short)) commandLength = short.length;
+			else if (lowerContent.startsWith(long)) commandLength = long.length;
 
-		if (commandLength == 0) continue;
+			if (commandLength == 0) continue;
 
-		const argument = message.content.substring(command.length + 1).trim();
-		onMessage(argument, message, services);
-		break; // dont run other commands
-	}
-});
+			const argument = message.content.substring(command.length + 1).trim();
+			onMessage(argument, message, services);
+			break; // dont run other commands
+		}
+	});
 */
 
-client.on("error", error => {
-	froglog.error(error);
-	process.exit(1);
-});
+	client.on("error", error => {
+		froglog.error(error);
+		process.exit(1);
+	});
 
-client.login(process.env.BOT_TOKEN).catch(error => {
-	froglog.error(error);
-	process.exit(1);
-});
+	client.login(process.env.BOT_TOKEN).catch(error => {
+		froglog.error(error);
+		process.exit(1);
+	});
+})();

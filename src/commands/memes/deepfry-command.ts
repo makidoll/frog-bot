@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { Categories, Command } from "../../command";
 import { froglog } from "../../froglog";
-import { magick } from "../../im-utils";
+import { magick } from "../../image-utils";
 import { downloadToBuffer } from "../../utils";
 
 // https://gist.github.com/44100hertz/ec0af5c47b4620966b732e72adad33dc

@@ -1,8 +1,8 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import * as sharp from "sharp";
-import * as path from "path";
 import { Categories, Command } from "../../command.js";
 import { froglog } from "../../froglog.js";
+import { rembg } from "../../image-utils.js";
 import { downloadToBuffer } from "../../utils.js";
 
 export const RemoveBgCommand: Command = {
@@ -29,7 +29,7 @@ export const RemoveBgCommand: Command = {
 				.setRequired(false),
 		),
 
-	onInteraction: async (interaction, { rembg }) => {
+	onInteraction: async interaction => {
 		const attachment = interaction.options.getAttachment("image");
 		const dontTrim = interaction.options.getBoolean("dont-trim");
 		const postProcessMask =
@@ -61,7 +61,7 @@ export const RemoveBgCommand: Command = {
 		try {
 			const inputBuffer = await downloadToBuffer(attachment.url);
 
-			let outputBuffer = await rembg.rembg(inputBuffer, postProcessMask);
+			let outputBuffer = await rembg(inputBuffer, postProcessMask);
 
 			if (!dontTrim) {
 				outputBuffer = await sharp(outputBuffer).png().toBuffer();

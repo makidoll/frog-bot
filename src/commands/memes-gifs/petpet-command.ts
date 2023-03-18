@@ -7,7 +7,12 @@ import * as sharp from "sharp";
 import { Writable } from "stream";
 import { Categories, Command } from "../../command.js";
 import { froglog } from "../../froglog.js";
-import { circleCrop, getMagickPath, makeGif } from "../../im-utils.js";
+import {
+	circleCrop,
+	getMagickPath,
+	makeGif,
+	rembg,
+} from "../../image-utils.js";
 import { downloadToBuffer, getUsernameAndAvatarURL } from "../../utils.js";
 
 const options = {
@@ -43,7 +48,7 @@ async function petpetFrame(
 	if (frame > options.frames - 1) throw new Error("Frame too high");
 	const { x, y, w, h } = offsets[frame];
 
-	const magick = getMagickPath("convert");
+	const magick = await getMagickPath("convert");
 
 	const subprocess = execa(
 		magick.path,
@@ -108,7 +113,7 @@ export const PetpetCommand: Command = {
 				.setDescription("dont do ai please")
 				.setRequired(false),
 		),
-	onInteraction: async (interaction, { rembg }) => {
+	onInteraction: async interaction => {
 		interaction.deferReply();
 
 		const user: ClientUser = interaction.options.getUser(
@@ -132,7 +137,7 @@ export const PetpetCommand: Command = {
 			} else {
 				// gifs dont do opacity so post process
 				// well, idk its prettier with dithered opacity so dont post process
-				avatarImage = await rembg.rembg(avatarImage, false);
+				avatarImage = await rembg(avatarImage, false);
 				avatarImage = await sharp(avatarImage).trim().png().toBuffer();
 			}
 

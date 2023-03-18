@@ -7,7 +7,7 @@ import {
 	liquidRescale,
 	makeGif,
 	rescale,
-} from "../../im-utils.js";
+} from "../../image-utils.js";
 import { downloadToBuffer } from "../../utils.js";
 
 export const CasCommand: Command = {

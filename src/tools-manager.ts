@@ -80,6 +80,9 @@ export class ToolsManager {
 				),
 		},
 		[ToolName.gifski]: {
+			// TODO: could use github https://github.com/ImageOptim/gifski
+			// but need to add function to unpack tar.xz file
+			// which contains binaries for all platforms
 			overrideInstalledPath: async () =>
 				path.resolve(
 					__dirname,
@@ -92,9 +95,12 @@ export class ToolsManager {
 				),
 		},
 		[ToolName.rembg]: {
+			// python blelelele
 			overrideInstalledPath: async () => which("rembg"),
 		},
 		[ToolName.magick]: {
+			// TODO: could do the same as gifski
+			// version url https://download.imagemagick.org/archive/binaries/digest.rdf
 			overrideInstalledPath: async () =>
 				osSwitch({
 					linux: await which("convert"),

@@ -209,15 +209,17 @@ export class ToolsManager {
 					responseType: "arraybuffer",
 				});
 
-				await fs.writeFile(
-					this.getPathToInstallTo(name),
-					toolRequest.data,
-				);
+				const installPath = this.getPathToInstallTo(name);
+				await fs.writeFile(installPath, toolRequest.data);
 
 				await fs.writeFile(
 					this.getInstalledVersionPath(name),
 					latestVersion,
 				);
+
+				if (osPlatform != "win32") {
+					await execa("chmod", ["+x", installPath]);
+				}
 
 				froglog.info(`Successfully updated "${name}"!`);
 			} else {

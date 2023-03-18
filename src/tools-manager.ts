@@ -88,9 +88,9 @@ export class ToolsManager {
 					__dirname,
 					"../node_modules/gifski/bin/",
 					osSwitch({
-						linux: "debian/gifski.exe",
+						linux: "debian/gifski",
 						windows: "windows/gifski.exe",
-						macos: "macos/gifski.exe",
+						macos: "macos/gifski",
 					}),
 				),
 		},

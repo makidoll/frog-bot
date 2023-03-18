@@ -1,6 +1,7 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import * as path from "path";
 import { Categories, Command } from "../../command";
+import { HtmlRenderer } from "../../services/html-renderer";
 import { downloadToDataUri, getUsernameAndAvatarURL } from "../../utils";
 
 const frogHugInfo = {
@@ -58,7 +59,7 @@ export const FrugCommand: Command = {
 				.setDescription("for a 6 frog hug")
 				.setRequired(false),
 		),
-	onInteraction: async (interaction, { htmlRenderer }) => {
+	onInteraction: async interaction => {
 		await interaction.deferReply();
 
 		// const usersHugging = removeDuplicates([
@@ -98,7 +99,7 @@ export const FrugCommand: Command = {
 				? alphabet[Math.floor(Math.random() * variations)]
 				: "");
 
-		const buffer = await htmlRenderer.renderHtml(
+		const buffer = await HtmlRenderer.instance.renderHtml(
 			"file://" +
 				path.resolve(
 					__dirname,

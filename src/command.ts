@@ -3,7 +3,6 @@ import {
 	SlashCommandSubcommandsOnlyBuilder,
 } from "@discordjs/builders";
 import { ChatInputCommandInteraction } from "discord.js";
-import { Services } from "./main";
 
 export enum Categories {
 	other = "🎀 other",
@@ -27,8 +26,5 @@ export interface Command {
 	command:
 		| Omit<SlashCommandBuilder, "addSubcommandGroup" | "addSubcommand">
 		| SlashCommandSubcommandsOnlyBuilder;
-	onInteraction: (
-		interaction: ChatInputCommandInteraction,
-		services: Services,
-	) => any;
+	onInteraction: (interaction: ChatInputCommandInteraction) => any;
 }

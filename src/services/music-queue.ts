@@ -17,11 +17,22 @@ import { FFmpeg } from "prism-media";
 import { ToolName, ToolsManager } from "../tools-manager";
 
 export class MusicQueue {
-	voiceConnections: { [channelId: string]: VoiceConnection } = {};
-	audioPlayers: { [channelId: string]: AudioPlayer } = {};
-	audioQueue: { [channelId: string]: AudioResource[] } = {};
+	private static _instance: MusicQueue;
 
-	constructor() {}
+	public static get instance(): MusicQueue {
+		if (!MusicQueue._instance) {
+			MusicQueue._instance = new MusicQueue();
+		}
+		return MusicQueue._instance;
+	}
+
+	private constructor() {}
+
+	private voiceConnections: { [channelId: string]: VoiceConnection } = {};
+	private audioPlayers: { [channelId: string]: AudioPlayer } = {};
+	private audioQueue: { [channelId: string]: AudioResource[] } = {};
+
+	async init() {}
 
 	async getInfo(search: string) {
 		const isUrl = /^https?:\/\//i.test(search);

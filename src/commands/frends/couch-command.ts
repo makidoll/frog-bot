@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from "@discordjs/builders";
 import { CommandInteraction } from "discord.js";
 import * as path from "path";
 import { Categories, Command } from "../../command";
-import { Services } from "../../main";
+import { HtmlRenderer } from "../../services/html-renderer";
 import { downloadToDataUri, getUsernameAndAvatarURL } from "../../utils";
 
 export const CouchCommand: Command = {
@@ -10,11 +10,7 @@ export const CouchCommand: Command = {
 	command: new SlashCommandBuilder()
 		.setName("couch")
 		.setDescription("🛋️ puts the last 4 messages on the frog couch"),
-	onInteraction: async (
-		interaction: CommandInteraction,
-
-		{ htmlRenderer }: Services,
-	) => {
+	onInteraction: async (interaction: CommandInteraction) => {
 		interaction.deferReply();
 
 		const messages = Array.from(
@@ -23,7 +19,7 @@ export const CouchCommand: Command = {
 			.reverse()
 			.slice(0, 4);
 
-		const buffer = await htmlRenderer.renderHtml(
+		const buffer = await HtmlRenderer.instance.renderHtml(
 			"file://" +
 				path.resolve(
 					__dirname,

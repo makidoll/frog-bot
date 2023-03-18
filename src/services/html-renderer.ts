@@ -1,11 +1,20 @@
 import { webkit, Browser, Page } from "playwright";
 
 export class HtmlRenderer {
-	browser: Browser;
+	private static _instance: HtmlRenderer;
 
-	constructor() {}
+	public static get instance(): HtmlRenderer {
+		if (!HtmlRenderer._instance) {
+			HtmlRenderer._instance = new HtmlRenderer();
+		}
+		return HtmlRenderer._instance;
+	}
 
-	async launch() {
+	private constructor() {}
+
+	private browser: Browser;
+
+	async init() {
 		this.browser = await webkit.launch({
 			// headless: false,
 		});
@@ -17,12 +26,17 @@ export class HtmlRenderer {
 	) {
 		const page = await this.browser.newPage();
 		await page.goto(path);
+
 		if (doWithPathFn != null) await doWithPathFn(page);
+
 		const screenshot = await page.screenshot({
 			type: "png",
 			omitBackground: true,
 		});
+
+		// dont async cause dont wanna wait
 		page.close();
+
 		return screenshot;
 	}
 }

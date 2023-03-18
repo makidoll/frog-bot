@@ -153,7 +153,7 @@ export class ToolsManager {
 		return this.getPathToInstallTo(name);
 	}
 
-	async checkForTools() {
+	async init() {
 		// ensure tools folder exists
 		fs.mkdir(this.getToolsPath(), { recursive: true });
 

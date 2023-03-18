@@ -2,6 +2,7 @@ import { SlashCommandBuilder } from "@discordjs/builders";
 import { ClientUser } from "discord.js";
 import * as path from "path";
 import { Categories, Command } from "../../command";
+import { HtmlRenderer } from "../../services/html-renderer";
 import { downloadToDataUri, getUsernameAndAvatarURL } from "../../utils";
 
 export const VapourHoldCommand: Command = {
@@ -12,7 +13,7 @@ export const VapourHoldCommand: Command = {
 		.addUserOption(option =>
 			option.setName("foe").setDescription("need foe").setRequired(true),
 		),
-	onInteraction: async (interaction, { htmlRenderer }) => {
+	onInteraction: async interaction => {
 		const user: ClientUser = interaction.options.getUser(
 			"foe",
 			false,
@@ -23,7 +24,7 @@ export const VapourHoldCommand: Command = {
 			interaction.guild,
 		);
 
-		const buffer = await htmlRenderer.renderHtml(
+		const buffer = await HtmlRenderer.instance.renderHtml(
 			"file://" +
 				path.resolve(
 					__dirname,

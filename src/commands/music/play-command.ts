@@ -2,6 +2,7 @@ import { SlashCommandBuilder } from "@discordjs/builders";
 import { MessageFlags } from "discord-api-types/v10";
 import { GuildMember } from "discord.js";
 import { Categories, Command } from "../../command";
+import { MusicQueue } from "../../services/music-queue";
 
 export const PlayCommand: Command = {
 	category: Categories.music,
@@ -14,7 +15,7 @@ export const PlayCommand: Command = {
 				.setDescription("search term or url")
 				.setRequired(true),
 		),
-	onInteraction: async (interaction, { musicQueue }) => {
+	onInteraction: async interaction => {
 		const search = interaction.options.getString("search", true);
 
 		const member = interaction.member as GuildMember;
@@ -31,7 +32,7 @@ export const PlayCommand: Command = {
 		});
 
 		try {
-			const info = await musicQueue.getInfo(search);
+			const info = await MusicQueue.instance.getInfo(search);
 
 			// await interaction.followUp(
 			// 	"🎶 ribbit, found: **" +
@@ -77,7 +78,7 @@ export const PlayCommand: Command = {
 					info.webpage_url,
 			);
 
-			musicQueue.addToQueue(channel, info.url, info.title);
+			MusicQueue.instance.addToQueue(channel, info.url, info.title);
 		} catch (error) {
 			interaction.followUp("aw ribbit... something went wrong :(");
 		}

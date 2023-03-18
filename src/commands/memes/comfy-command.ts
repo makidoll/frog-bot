@@ -2,6 +2,7 @@ import { SlashCommandBuilder } from "@discordjs/builders";
 import { ClientUser } from "discord.js";
 import * as path from "path";
 import { Categories, Command } from "../../command";
+import { HtmlRenderer } from "../../services/html-renderer";
 import { downloadToDataUri, getUsernameAndAvatarURL } from "../../utils";
 
 export const ComfyCommand: Command = {
@@ -15,7 +16,7 @@ export const ComfyCommand: Command = {
 				.setDescription("need frog fren")
 				.setRequired(false),
 		),
-	onInteraction: async (interaction, { htmlRenderer }) => {
+	onInteraction: async interaction => {
 		const user: ClientUser = interaction.options.getUser(
 			"friend",
 			false,
@@ -26,7 +27,7 @@ export const ComfyCommand: Command = {
 			interaction.guild,
 		);
 
-		const buffer = await htmlRenderer.renderHtml(
+		const buffer = await HtmlRenderer.instance.renderHtml(
 			"file://" +
 				path.resolve(
 					__dirname,

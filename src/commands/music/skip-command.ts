@@ -1,13 +1,14 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { GuildMember } from "discord.js";
 import { Categories, Command } from "../../command";
+import { MusicQueue } from "../../services/music-queue";
 
 export const SkipCommand: Command = {
 	category: Categories.music,
 	command: new SlashCommandBuilder()
 		.setName("skip")
 		.setDescription("⏭️ skip current song in vc"),
-	onInteraction: async (interaction, { musicQueue }) => {
+	onInteraction: async interaction => {
 		const member = interaction.member as GuildMember;
 		const channel = member.voice.channel;
 
@@ -16,7 +17,7 @@ export const SkipCommand: Command = {
 			return;
 		}
 
-		const skipped = await musicQueue.skipCurrentSong(channel);
+		const skipped = await MusicQueue.instance.skipCurrentSong(channel);
 
 		if (skipped) {
 			await interaction.reply("⏭️ ribbit, skipped current song");

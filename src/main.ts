@@ -30,11 +30,6 @@ import { HtmlRenderer } from "./services/html-renderer";
 import { MusicQueue } from "./services/music-queue";
 import { ToolsManager } from "./tools-manager";
 
-export interface Services {
-	htmlRenderer: HtmlRenderer;
-	musicQueue: MusicQueue;
-}
-
 // export const commandPrefix = "frog ";
 export const availableCommands: Command[] = [
 	// > other
@@ -64,16 +59,9 @@ export const availableCommands: Command[] = [
 		froglog.debug("Found DEV env");
 	}
 
-	// TODO: proper dependency injection or singletons please???
-
-	const services: Services = {
-		htmlRenderer: new HtmlRenderer(),
-		musicQueue: new MusicQueue(),
-	};
-
-	await ToolsManager.instance.checkForTools();
-
-	services.htmlRenderer.launch();
+	await ToolsManager.instance.init();
+	await HtmlRenderer.instance.init();
+	await MusicQueue.instance.init();
 
 	const client = new Client({
 		intents: [
@@ -172,7 +160,6 @@ export const availableCommands: Command[] = [
 			try {
 				command.onInteraction(
 					interaction as ChatInputCommandInteraction,
-					services,
 				);
 			} catch (error) {}
 		}

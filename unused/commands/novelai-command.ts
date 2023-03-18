@@ -3,10 +3,10 @@ import axios from "axios";
 import * as fs from "fs/promises";
 import * as path from "path";
 import slugify from "slugify";
-import { Categories, Command } from "../../command";
-import { plural, stNdRdTh } from "../../utils";
+import { Categories, Command } from "../src/command";
+import { plural, stNdRdTh } from "../src/utils";
 import { formatDistance } from "date-fns";
-import { froglog } from "../../froglog";
+import { froglog } from "../src/froglog";
 
 const novelAiSavedPath = path.resolve(__dirname, "../../novelai-saved/");
 

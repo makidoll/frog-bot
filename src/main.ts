@@ -28,13 +28,10 @@ import { initReactionRoles } from "./reaction-roles";
 import { initReminders } from "./reminders";
 import { HtmlRenderer } from "./services/html-renderer";
 import { MusicQueue } from "./services/music-queue";
-import { TaskQueue } from "./services/task-queue";
 import { ToolsManager } from "./tools-manager";
 
 export interface Services {
 	htmlRenderer: HtmlRenderer;
-	stableDiffusionQueue: TaskQueue;
-	// novelAiQueue: TaskQueue;
 	musicQueue: MusicQueue;
 }
 
@@ -42,9 +39,7 @@ export interface Services {
 export const availableCommands: Command[] = [
 	// > other
 	HelpCommand,
-	// NovelAiCommand,
 	RemoveBgCommand,
-	// StableDiffusionCommand,
 	// > frends
 	CouchCommand,
 	FrugCommand,
@@ -70,12 +65,9 @@ export const availableCommands: Command[] = [
 	}
 
 	// TODO: proper dependency injection or singletons please???
-	// TODO: also move ai services and commands to unused
 
 	const services: Services = {
 		htmlRenderer: new HtmlRenderer(),
-		stableDiffusionQueue: new TaskQueue(),
-		// novelAiQueue: new TaskQueue(),
 		musicQueue: new MusicQueue(),
 	};
 

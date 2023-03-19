@@ -20,12 +20,12 @@ const reminders: Reminder[] =
 				// },
 		  ]
 		: [
-				{
-					cron: "0 14 * * *",
-					message:
-						"ribbit, <@279887350027386881> and <@138864336054648834>, go do blender practice!",
-					channelId: "496631514038009856", // mechanyx
-				},
+				// {
+				// 	cron: "0 14 * * *",
+				// 	message:
+				// 		"ribbit, <@279887350027386881> and <@138864336054648834>, go do blender practice!",
+				// 	channelId: "496631514038009856", // mechanyx
+				// },
 		  ];
 
 let jobs: CronJob[] = [];

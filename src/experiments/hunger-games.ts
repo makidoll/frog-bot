@@ -132,7 +132,7 @@ async function simulateHungerGames() {
 	await page.close();
 }
 
-(async () => {
-	await HtmlRenderer.instance.init();
-	simulateHungerGames();
-})();
+// (async () => {
+// 	await HtmlRenderer.instance.init();
+// 	simulateHungerGames();
+// })();

@@ -39,4 +39,8 @@ export class HtmlRenderer {
 
 		return screenshot;
 	}
+
+	getBrowser() {
+		return this.browser;
+	}
 }

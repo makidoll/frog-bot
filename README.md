@@ -19,3 +19,5 @@ yarn build
 run with `node dist/main.js`
 
 or use `pm2 start ecosystem.config.js`
+
+if you want to use your own ffmpeg installation set env `FFMPEG_BIN`

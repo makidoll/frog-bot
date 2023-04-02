@@ -8,7 +8,7 @@ export const HelpCommand: Command = {
 		.setName("help")
 		.setDescription("📚 shows frog bot help!"),
 	onInteraction: interaction => {
-		let out = "ribbit! here are my commands! 🐸\n\n";
+		let out = "ribbit! here are my commands! 🐸🌺\n\n";
 
 		const perCategoryHelp = {};
 

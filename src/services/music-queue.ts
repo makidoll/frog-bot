@@ -13,6 +13,7 @@ import {
 } from "@discordjs/voice";
 import { VoiceBasedChannel } from "discord.js";
 import * as execa from "execa";
+import * as path from "path";
 import { FFmpeg } from "prism-media";
 import { ToolName, ToolsManager } from "../tools-manager";
 
@@ -79,17 +80,21 @@ export class MusicQueue {
 		};
 	}
 
-	urlToFfmpegStream(url: string) {
+	strInputToFfmpegStream(url: string, isFile: boolean) {
 		// https://github.com/skick1234/DisTube/blob/stable/src/core/DisTubeStream.ts
 
 		const args = [
 			// fixes youtube links from stopping
-			"-reconnect",
-			"1",
-			"-reconnect_streamed",
-			"1",
-			"-reconnect_delay_max",
-			"5",
+			...(isFile
+				? []
+				: [
+						"-reconnect",
+						"1",
+						"-reconnect_streamed",
+						"1",
+						"-reconnect_delay_max",
+						"5",
+				  ]),
 			// input
 			"-i",
 			url,
@@ -182,26 +187,67 @@ export class MusicQueue {
 		this.audioQueue[channel.id] = null;
 	}
 
-	async addToQueue(channel: VoiceBasedChannel, url: string, title: string) {
+	getOdemonGoodbyeResource() {
+		return createAudioResource(
+			this.strInputToFfmpegStream(
+				// thank you odemon <3
+				path.resolve(__dirname, "../../assets/bybye_ribbit.mp3"),
+				true,
+			),
+			{
+				inputType: StreamType.OggOpus,
+				inlineVolume: true, // still works with ffmpeg stream
+				metadata: { title: "frog bot goodbye", goodbye: true },
+			},
+		);
+	}
+
+	async addToQueue(
+		channel: VoiceBasedChannel,
+		url: string,
+		title: string,
+		playOdemonGoodbye = false,
+	) {
 		const connection = await this.ensureConnection(channel);
 		const player = await this.ensurePlayer(channel, connection);
 
-		const audioResource = createAudioResource(this.urlToFfmpegStream(url), {
-			inputType: StreamType.OggOpus,
-			inlineVolume: true, // still works with ffmpeg stream
-			metadata: { title },
-		});
+		const audioResource = createAudioResource(
+			this.strInputToFfmpegStream(url, false),
+			{
+				inputType: StreamType.OggOpus,
+				inlineVolume: true, // still works with ffmpeg stream
+				metadata: { title },
+			},
+		);
 
 		audioResource.volume.setVolume(0.25);
 
 		if (this.audioQueue[channel.id] != null) {
 			// already a queue available, so add song
-			this.audioQueue[channel.id].push(audioResource);
+			// but we should add it before any goodbye resource
+
+			const goodbyeIndex = this.audioQueue[channel.id].findIndex(
+				resource => (resource.metadata as any).goodbye,
+			);
+
+			if (goodbyeIndex == -1) {
+				this.audioQueue[channel.id].push(audioResource);
+			} else {
+				// add right before last resource
+				this.audioQueue[channel.id].splice(
+					this.audioQueue[channel.id].length - 1,
+					0,
+					audioResource,
+				);
+			}
+
 			return;
 		}
 
 		// no queue available so lets make one and immediately play
-		this.audioQueue[channel.id] = [];
+		this.audioQueue[channel.id] = playOdemonGoodbye
+			? [this.getOdemonGoodbyeResource()]
+			: [];
 
 		player.play(audioResource);
 

@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { MessageFlags } from "discord-api-types/v10";
 import { GuildMember } from "discord.js";
-import { Categories, Command } from "../../command";
+import { Categories, Command, ServerExclusiveCategories } from "../../command";
 import { MusicQueue } from "../../services/music-queue";
 
 export const PlayCommand: Command = {
@@ -78,7 +78,18 @@ export const PlayCommand: Command = {
 					info.webpage_url,
 			);
 
-			MusicQueue.instance.addToQueue(channel, info.url, info.title);
+			const playOdemonGoodbye = process.env.DEV
+				? true
+				: ServerExclusiveCategories[Categories.mechanyx].includes(
+						interaction.guildId,
+				  );
+
+			MusicQueue.instance.addToQueue(
+				channel,
+				info.url,
+				info.title,
+				playOdemonGoodbye,
+			);
 		} catch (error) {
 			interaction.followUp("aw ribbit... something went wrong :(");
 		}

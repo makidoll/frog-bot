@@ -110,8 +110,11 @@ export class MusicQueue {
 			"-i",
 			url,
 			// normalize audio https://superuser.com/a/323127
+			// https://ffmpeg.org/ffmpeg-filters.html#dynaudnorm
+			// https://ffmpeg.org/ffmpeg-filters.html#loudnorm
+			// loudnorm sounds better than dynaudnorm
 			"-filter:a",
-			"dynaudnorm=p=0.9:s=5",
+			"loudnorm", // =p=0.9:s=5
 			// https://github.com/discordjs/voice/blob/main/src/audio/TransformerGraph.ts
 			"-analyzeduration",
 			"0",

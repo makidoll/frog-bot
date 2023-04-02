@@ -18,6 +18,7 @@ import * as execa from "execa";
 import * as pathToFfmpeg from "ffmpeg-static";
 import * as path from "path";
 import { FFmpeg } from "prism-media";
+import { froglog } from "../froglog";
 import { ToolName, ToolsManager } from "../tools-manager";
 
 interface Queue {
@@ -44,7 +45,71 @@ export class MusicQueue {
 
 	private audioQueue: { [channelId: string]: Queue } = {};
 
+	private ffmpegExtensions: string[] = [];
+
+	async getFfmpegExtensions() {
+		const ffmpegExtensionsKey = "extensions for " + pathToFfmpeg;
+		const cachedFfmpegExtensions = await ToolsManager.instance.getKeyValue(
+			"ffmpeg",
+			ffmpegExtensionsKey,
+		);
+
+		if (cachedFfmpegExtensions != null) {
+			froglog.info("Found cached ffmpeg file extensions");
+			this.ffmpegExtensions = cachedFfmpegExtensions;
+			return;
+		}
+
+		froglog.info("Fetching ffmpeg file extensions...");
+
+		const { stdout } = await execa(pathToFfmpeg as any, [
+			"-hide_banner",
+			"-demuxers",
+		]);
+
+		const demuxers = stdout
+			.split("--")
+			.slice(1)
+			.join("--")
+			.split("\n")
+			.filter(line => line.trim() != "")
+			.map(line => line.slice(4).split(" ")[0]);
+
+		const exts = [];
+
+		for (const demuxer of demuxers) {
+			const { stdout } = await execa(pathToFfmpeg as any, [
+				"-hide_banner",
+				"-h",
+				"demuxer=" + demuxer,
+			]);
+
+			const matches = stdout.match(/Common extensions: (.+)\./);
+
+			if (matches) {
+				const foundExts = matches[1].split(",").map(ext => ext.trim());
+				for (const foundExt of foundExts) {
+					if (!exts.includes(foundExt)) {
+						exts.push(foundExt);
+					}
+				}
+			}
+		}
+
+		this.ffmpegExtensions = exts;
+
+		await ToolsManager.instance.setKeyValue(
+			"ffmpeg",
+			ffmpegExtensionsKey,
+			exts,
+		);
+
+		froglog.info("Done!");
+	}
+
 	async init() {
+		await this.getFfmpegExtensions();
+
 		// TODO: add system that saves queue so when frog bot restarts, everything reconnects
 	}
 
@@ -71,6 +136,7 @@ export class MusicQueue {
 
 			try {
 				const { stdout, stderr } = await execa(pathToFfmpeg as any, [
+					"-hide_banner",
 					"-i",
 					input,
 					"-f",
@@ -87,6 +153,7 @@ export class MusicQueue {
 	}
 
 	formatDuration(s: number) {
+		if (s < 0) return "unknown";
 		return formatDuration(
 			{
 				seconds: Math.floor(s % 60),
@@ -101,17 +168,20 @@ export class MusicQueue {
 	async getInfo(search: string) {
 		const isUrl = /^https?:\/\//i.test(search);
 
-		// TODO: should probably add more extensions
+		if (isUrl) {
+			const url = new URL(search);
+			const ext = url.pathname.split(".").pop();
 
-		if (isUrl && /\.(?:mp4)|(?:mp3)|(?:ogg)|(?:wav)$/i.test(search)) {
-			const seconds = await this.fetchLengthInSeconds(search);
+			if (this.ffmpegExtensions.includes(ext)) {
+				const seconds = await this.fetchLengthInSeconds(search);
 
-			return {
-				title: search,
-				url: search,
-				duration_string: this.formatDuration(seconds),
-				webpage_url: search,
-			};
+				return {
+					title: search,
+					url: search,
+					duration_string: this.formatDuration(seconds),
+					webpage_url: search,
+				};
+			}
 		}
 
 		const isUrlWithoutHttp =

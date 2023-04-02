@@ -231,4 +231,30 @@ export class ToolsManager {
 
 		froglog.info("Finished checking installed tools!");
 	}
+
+	private keyValueDbPath(dbName: string) {
+		return path.resolve(this.getToolsPath(), "db_" + dbName + ".json");
+	}
+
+	private async readKeyValueDb(dbName: string) {
+		try {
+			const db = await fs.readFile(this.keyValueDbPath(dbName), {
+				encoding: "utf8",
+			});
+			return JSON.parse(db);
+		} catch (error) {
+			return {};
+		}
+	}
+
+	async getKeyValue(dbName: string, key: string) {
+		const db = await this.readKeyValueDb(dbName);
+		return db[key];
+	}
+
+	async setKeyValue(dbName: string, key: string, value: any) {
+		const db = await this.readKeyValueDb(dbName);
+		db[key] = value;
+		await fs.writeFile(this.keyValueDbPath(dbName), JSON.stringify(db));
+	}
 }

@@ -38,6 +38,17 @@ export class MusicQueue {
 	async getInfo(search: string) {
 		const isUrl = /^https?:\/\//i.test(search);
 
+		// TODO: should probably add more extensions
+		if (isUrl && /\.(?:mp4)|(?:mp3)|(?:ogg)|(?:wav)$/i.test(search)) {
+			// TODO: use ffprobe for duration string?
+			return {
+				title: search,
+				url: search,
+				duration_string: "unknown",
+				webpage_url: search,
+			};
+		}
+
 		const isUrlWithoutHttp =
 			/^youtube\.com/i.test(search) || /^youtu\.be/i.test(search);
 

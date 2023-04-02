@@ -1,5 +1,6 @@
 import {
 	AudioPlayer,
+	AudioPlayerState,
 	AudioPlayerStatus,
 	AudioResource,
 	createAudioPlayer,
@@ -17,6 +18,13 @@ import * as path from "path";
 import { FFmpeg } from "prism-media";
 import { ToolName, ToolsManager } from "../tools-manager";
 
+interface Queue {
+	current: AudioResource;
+	resources: AudioResource[];
+	looping: boolean;
+	skipping: boolean;
+}
+
 export class MusicQueue {
 	private static _instance: MusicQueue;
 
@@ -31,7 +39,8 @@ export class MusicQueue {
 
 	private voiceConnections: { [channelId: string]: VoiceConnection } = {};
 	private audioPlayers: { [channelId: string]: AudioPlayer } = {};
-	private audioQueue: { [channelId: string]: AudioResource[] } = {};
+
+	private audioQueue: { [channelId: string]: Queue } = {};
 
 	async init() {}
 
@@ -172,7 +181,7 @@ export class MusicQueue {
 	) {
 		let player = this.audioPlayers[channel.id];
 
-		if (player == null || !player.checkPlayable()) {
+		if (player == null) {
 			player = createAudioPlayer({
 				behaviors: {
 					noSubscriber: NoSubscriberBehavior.Play,
@@ -182,7 +191,7 @@ export class MusicQueue {
 			this.audioPlayers[channel.id] = player;
 		}
 
-		// hopefully won't subscribe twice?
+		// doesn't subscribe twice, checked with .listeners.length
 		connection.subscribe(player);
 
 		return player;
@@ -204,6 +213,20 @@ export class MusicQueue {
 		this.audioQueue[channel.id] = null;
 	}
 
+	createAudioResource(url: string, isFile: boolean, metadata = {}) {
+		return createAudioResource(this.strInputToFfmpegStream(url, isFile), {
+			inputType: StreamType.OggOpus,
+			inlineVolume: true, // still works with ffmpeg stream
+			metadata: { ...metadata, url, isFile },
+		});
+	}
+
+	recreateAudioResource(audioResource: AudioResource) {
+		const metadata = audioResource.metadata as any;
+		const { url, isFile } = metadata;
+		return this.createAudioResource(url, isFile, metadata);
+	}
+
 	getOdemonGoodbyeResource() {
 		// thank you odemon <3
 
@@ -214,17 +237,51 @@ export class MusicQueue {
 			filename = "bybye_ribbit_cursed.mp3";
 		}
 
-		return createAudioResource(
-			this.strInputToFfmpegStream(
-				path.resolve(__dirname, "../../assets/", filename),
-				true,
-			),
-			{
-				inputType: StreamType.OggOpus,
-				inlineVolume: true, // still works with ffmpeg stream
-				metadata: { title: "frog bot goodbye", goodbye: true },
-			},
+		return this.createAudioResource(
+			path.resolve(__dirname, "../../assets/", filename),
+			true,
+			{ title: "frog bot goodbye", goodbye: true },
 		);
+	}
+
+	stateChangeCallback(channel: VoiceBasedChannel) {
+		return async (
+			oldState: AudioPlayerState,
+			newState: AudioPlayerState,
+		) => {
+			// only when song finished
+			if (newState.status != AudioPlayerStatus.Idle) return;
+
+			// lets hope this never happens
+			const queue = this.audioQueue[channel.id];
+			if (queue == null) this.disconnectAndCleanup(channel);
+
+			const connection = await this.ensureConnection(channel);
+			const player = await this.ensurePlayer(channel, connection);
+
+			if (
+				queue.looping &&
+				queue.skipping == false &&
+				// dont loop goodbye
+				(queue.current.metadata as any).goodbye == null
+			) {
+				queue.current = this.recreateAudioResource(queue.current);
+				player.play(queue.current);
+			} else {
+				// if we're looping this'll make sure we dont skip again
+				queue.skipping = false;
+
+				if (queue.resources.length == 0) {
+					// disconnect if empty
+					this.disconnectAndCleanup(channel);
+				} else {
+					// shift song and play
+					const audioResource = queue.resources.shift();
+					queue.current = audioResource;
+					player.play(audioResource);
+				}
+			}
+		};
 	}
 
 	async addToQueue(
@@ -233,34 +290,24 @@ export class MusicQueue {
 		title: string,
 		playOdemonGoodbye = false,
 	) {
-		const connection = await this.ensureConnection(channel);
-		const player = await this.ensurePlayer(channel, connection);
-
-		const audioResource = createAudioResource(
-			this.strInputToFfmpegStream(url, false),
-			{
-				inputType: StreamType.OggOpus,
-				inlineVolume: true, // still works with ffmpeg stream
-				metadata: { title },
-			},
-		);
-
+		const audioResource = this.createAudioResource(url, false, { title });
 		audioResource.volume.setVolume(0.25);
 
-		if (this.audioQueue[channel.id] != null) {
+		const foundQueue = this.audioQueue[channel.id];
+		if (foundQueue != null) {
 			// already a queue available, so add song
-			// but we should add it before any goodbye resource
+			// but we should add it before a found goodbye resource
 
-			const goodbyeIndex = this.audioQueue[channel.id].findIndex(
+			const goodbyeIndex = foundQueue.resources.findIndex(
 				resource => (resource.metadata as any).goodbye,
 			);
 
 			if (goodbyeIndex == -1) {
-				this.audioQueue[channel.id].push(audioResource);
+				foundQueue.resources.push(audioResource);
 			} else {
 				// add right before last resource
-				this.audioQueue[channel.id].splice(
-					this.audioQueue[channel.id].length - 1,
+				foundQueue.resources.splice(
+					foundQueue.resources.length - 1,
 					0,
 					audioResource,
 				);
@@ -269,31 +316,49 @@ export class MusicQueue {
 			return;
 		}
 
-		// no queue available so lets make one and immediately play
-		this.audioQueue[channel.id] = playOdemonGoodbye
-			? [this.getOdemonGoodbyeResource()]
-			: [];
+		// no queue found so lets make one and immediately play
+
+		this.audioQueue[channel.id] = {
+			current: audioResource,
+			resources: playOdemonGoodbye
+				? [this.getOdemonGoodbyeResource()]
+				: [],
+			looping: false,
+			skipping: false,
+		};
+
+		const connection = await this.ensureConnection(channel);
+		const player = await this.ensurePlayer(channel, connection);
 
 		player.play(audioResource);
 
-		player.on("stateChange", (oldState, newState) => {
-			// only when song finished
-			if (newState.status != AudioPlayerStatus.Idle) return;
+		// listen to state change when song finishes
+		// outsourced because its best we dont reference anything from here except channel
 
-			if (this.audioQueue[channel.id].length == 0) {
-				// disconnect if empty
-				this.disconnectAndCleanup(channel);
-			} else {
-				// shift song and play
-				const audioResource = this.audioQueue[channel.id].shift();
-				player.play(audioResource);
-			}
-		});
+		player.on("stateChange", this.stateChangeCallback(channel));
 	}
 
-	async skipCurrentSong(channel: VoiceBasedChannel) {
-		if (this.audioPlayers[channel.id] == null) return false;
+	skipCurrentSong(channel: VoiceBasedChannel) {
+		if (this.audioPlayers[channel.id] == null)
+			throw new Error("Player not found");
+
+		const queue = this.audioQueue[channel.id];
+		if (queue == null) throw new Error("Queue not found");
+
+		// if we're looping, it won't know if its an intentional skip or not
+		// will be set to false right after state change
+		queue.skipping = true;
+
 		this.audioPlayers[channel.id].stop(); // should run state change
-		return true;
+	}
+
+	toggleLoop(channel: VoiceBasedChannel) {
+		const queue = this.audioQueue[channel.id];
+		if (queue == null) throw new Error("Queue not found");
+
+		// when song ends, will check in state change
+		queue.looping = !queue.looping;
+
+		return queue.looping;
 	}
 }

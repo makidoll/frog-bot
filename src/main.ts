@@ -18,6 +18,7 @@ import { SquishyCommand } from "./commands/memes-gifs/squishy-command";
 import { ComfyCommand } from "./commands/memes/comfy-command";
 import { DeepfryCommand } from "./commands/memes/deepfry-command";
 import { OmgHiCommand } from "./commands/memes/omg-hi-command";
+import { LoopCommand } from "./commands/music/loop-command";
 import { PlayCommand } from "./commands/music/play-command";
 import { SkipCommand } from "./commands/music/skip-command";
 import { StopCommand } from "./commands/music/stop-command";
@@ -50,6 +51,7 @@ export const availableCommands: Command[] = [
 	PlayCommand,
 	StopCommand,
 	SkipCommand,
+	LoopCommand,
 	// > mechanyx
 	VapourHoldCommand,
 ];

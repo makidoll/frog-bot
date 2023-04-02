@@ -3,11 +3,11 @@ import { GuildMember } from "discord.js";
 import { Categories, Command } from "../../command";
 import { MusicQueue } from "../../services/music-queue";
 
-export const SkipCommand: Command = {
+export const LoopCommand: Command = {
 	category: Categories.music,
 	command: new SlashCommandBuilder()
-		.setName("skip")
-		.setDescription("⏭️ skip current song in vc"),
+		.setName("loop")
+		.setDescription("🔁 loops current song foreverrr in vc"),
 	onInteraction: async interaction => {
 		const member = interaction.member as GuildMember;
 		const channel = member.voice.channel;
@@ -18,10 +18,18 @@ export const SkipCommand: Command = {
 		}
 
 		try {
-			MusicQueue.instance.skipCurrentSong(channel);
-			await interaction.reply("⏭️ ribbit, skipped current song");
+			const looping = MusicQueue.instance.toggleLoop(channel);
+			if (looping) {
+				await interaction.reply(
+					"🔁 🟢 ribbit, **enabled looping** foreverrrrr!",
+				);
+			} else {
+				await interaction.reply(
+					"🔁 🔴 ribbit, **disabled looping** not forever anymore",
+				);
+			}
 		} catch (error) {
-			await interaction.reply("aw ribbit, couldn't skip current song");
+			await interaction.reply("aw ribbit, couldn't loop current song");
 		}
 	},
 };

@@ -12,8 +12,10 @@ import {
 	VoiceConnection,
 	VoiceConnectionStatus,
 } from "@discordjs/voice";
+import { formatDuration } from "date-fns";
 import { VoiceBasedChannel } from "discord.js";
 import * as execa from "execa";
+import * as pathToFfmpeg from "ffmpeg-static";
 import * as path from "path";
 import { FFmpeg } from "prism-media";
 import { ToolName, ToolsManager } from "../tools-manager";
@@ -42,18 +44,72 @@ export class MusicQueue {
 
 	private audioQueue: { [channelId: string]: Queue } = {};
 
-	async init() {}
+	async init() {
+		// TODO: add system that saves queue so when frog bot restarts, everything reconnects
+	}
+
+	fetchLengthInSeconds(input: string) {
+		// start ffmpeg but don't output. this will error but
+		// it'll print the duration. it doesn't come with ffprobe
+
+		return new Promise<number>(async resolve => {
+			const tryFindDuration = (output: string) => {
+				const matches = output.match(
+					/Duration: ([0-9]+):([0-9]+):([0-9]+)\.([0-9]+)/,
+				);
+				if (matches == null) return false;
+
+				const h = parseInt(matches[1]) * 60 * 60;
+				const m = parseInt(matches[2]) * 60;
+				const s = parseInt(matches[3]);
+				const ms = parseFloat("0." + matches[4]);
+				const totalSeconds = h + m + s + ms;
+
+				resolve(totalSeconds);
+				return true;
+			};
+
+			try {
+				const { stdout, stderr } = await execa(pathToFfmpeg as any, [
+					"-i",
+					input,
+					"-f",
+					"null",
+				]);
+				if (tryFindDuration(stdout)) return;
+				if (tryFindDuration(stderr)) return;
+			} catch (error) {
+				if (tryFindDuration(error.stderr)) return;
+			}
+
+			resolve(-1);
+		});
+	}
+
+	formatDuration(s: number) {
+		return formatDuration(
+			{
+				seconds: Math.floor(s % 60),
+				minutes: Math.floor(s / 60),
+				hours: Math.floor(s / 60 / 60),
+				days: Math.floor(s / 60 / 60 / 24),
+			},
+			{ delimiter: ", " },
+		);
+	}
 
 	async getInfo(search: string) {
 		const isUrl = /^https?:\/\//i.test(search);
 
 		// TODO: should probably add more extensions
+
 		if (isUrl && /\.(?:mp4)|(?:mp3)|(?:ogg)|(?:wav)$/i.test(search)) {
-			// TODO: use ffprobe for duration string?
+			const seconds = await this.fetchLengthInSeconds(search);
+
 			return {
 				title: search,
 				url: search,
-				duration_string: "unknown",
+				duration_string: this.formatDuration(seconds),
 				webpage_url: search,
 			};
 		}
@@ -77,12 +133,10 @@ export class MusicQueue {
 			args,
 		);
 
-		// fs.writeFile("info.json", stdout);
-
 		const {
 			title,
 			url,
-			duration_string,
+			duration,
 			// thumbnail,
 			// uploader,
 			// uploader_url,
@@ -92,7 +146,7 @@ export class MusicQueue {
 		return {
 			title,
 			url,
-			duration_string,
+			duration_string: this.formatDuration(duration),
 			// thumbnail,
 			// uploader,
 			// uploader_url,

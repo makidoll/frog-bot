@@ -2,6 +2,7 @@ import { SlashCommandBuilder } from "@discordjs/builders";
 import { MessageFlags } from "discord-api-types/v10";
 import { GuildMember } from "discord.js";
 import { Categories, Command, ServerExclusiveCategories } from "../../command";
+import { froglog } from "../../froglog";
 import { MusicQueue } from "../../services/music-queue";
 
 export const PlayCommand: Command = {
@@ -91,6 +92,7 @@ export const PlayCommand: Command = {
 				playOdemonGoodbye,
 			);
 		} catch (error) {
+			froglog.error(error);
 			interaction.followUp("aw ribbit... something went wrong :(");
 		}
 	},

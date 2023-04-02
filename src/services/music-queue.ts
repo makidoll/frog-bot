@@ -206,8 +206,11 @@ export class MusicQueue {
 
 	getOdemonGoodbyeResource() {
 		// thank you odemon <3
+
+		const cursedChance = 0.05; // %
 		let filename = "bybye_ribbit.mp3";
-		if (Math.random() >= 0.95) {
+
+		if (Math.random() >= 1 - cursedChance) {
 			filename = "bybye_ribbit_cursed.mp3";
 		}
 

@@ -202,10 +202,15 @@ export class MusicQueue {
 	}
 
 	getOdemonGoodbyeResource() {
+		// thank you odemon <3
+		let filename = "bybye_ribbit.mp3";
+		if (Math.random() >= 0.95) {
+			filename = "bybye_ribbit_cursed.mp3";
+		}
+
 		return createAudioResource(
 			this.strInputToFfmpegStream(
-				// thank you odemon <3
-				path.resolve(__dirname, "../../assets/bybye_ribbit.mp3"),
+				path.resolve(__dirname, "../../assets/", filename),
 				true,
 			),
 			{

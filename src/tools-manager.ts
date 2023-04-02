@@ -232,6 +232,8 @@ export class ToolsManager {
 		froglog.info("Finished checking installed tools!");
 	}
 
+	// TODO: we need proper databasing eventually
+
 	private keyValueDbPath(dbName: string) {
 		return path.resolve(this.getToolsPath(), "db_" + dbName + ".json");
 	}

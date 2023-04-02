@@ -73,24 +73,28 @@ export const availableCommands: Command[] = [
 		partials: [Partials.Message, Partials.Channel, Partials.Reaction],
 	});
 
+	const setActivity = () => {
+		client.user.setActivity({
+			name: "you hoppy 🐸🌺",
+			type: ActivityType.Watching,
+			url: "https://maki.cafe",
+		});
+	};
+
 	client.on("ready", async () => {
 		froglog.info(`Logged in as: ${client.user.tag}`);
 
-		client.user.setPresence({
-			activities: [
-				{
-					name: "you hoppy ribbit",
-					type: ActivityType.Watching,
-					url: "https://maki.cafe",
-				},
-			],
-		});
+		// run this every day so it doesn't go away
+		setActivity();
+		setInterval(setActivity, 1000 * 60 * 60 * 24);
 
 		initReactionRoles(client);
 
 		initReminders(client);
 
-		const rest = new REST({ version: "9" }).setToken(process.env.BOT_TOKEN);
+		const rest = new REST({ version: "10" }).setToken(
+			process.env.BOT_TOKEN,
+		);
 
 		if (process.env.DEV != null) {
 			froglog.info(

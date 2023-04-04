@@ -22,6 +22,7 @@ import { LoopCommand } from "./commands/music/loop-command";
 import { PlayCommand } from "./commands/music/play-command";
 import { SkipCommand } from "./commands/music/skip-command";
 import { StopCommand } from "./commands/music/stop-command";
+import { FeatureplsCommand } from "./commands/other/featurepls-command";
 import { HelpCommand } from "./commands/other/help-command";
 import { RemoveBgCommand } from "./commands/other/remove-bg-command";
 import { froglog } from "./froglog";
@@ -36,6 +37,7 @@ export const availableCommands: Command[] = [
 	// > other
 	HelpCommand,
 	RemoveBgCommand,
+	FeatureplsCommand,
 	// > frends
 	CouchCommand,
 	FrugCommand,

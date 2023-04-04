@@ -45,3 +45,20 @@ export function plural(n: number, single: string, plural) {
 	if (n == 1 || n == -1) return n + " " + single;
 	else return n + " " + plural;
 }
+
+export function formatDuration(s: number) {
+	if (s < 0) return "unknown";
+
+	const seconds = Math.floor(s % 60);
+	const minutes = Math.floor((s / 60) % 60);
+	const hours = Math.floor((s / 60 / 60) % 24);
+	const days = Math.floor(s / 60 / 60 / 24);
+
+	return (
+		(days > 0 ? String(days).padStart(2, "0") + ":" : "") +
+		(hours > 0 ? String(hours).padStart(2, "0") + ":" : "") +
+		String(minutes).padStart(2, "0") +
+		":" +
+		String(seconds).padStart(2, "0")
+	).replace(/^0/, "");
+}

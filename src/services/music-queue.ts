@@ -19,6 +19,7 @@ import * as path from "path";
 import { FFmpeg } from "prism-media";
 import { froglog } from "../froglog";
 import { ToolName, ToolsManager } from "../tools-manager";
+import { formatDuration } from "../utils";
 
 interface Queue {
 	current: AudioResource;
@@ -151,23 +152,6 @@ export class MusicQueue {
 		});
 	}
 
-	formatDuration(s: number) {
-		if (s < 0) return "unknown";
-
-		const seconds = Math.floor(s % 60);
-		const minutes = Math.floor((s / 60) % 60);
-		const hours = Math.floor((s / 60 / 60) % 24);
-		const days = Math.floor(s / 60 / 60 / 24);
-
-		return (
-			(days > 0 ? String(days).padStart(2, "0") + ":" : "") +
-			(hours > 0 ? String(hours).padStart(2, "0") + ":" : "") +
-			String(minutes).padStart(2, "0") +
-			":" +
-			String(seconds).padStart(2, "0")
-		).replace(/^0/, "");
-	}
-
 	async getInfo(search: string) {
 		const isUrl = /^https?:\/\//i.test(search);
 
@@ -181,7 +165,7 @@ export class MusicQueue {
 				return {
 					title: search,
 					url: search,
-					duration_string: this.formatDuration(seconds),
+					duration_string: formatDuration(seconds),
 					webpage_url: search,
 				};
 			}
@@ -219,7 +203,7 @@ export class MusicQueue {
 		return {
 			title,
 			url,
-			duration_string: this.formatDuration(duration),
+			duration_string: formatDuration(duration),
 			// thumbnail,
 			// uploader,
 			// uploader_url,

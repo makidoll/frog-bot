@@ -133,9 +133,9 @@ export const availableCommands: Command[] = [
 	client.on("ready", async () => {
 		froglog.info(`Logged in as: ${client.user.tag}`);
 
-		// cycle activity every 10 minutes
+		// cycle activity every 5 minutes
 		setActivity();
-		setInterval(setActivity, 1000 * 60 * 10);
+		setInterval(setActivity, 1000 * 60 * 5);
 
 		initReactionRoles(client);
 

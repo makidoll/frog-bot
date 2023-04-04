@@ -40,12 +40,10 @@ export class MusicQueue {
 
 	private constructor() {}
 
-	// TODO: change to Map<>
+	private voiceConnections = new Map<string, VoiceConnection>();
+	private audioPlayers = new Map<string, AudioPlayer>();
 
-	private voiceConnections: { [channelId: string]: VoiceConnection } = {};
-	private audioPlayers: { [channelId: string]: AudioPlayer } = {};
-
-	private audioQueue: { [channelId: string]: Queue } = {};
+	private audioQueue = new Map<string, Queue>();
 
 	private pathToFfmpeg = "";
 	private ffmpegExtensions: string[] = [];
@@ -57,7 +55,7 @@ export class MusicQueue {
 
 		// TODO: add system that saves queue so when frog bot restarts, everything reconnects
 
-		const reaperInterval = 1000 * 60 * 5; // every 5 minutes
+		const reaperInterval = 1000 * 60; // every minute
 		setInterval(this.reaperCallback.bind(this), reaperInterval);
 	}
 

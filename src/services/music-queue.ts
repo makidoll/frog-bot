@@ -12,7 +12,6 @@ import {
 	VoiceConnection,
 	VoiceConnectionStatus,
 } from "@discordjs/voice";
-import { formatDuration } from "date-fns";
 import { VoiceBasedChannel } from "discord.js";
 import * as execa from "execa";
 import * as pathToFfmpeg from "ffmpeg-static";
@@ -154,15 +153,19 @@ export class MusicQueue {
 
 	formatDuration(s: number) {
 		if (s < 0) return "unknown";
-		return formatDuration(
-			{
-				seconds: Math.floor(s % 60),
-				minutes: Math.floor(s / 60),
-				hours: Math.floor(s / 60 / 60),
-				days: Math.floor(s / 60 / 60 / 24),
-			},
-			{ delimiter: ", " },
-		);
+
+		const seconds = Math.floor(s % 60);
+		const minutes = Math.floor((s / 60) % 60);
+		const hours = Math.floor((s / 60 / 60) % 24);
+		const days = Math.floor(s / 60 / 60 / 24);
+
+		return (
+			(days > 0 ? String(days).padStart(2, "0") + ":" : "") +
+			(hours > 0 ? String(hours).padStart(2, "0") + ":" : "") +
+			String(minutes).padStart(2, "0") +
+			":" +
+			String(seconds).padStart(2, "0")
+		).replace(/^0/, "");
 	}
 
 	async getInfo(search: string) {

@@ -253,6 +253,10 @@ export class MusicQueue {
 
 		const stream = new FFmpeg({ args, shell: false });
 
+		stream.on("error", error => {
+			console.error(error);
+		});
+
 		// potentially fixes buffer memory issues
 		(stream as any)._readableState &&
 			((stream as any)._readableState.highWaterMark = 1 << 25);

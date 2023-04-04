@@ -6,6 +6,7 @@ import {
 	ActivityType,
 	ChatInputCommandInteraction,
 	Client,
+	ModalSubmitInteraction,
 	Partials,
 } from "discord.js";
 import { Command, ServerExclusiveCategories } from "./command";
@@ -219,19 +220,32 @@ https://github.com/makifoxgirl/frog-bot`.trim();
 	});
 
 	client.on("interactionCreate", interaction => {
-		if (!interaction.isCommand()) return;
+		if (interaction.isCommand()) {
+			const command = availableCommands.find(
+				command => command.command.name == interaction.commandName,
+			);
 
-		const command = availableCommands.find(
-			command => command.command.name == interaction.commandName,
-		);
+			if (command) {
+				try {
+					command.onInteraction(
+						interaction as ChatInputCommandInteraction,
+					);
+				} catch (error) {}
+			}
+		} else if (interaction.isModalSubmit()) {
+			const command = availableCommands.find(command =>
+				(command.modalSubmitCustomIds ?? []).includes(
+					interaction.customId,
+				),
+			);
 
-		if (command) {
-			// we're not using MessageContextMenu or UserContextMenu interactions
-			try {
-				command.onInteraction(
-					interaction as ChatInputCommandInteraction,
-				);
-			} catch (error) {}
+			if (command && command.onModalSubmit) {
+				try {
+					command.onModalSubmit(
+						interaction as ModalSubmitInteraction,
+					);
+				} catch (error) {}
+			}
 		}
 	});
 

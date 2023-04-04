@@ -2,7 +2,10 @@ import {
 	SlashCommandBuilder,
 	SlashCommandSubcommandsOnlyBuilder,
 } from "@discordjs/builders";
-import { ChatInputCommandInteraction } from "discord.js";
+import {
+	ChatInputCommandInteraction,
+	ModalSubmitInteraction,
+} from "discord.js";
 
 export enum Categories {
 	other = "🎀 other",
@@ -27,4 +30,6 @@ export interface Command {
 		| Omit<SlashCommandBuilder, "addSubcommandGroup" | "addSubcommand">
 		| SlashCommandSubcommandsOnlyBuilder;
 	onInteraction: (interaction: ChatInputCommandInteraction) => any;
+	modalSubmitCustomIds?: string[];
+	onModalSubmit?: (interaction: ModalSubmitInteraction) => any;
 }

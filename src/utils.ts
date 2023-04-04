@@ -63,3 +63,12 @@ export function formatDuration(s: number) {
 		String(seconds).padStart(2, "0")
 	).replace(/^0/, "");
 }
+
+export function shuffleArray(array: any[]) {
+	for (let i = array.length - 1; i > 0; i--) {
+		const j = Math.floor(Math.random() * (i + 1));
+		const temp = array[i];
+		array[i] = array[j];
+		array[j] = temp;
+	}
+}

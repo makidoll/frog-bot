@@ -31,6 +31,7 @@ import { initReminders } from "./reminders";
 import { HtmlRenderer } from "./services/html-renderer";
 import { MusicQueue } from "./services/music-queue";
 import { ToolsManager } from "./tools-manager";
+import { shuffleArray } from "./utils";
 
 // export const commandPrefix = "frog ";
 export const availableCommands: Command[] = [
@@ -77,9 +78,53 @@ export const availableCommands: Command[] = [
 		partials: [Partials.Message, Partials.Channel, Partials.Reaction],
 	});
 
+	let currentActivityIndex = -1;
+	let activities = [
+		"hoppy 🌺",
+		"ribbit 🐸",
+		"squirrel 🐿️",
+		"winton 🦍",
+		"foxy 🦊",
+		"meow 🐱",
+		"mooo 🐮",
+		"remmy 🐭",
+		"hampter 🐹",
+		"hedgie 🦔",
+		"rouge 🦇",
+		"baloo 🐻",
+		"slothtje 🦥",
+		"otterbox 🦦",
+		"chiken 🐔",
+		"pengi 🐧",
+		"duckusu 🦆",
+		"gay raptor 🦖",
+		"moby dick 🐋",
+		"dolfin 🐬",
+		"blahaj 🦈",
+		"octopie 🐙",
+		"gary 🐌",
+		"fairy 🦋",
+		"like bug 🐛",
+		"bee movie 🐝",
+		"wormclub 🪱",
+		"do drugs 🍄",
+		"crab rave 🦀",
+		"lobster cop 🦞",
+		"shrimptje 🦐",
+		"squidkid 🦑",
+	];
+
+	shuffleArray(activities);
+
 	const setActivity = () => {
+		currentActivityIndex++;
+		if (currentActivityIndex > activities.length - 1) {
+			shuffleArray(activities);
+			currentActivityIndex = 0;
+		}
+
 		client.user.setActivity({
-			name: "you hoppy 🐸🌺",
+			name: "you " + activities[currentActivityIndex],
 			type: ActivityType.Watching,
 			url: "https://maki.cafe",
 		});
@@ -88,9 +133,9 @@ export const availableCommands: Command[] = [
 	client.on("ready", async () => {
 		froglog.info(`Logged in as: ${client.user.tag}`);
 
-		// run this every day so it doesn't go away
+		// cycle activity every 10 minutes
 		setActivity();
-		setInterval(setActivity, 1000 * 60 * 60 * 24);
+		setInterval(setActivity, 1000 * 60 * 10);
 
 		initReactionRoles(client);
 

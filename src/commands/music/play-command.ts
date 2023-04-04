@@ -85,7 +85,7 @@ export const PlayCommand: Command = {
 						interaction.guildId,
 				  );
 
-			MusicQueue.instance.addToQueue(
+			await MusicQueue.instance.addToQueue(
 				channel,
 				info.url,
 				info.title,

@@ -101,6 +101,7 @@ export const availableCommands: Command[] = [
 		);
 
 		// i think this only worked on api v9, now its in developer applications
+		// https://discord.com/developers/applications
 		/*
 		const bio = `
 ribbit! im frog bot! hoppy 🐸 🌺
@@ -111,6 +112,10 @@ https://github.com/makifoxgirl/frog-bot`.trim();
 
 		rest.patch(Routes.user("@me"), { body: { bio } });
 		*/
+
+		froglog.info(
+			`Invite link: https://discord.com/oauth2/authorize?client_id=${client.user.id}&scope=bot+applications.commands`,
+		);
 
 		if (process.env.DEV != null) {
 			froglog.info(

@@ -408,6 +408,10 @@ export class MusicQueue {
 		const audioResource = this.createAudioResource(url, false, { title });
 		audioResource.volume.setVolume(0.25);
 
+		if (audioResource.ended) {
+			throw new Error("Audio resource failed");
+		}
+
 		const foundQueue = this.audioQueue[channel.id];
 		if (foundQueue != null) {
 			// already a queue available, so add song

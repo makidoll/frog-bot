@@ -1,6 +1,7 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { Categories, Command, ServerExclusiveCategories } from "../../command";
 import { availableCommands } from "../../main";
+import { plural } from "../../utils";
 
 export const HelpCommand: Command = {
 	category: Categories.other,
@@ -33,6 +34,13 @@ export const HelpCommand: Command = {
 		for (const [category, help] of Object.entries(perCategoryHelp)) {
 			out += "> *" + category + "*\n" + help + "\n";
 		}
+
+		const totalServers = interaction.client.guilds.cache.size;
+
+		out +=
+			"oh also i'm part of **" +
+			plural(totalServers, "server") +
+			"**, yay!\n\n";
 
 		out += "see me hoppy! 🐛 https://github.com/makifoxgirl/frog-bot";
 

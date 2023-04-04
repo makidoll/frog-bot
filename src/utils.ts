@@ -41,7 +41,8 @@ export function stNdRdTh(n: number) {
 	else return n + "th";
 }
 
-export function plural(n: number, single: string, plural) {
+export function plural(n: number, single: string, plural: string = null) {
+	if (plural == null) plural = single + "s";
 	if (n == 1 || n == -1) return n + " " + single;
 	else return n + " " + plural;
 }

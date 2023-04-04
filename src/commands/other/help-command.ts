@@ -1,4 +1,5 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
+import { MessageFlags } from "discord.js";
 import { Categories, Command, ServerExclusiveCategories } from "../../command";
 import { availableCommands } from "../../main";
 import { plural } from "../../utils";
@@ -9,7 +10,7 @@ export const HelpCommand: Command = {
 		.setName("help")
 		.setDescription("📚 shows frog bot help!"),
 	onInteraction: interaction => {
-		let out = "ribbit! here are my commands! 🐸🌺\n\n";
+		let content = "ribbit! here are my commands! 🐸🌺\n\n";
 
 		const perCategoryHelp = {};
 
@@ -32,18 +33,21 @@ export const HelpCommand: Command = {
 		}
 
 		for (const [category, help] of Object.entries(perCategoryHelp)) {
-			out += "> *" + category + "*\n" + help + "\n";
+			content += "> *" + category + "*\n" + help + "\n";
 		}
 
 		const totalServers = interaction.client.guilds.cache.size;
 
-		out +=
+		content +=
 			"oh also i'm part of **" +
 			plural(totalServers, "server") +
-			"**, yay!\n\n";
+			"**, yay!\n";
 
-		out += "see me hoppy! 🐛 https://github.com/makifoxgirl/frog-bot";
+		content += "see me hoppy! 🐛 https://github.com/makifoxgirl/frog-bot";
 
-		interaction.reply(out);
+		interaction.reply({
+			content,
+			flags: MessageFlags.SuppressEmbeds,
+		});
 	},
 };

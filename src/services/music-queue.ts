@@ -408,10 +408,6 @@ export class MusicQueue {
 		const audioResource = this.createAudioResource(url, false, { title });
 		audioResource.volume.setVolume(0.25);
 
-		if (audioResource.ended) {
-			throw new Error("Audio resource failed");
-		}
-
 		const foundQueue = this.audioQueue[channel.id];
 		if (foundQueue != null) {
 			// already a queue available, so add song
@@ -448,6 +444,12 @@ export class MusicQueue {
 
 		const connection = await this.ensureConnection(channel);
 		const player = await this.ensurePlayer(channel, connection);
+
+		// when audio resource fails, throw so command can follow up nicely
+		if (audioResource.ended) {
+			this.disconnectAndCleanup(channel);
+			throw new Error("Audio resource failed");
+		}
 
 		player.play(audioResource);
 

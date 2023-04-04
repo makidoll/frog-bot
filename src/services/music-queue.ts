@@ -21,6 +21,7 @@ import { ToolName, ToolsManager, which } from "../tools-manager";
 import { formatDuration } from "../utils";
 
 interface Queue {
+	channel: VoiceBasedChannel;
 	current: AudioResource;
 	resources: AudioResource[];
 	looping: boolean;
@@ -39,6 +40,8 @@ export class MusicQueue {
 
 	private constructor() {}
 
+	// TODO: change to Map<>
+
 	private voiceConnections: { [channelId: string]: VoiceConnection } = {};
 	private audioPlayers: { [channelId: string]: AudioPlayer } = {};
 
@@ -53,6 +56,27 @@ export class MusicQueue {
 		await this.getFfmpegExtensions();
 
 		// TODO: add system that saves queue so when frog bot restarts, everything reconnects
+
+		const reaperInterval = 1000 * 60 * 5; // every 5 minutes
+		setInterval(this.reaperCallback.bind(this), reaperInterval);
+	}
+
+	reaperCallback() {
+		for (const queue of Object.values(this.audioQueue)) {
+			// check if there's anyone connected, excluding bots
+
+			let anyoneConnected = false;
+
+			for (const [_, member] of queue.channel.members) {
+				if (member.user.bot) continue;
+				anyoneConnected = true;
+				break;
+			}
+
+			if (!anyoneConnected) {
+				this.disconnectAndCleanup(queue.channel);
+			}
+		}
 	}
 
 	async getFfmpegExtensions() {
@@ -314,16 +338,16 @@ export class MusicQueue {
 		if (this.voiceConnections[channel.id] != null) {
 			this.voiceConnections[channel.id].removeAllListeners();
 			this.voiceConnections[channel.id].disconnect();
-			this.voiceConnections[channel.id] = null;
+			delete this.voiceConnections[channel.id];
 		}
 
 		if (this.audioPlayers[channel.id] != null) {
 			this.audioPlayers[channel.id].removeAllListeners();
 			this.audioPlayers[channel.id].stop(); // not necessary
-			this.audioPlayers[channel.id] = null;
+			delete this.audioPlayers[channel.id];
 		}
 
-		this.audioQueue[channel.id] = null;
+		delete this.audioQueue[channel.id];
 	}
 
 	createAudioResource(url: string, isFile: boolean, metadata = {}) {
@@ -432,6 +456,7 @@ export class MusicQueue {
 		// no queue found so lets make one and immediately play
 
 		this.audioQueue[channel.id] = {
+			channel,
 			current: audioResource,
 			resources: playOdemonGoodbye
 				? [this.getOdemonGoodbyeResource()]

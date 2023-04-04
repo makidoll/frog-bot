@@ -60,7 +60,7 @@ export async function which(name: string) {
 			osPlatform == "win32" ? "where" : "which",
 			[name],
 		);
-		return stdout;
+		return stdout.split("\n")[0].trim();
 	} catch (error) {
 		return null;
 	}

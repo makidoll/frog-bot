@@ -7,6 +7,7 @@
 make sure these are installed
 
 -   imagemagick
+-   ffmpeg
 -   [rembg](https://pypi.org/project/rembg/)
 
 copy `.env.sample` to `.env` and set your token

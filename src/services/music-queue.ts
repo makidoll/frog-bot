@@ -14,11 +14,10 @@ import {
 } from "@discordjs/voice";
 import { VoiceBasedChannel } from "discord.js";
 import * as execa from "execa";
-import * as pathToFfmpeg from "ffmpeg-static";
 import * as path from "path";
 import { FFmpeg } from "prism-media";
 import { froglog } from "../froglog";
-import { ToolName, ToolsManager } from "../tools-manager";
+import { ToolName, ToolsManager, which } from "../tools-manager";
 import { formatDuration } from "../utils";
 
 interface Queue {
@@ -45,10 +44,19 @@ export class MusicQueue {
 
 	private audioQueue: { [channelId: string]: Queue } = {};
 
+	private pathToFfmpeg = "";
 	private ffmpegExtensions: string[] = [];
 
+	async init() {
+		this.pathToFfmpeg = await which("ffmpeg");
+
+		await this.getFfmpegExtensions();
+
+		// TODO: add system that saves queue so when frog bot restarts, everything reconnects
+	}
+
 	async getFfmpegExtensions() {
-		const ffmpegExtensionsKey = "extensions for " + pathToFfmpeg;
+		const ffmpegExtensionsKey = "extensions for " + this.pathToFfmpeg;
 		const cachedFfmpegExtensions = await ToolsManager.instance.getKeyValue(
 			"ffmpeg",
 			ffmpegExtensionsKey,
@@ -62,7 +70,7 @@ export class MusicQueue {
 
 		froglog.info("Fetching ffmpeg file extensions...");
 
-		const { stdout } = await execa(pathToFfmpeg as any, [
+		const { stdout } = await execa(this.pathToFfmpeg, [
 			"-hide_banner",
 			"-demuxers",
 		]);
@@ -78,7 +86,7 @@ export class MusicQueue {
 		const exts = [];
 
 		for (const demuxer of demuxers) {
-			const { stdout } = await execa(pathToFfmpeg as any, [
+			const { stdout } = await execa(this.pathToFfmpeg, [
 				"-hide_banner",
 				"-h",
 				"demuxer=" + demuxer,
@@ -107,12 +115,6 @@ export class MusicQueue {
 		froglog.info("Done!");
 	}
 
-	async init() {
-		await this.getFfmpegExtensions();
-
-		// TODO: add system that saves queue so when frog bot restarts, everything reconnects
-	}
-
 	fetchLengthInSeconds(input: string) {
 		// start ffmpeg but don't output. this will error but
 		// it'll print the duration. it doesn't come with ffprobe
@@ -135,7 +137,7 @@ export class MusicQueue {
 			};
 
 			try {
-				const { stdout, stderr } = await execa(pathToFfmpeg as any, [
+				const { stdout, stderr } = await execa(this.pathToFfmpeg, [
 					"-hide_banner",
 					"-i",
 					input,
@@ -252,10 +254,6 @@ export class MusicQueue {
 		];
 
 		const stream = new FFmpeg({ args, shell: false });
-
-		stream.on("error", error => {
-			console.error(error);
-		});
 
 		// potentially fixes buffer memory issues
 		(stream as any)._readableState &&
@@ -448,7 +446,7 @@ export class MusicQueue {
 		// when audio resource fails, throw so command can follow up nicely
 		if (audioResource.ended) {
 			this.disconnectAndCleanup(channel);
-			throw new Error("Audio resource failed");
+			throw new Error("Audio resource ended early");
 		}
 
 		player.play(audioResource);

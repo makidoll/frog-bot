@@ -98,6 +98,18 @@ export const availableCommands: Command[] = [
 			process.env.BOT_TOKEN,
 		);
 
+		// i think this only worked on api v9, now its in developer applications
+		/*
+		const bio = `
+ribbit! im frog bot! hoppy 🐸 🌺
+• **maki made me, i love her so much 💕**
+• i was born one day before her birthday wahoo
+• **do feature request, do it do it! /featurepls**
+https://github.com/makifoxgirl/frog-bot`.trim();
+
+		rest.patch(Routes.user("@me"), { body: { bio } });
+		*/
+
 		if (process.env.DEV != null) {
 			froglog.info(
 				"DEV env set to true, ignoring server exclusive categories",

@@ -127,7 +127,7 @@ export class MusicQueue {
 				channel,
 				dbAudioQueue.current.url,
 				dbAudioQueue.current.title,
-				false,
+				false, // will be stored in resources
 				seekSeconds,
 			);
 
@@ -317,61 +317,6 @@ export class MusicQueue {
 		};
 	}
 
-	private strInputToFfmpegStream(
-		url: string,
-		isFile: boolean,
-		seekSeconds = 0,
-	) {
-		// https://github.com/skick1234/DisTube/blob/stable/src/core/DisTubeStream.ts
-
-		const args = [
-			// fixes youtube links from stopping
-			...(isFile
-				? []
-				: [
-						"-reconnect",
-						"1",
-						"-reconnect_streamed",
-						"1",
-						"-reconnect_delay_max",
-						"5",
-				  ]),
-			// seek seconds. needs to be placed before -i or will take a long time
-			...(seekSeconds > 0 ? ["-ss", String(seekSeconds)] : []),
-			// input
-			"-i",
-			url,
-			// normalize audio https://superuser.com/a/323127
-			// https://ffmpeg.org/ffmpeg-filters.html#dynaudnorm
-			// https://ffmpeg.org/ffmpeg-filters.html#loudnorm
-			// loudnorm sounds better than dynaudnorm
-			"-filter:a",
-			"loudnorm", // =p=0.9:s=5
-			// https://github.com/discordjs/voice/blob/main/src/audio/TransformerGraph.ts
-			"-analyzeduration",
-			"0",
-			"-loglevel",
-			"0",
-			"-ar",
-			"48000",
-			"-ac",
-			"2",
-			// format
-			"-f",
-			"opus",
-			"-acodec",
-			"libopus",
-		];
-
-		const stream = new FFmpeg({ args, shell: false });
-
-		// potentially fixes buffer memory issues
-		(stream as any)._readableState &&
-			((stream as any)._readableState.highWaterMark = 1 << 25);
-
-		return stream;
-	}
-
 	private async ensureConnection(
 		channel: VoiceBasedChannel,
 	): Promise<VoiceConnection> {
@@ -448,16 +393,58 @@ export class MusicQueue {
 		metadata = {},
 		seekSeconds = 0,
 	) {
-		const audioResource = createAudioResource(
-			this.strInputToFfmpegStream(url, isFile, seekSeconds),
-			{
-				inputType: StreamType.OggOpus,
-				inlineVolume: true, // still works with ffmpeg stream
-				metadata: { ...metadata, url, isFile },
-			},
-		);
-		audioResource.volume.setVolume(0.25);
-		return audioResource;
+		// https://github.com/skick1234/DisTube/blob/stable/src/core/DisTubeStream.ts
+
+		const args = [
+			// fixes youtube links from stopping
+			...(isFile
+				? []
+				: [
+						"-reconnect",
+						"1",
+						"-reconnect_streamed",
+						"1",
+						"-reconnect_delay_max",
+						"5",
+				  ]),
+			// seek seconds. needs to be placed before -i or will take a long time
+			...(seekSeconds > 0 ? ["-ss", String(seekSeconds)] : []),
+			// input
+			"-i",
+			url,
+			// normalize audio https://superuser.com/a/323127
+			// https://ffmpeg.org/ffmpeg-filters.html#dynaudnorm
+			// https://ffmpeg.org/ffmpeg-filters.html#loudnorm
+			// loudnorm sounds better than dynaudnorm=p=0.9:s=5
+			"-filter:a",
+			"loudnorm,volume=0.25",
+			// https://github.com/discordjs/voice/blob/main/src/audio/TransformerGraph.ts
+			"-analyzeduration",
+			"0",
+			"-loglevel",
+			"0",
+			"-ar",
+			"48000",
+			"-ac",
+			"2",
+			// format
+			"-f",
+			"opus",
+			"-acodec",
+			"libopus",
+		];
+
+		const stream = new FFmpeg({ args, shell: false });
+
+		// potentially fixes buffer memory issues
+		(stream as any)._readableState &&
+			((stream as any)._readableState.highWaterMark = 1 << 25);
+
+		// create resource
+		return createAudioResource(stream, {
+			inputType: StreamType.OggOpus,
+			metadata: { ...metadata, url, isFile },
+		});
 	}
 
 	private recreateAudioResource(audioResource: AudioResource) {
@@ -475,6 +462,8 @@ export class MusicQueue {
 		if (Math.random() >= 1 - cursedChance) {
 			filename = "bybye_ribbit_cursed.mp3";
 		}
+
+		// TODO: should be 0.5 volume but when recreated through database loading, will reset
 
 		return this.createAudioResource(
 			path.resolve(__dirname, "../../assets/", filename),

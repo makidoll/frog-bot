@@ -4,15 +4,17 @@
 
 ## how
 
-make sure these are installed
+make sure these are system-wide installed:
 
 -   imagemagick
 -   ffmpeg
 -   [rembg](https://pypi.org/project/rembg/)
 
-autoinstalls:
+these will get automatically downloaded:
 
 -   webkit (playwright)
+-   gifski
+-   yt-dlp
 
 copy `.env.sample` to `.env` and set your token
 

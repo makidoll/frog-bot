@@ -1,4 +1,6 @@
 import axios from "axios";
+import * as decompress from "decompress";
+import * as decompressTarxz from "decompress-tarxz";
 import * as execa from "execa";
 import * as fs from "fs/promises";
 import * as os from "os";
@@ -42,25 +44,28 @@ async function githubGetLatestVersion(repo: string): Promise<string> {
 	return latestVersion;
 }
 
-async function githubGetToolBuffer(
-	repo: string,
-	filename: string,
-	version: string,
-): Promise<Buffer> {
-	const downloadUrl =
-		"https://github.com/" +
-		repo +
-		"/releases/download/" +
-		version +
-		"/" +
-		filename;
-
+async function downloadBuffer(url: string) {
 	const request = await axios({
-		url: downloadUrl,
+		url,
 		responseType: "arraybuffer",
 	});
 
 	return request.data;
+}
+
+function githubGetToolBuffer(
+	repo: string,
+	filename: string,
+	version: string,
+): Promise<Buffer> {
+	return downloadBuffer(
+		"https://github.com/" +
+			repo +
+			"/releases/download/" +
+			version +
+			"/" +
+			filename,
+	);
 }
 
 export async function which(name: string) {
@@ -76,6 +81,9 @@ export async function which(name: string) {
 }
 
 export class ToolsManager {
+	// so we dont rate limit ourselves when developing
+	apiCooldownTime = 1000 * 60 * 5; // 5 minutes
+
 	tools: { [key in ToolName]: ToolInfo } = {
 		[ToolName.yt_dlp]: {
 			getLatestVersion: () => githubGetLatestVersion("yt-dlp/yt-dlp"),
@@ -91,33 +99,93 @@ export class ToolsManager {
 				),
 		},
 		[ToolName.gifski]: {
-			// TODO: could use github https://github.com/ImageOptim/gifski
-			// but need to add function to unpack tar.xz file
-			// which contains binaries for all platforms
-			overrideInstalledPath: async () =>
-				path.resolve(
-					__dirname,
-					"../node_modules/gifski/bin/",
-					osSwitch({
-						linux: "debian/gifski",
-						windows: "windows/gifski.exe",
-						macos: "macos/gifski",
-					}),
-				),
+			getLatestVersion: () => githubGetLatestVersion("ImageOptim/gifski"),
+			getToolBuffer: async version => {
+				const downloadUrl = `https://github.com/ImageOptim/gifski/releases/download/${version}/gifski-${version}.tar.xz`;
+
+				const request = await axios({
+					url: downloadUrl,
+					responseType: "arraybuffer",
+				});
+
+				const files = await decompress(request.data, {
+					plugins: [decompressTarxz()],
+				});
+
+				const filePath = osSwitch({
+					linux: "linux/gifski",
+					windows: "win/gifski.exe",
+					macos: "mac/gifski",
+				});
+
+				for (const file of files) {
+					if (file.path == filePath) {
+						return file.data;
+					}
+				}
+
+				throw new Error("Failed to extract gifski");
+			},
 		},
-		[ToolName.rembg]: {
-			// python blelelele
-			overrideInstalledPath: async () => which("rembg"),
-		},
+
 		[ToolName.magick]: {
-			// TODO: could do the same as gifski
-			// version url https://download.imagemagick.org/archive/binaries/digest.rdf
+			// async getLatestVersion() {
+			// 	const request = await axios(
+			// 		"https://download.imagemagick.org/archive/binaries/digest.rdf",
+			// 	);
+
+			// 	const xml = await xml2js.parseStringPromise(request.data, {});
+			// 	const filenames: string[] = xml["rdf:RDF"][
+			// 		"digest:Content"
+			// 	].map(release => release["$"]["rdf:about"]);
+
+			// 	let majors = [];
+			// 	let versions = filenames
+			// 		.map(filename => {
+			// 			const matches = filename.match(
+			// 				/^ImageMagick-(([0-9]+)\.[0-9]+\.[0-9]+(?:-[0-9]+)?)/,
+			// 			);
+			// 			if (matches == null) return null;
+			// 			return {
+			// 				major: parseInt(matches[2]),
+			// 				version: matches[1],
+			// 			};
+			// 		})
+			// 		.filter(version => version != null)
+			// 		.filter(version => {
+			// 			if (!majors.includes(version.major)) {
+			// 				majors.push(version.major);
+			// 				return true;
+			// 			}
+			// 			return false;
+			// 		})
+			// 		.sort((a, b) => b.major - a.major);
+
+			// 	// sorted so major is first
+			// 	return versions[0].version;
+			// },
+			// getToolBuffer: version =>
+			// 	downloadBuffer(
+			// 		"https://download.imagemagick.org/archive/binaries/ImageMagick-" +
+			// 			version +
+			// 			osSwitch({
+			// 				linux: "",
+			// 				windows: "-Q16-x64-static.exe",
+			// 				macos: "",
+			// 			}),
+			// 	),
+
+			// bleh
 			overrideInstalledPath: async () =>
 				osSwitch({
 					linux: await which("convert"),
 					windows: await which("magick"),
 					macos: await which("convert"),
 				}),
+		},
+		[ToolName.rembg]: {
+			// python blelelele
+			overrideInstalledPath: async () => which("rembg"),
 		},
 	};
 
@@ -224,7 +292,29 @@ export class ToolsManager {
 
 			const installedVersion = await this.getInstalledVersion(name);
 
-			const latestVersion = await toolInfo.getLatestVersion();
+			let latestVersion = "";
+
+			if (installedVersion == null) {
+				// not installed so get latest version
+				latestVersion = await toolInfo.getLatestVersion();
+			} else {
+				// installed but respect cooldown first so we dont api rate limit
+
+				const lastInstalledTools =
+					await Database.instance.getKeyValue<number>(
+						"last-installed-tools",
+					);
+
+				if (
+					lastInstalledTools == null ||
+					Date.now() > lastInstalledTools + this.apiCooldownTime
+				) {
+					latestVersion = await toolInfo.getLatestVersion();
+				} else {
+					froglog.info(`Skipping "${name}" to avoid rate limit`);
+					continue;
+				}
+			}
 
 			if (latestVersion != installedVersion) {
 				froglog.info(
@@ -249,6 +339,8 @@ export class ToolsManager {
 
 			toolInfo.available = true;
 		}
+
+		await Database.instance.setKeyValue("last-installed-tools", Date.now());
 
 		froglog.info("Finished checking installed tools!");
 	}

@@ -4,6 +4,7 @@ import * as fs from "fs/promises";
 import * as os from "os";
 import * as path from "path";
 import { froglog } from "./froglog";
+import { Database } from "./services/database";
 
 interface ToolInfo {
 	getLatestVersionAndDownloadUrl?: () => Promise<{
@@ -125,19 +126,25 @@ export class ToolsManager {
 		return path.resolve(__dirname, "../tools/");
 	}
 
-	private getInstalledVersionPath(name: ToolName) {
-		return path.resolve(this.getToolsPath(), name + ".txt");
+	private async getInstalledVersion(name: ToolName) {
+		const installedTool = await Database.instance.installedTools.findOne({
+			_id: name,
+		});
+		if (installedTool == null) return null;
+		return installedTool.version;
 	}
 
-	private async getInstalledVersion(name: ToolName) {
-		try {
-			const version = await fs.readFile(
-				this.getInstalledVersionPath(name),
-				{ encoding: "utf-8" },
-			);
-			return version;
-		} catch (error) {
-			return null;
+	private async setInstalledVersion(name: ToolName, version: string) {
+		const updated = await Database.instance.installedTools.updateOne(
+			{ _id: name },
+			{ version },
+		);
+
+		if (updated == 0) {
+			await Database.instance.installedTools.insertOne({
+				_id: name,
+				version,
+			});
 		}
 	}
 
@@ -212,10 +219,7 @@ export class ToolsManager {
 				const installPath = this.getPathToInstallTo(name);
 				await fs.writeFile(installPath, toolRequest.data);
 
-				await fs.writeFile(
-					this.getInstalledVersionPath(name),
-					latestVersion,
-				);
+				await this.setInstalledVersion(name, latestVersion);
 
 				if (osPlatform != "win32") {
 					await execa("chmod", ["+x", installPath]);

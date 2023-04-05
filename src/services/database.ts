@@ -15,6 +15,11 @@ export interface MusicAudioQueueDocument {
 	looping: boolean;
 }
 
+export interface InstalledToolsDocument {
+	_id: string; // tool name
+	version: string;
+}
+
 export class Database {
 	private static _instance: Database;
 
@@ -27,29 +32,27 @@ export class Database {
 
 	private constructor() {}
 
-	private _ffmpegExts: Datastore<FfmpegExtsDocument>;
-	public get ffmpegExts(): Datastore<FfmpegExtsDocument> {
-		return this._ffmpegExts;
-	}
+	public ffmpegExts: Datastore<FfmpegExtsDocument>;
+	public musicAudioQueue: Datastore<MusicAudioQueueDocument>;
+	public installedTools: Datastore<InstalledToolsDocument>;
 
-	private _musicAudioQueue: Datastore<MusicAudioQueueDocument>;
-	public get musicAudioQueue(): Datastore<MusicAudioQueueDocument> {
-		return this._musicAudioQueue;
+	private dbDir = path.resolve(__dirname, "../../db");
+
+	private async initDb(filename: string) {
+		const db = Datastore.create({
+			filename: path.resolve(this.dbDir, filename),
+		});
+		await db.load();
+		return db;
 	}
 
 	async init() {
-		const dbDir = path.resolve(__dirname, "../../db");
+		this.ffmpegExts = await this.initDb("ffmpeg-exts.db");
+		this.musicAudioQueue = await this.initDb("music-audio-queue.db");
+		this.installedTools = await this.initDb("installed-tools.db");
 
-		this._ffmpegExts = Datastore.create({
-			filename: path.resolve(dbDir, "ffmpeg-exts.db"),
-		});
-		await this._ffmpegExts.load();
-
-		this._musicAudioQueue = Datastore.create({
-			filename: path.resolve(dbDir, "music-audio-queue.db"),
-		});
-		await this._musicAudioQueue.load();
-
-		froglog.info('Initializated databases in folder\n  "' + dbDir + '"');
+		froglog.info(
+			'Initializated databases in folder\n  "' + this.dbDir + '"',
+		);
 	}
 }

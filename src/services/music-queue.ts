@@ -18,7 +18,7 @@ import * as path from "path";
 import { FFmpeg } from "prism-media";
 import { froglog } from "../froglog";
 import { ToolName, ToolsManager, which } from "../tools-manager";
-import { formatDuration } from "../utils";
+import { formatDuration, shortenYoutubeLink } from "../utils";
 import { Database, MusicAudioQueueDocument } from "./database";
 
 interface AudioQueue {
@@ -258,7 +258,12 @@ export class MusicQueue {
 		});
 	}
 
-	async getInfo(search: string) {
+	async getInfo(search: string): Promise<{
+		title: string;
+		url: string;
+		seconds: number;
+		videoUrl: string;
+	}> {
 		const isUrl = /^https?:\/\//i.test(search);
 
 		if (isUrl) {
@@ -271,8 +276,8 @@ export class MusicQueue {
 				return {
 					title: search,
 					url: search,
-					duration_string: formatDuration(seconds),
-					webpage_url: search,
+					seconds,
+					videoUrl: search,
 				};
 			}
 		}
@@ -309,11 +314,11 @@ export class MusicQueue {
 		return {
 			title,
 			url,
-			duration_string: formatDuration(duration),
+			seconds: duration,
 			// thumbnail,
 			// uploader,
 			// uploader_url,
-			webpage_url,
+			videoUrl: shortenYoutubeLink(webpage_url),
 		};
 	}
 

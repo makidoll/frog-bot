@@ -4,6 +4,7 @@ import { REST } from "@discordjs/rest";
 import { Routes } from "discord-api-types/v9";
 import {
 	ActivityType,
+	ButtonInteraction,
 	ChatInputCommandInteraction,
 	Client,
 	ModalSubmitInteraction,
@@ -33,7 +34,7 @@ import { Database } from "./services/database";
 import { HtmlRenderer } from "./services/html-renderer";
 import { MusicQueue } from "./services/music-queue";
 import { ToolsManager } from "./tools-manager";
-import { shuffleArray } from "./utils";
+import { customIdMatch, shuffleArray } from "./utils";
 
 // export const commandPrefix = "frog ";
 export const availableCommands: Command[] = [
@@ -239,7 +240,8 @@ https://github.com/makifoxgirl/frog-bot`.trim();
 			}
 		} else if (interaction.isModalSubmit()) {
 			const command = availableCommands.find(command =>
-				(command.modalSubmitCustomIds ?? []).includes(
+				customIdMatch(
+					command.modalSubmitCustomIds,
 					interaction.customId,
 				),
 			);
@@ -249,6 +251,16 @@ https://github.com/makifoxgirl/frog-bot`.trim();
 					command.onModalSubmit(
 						interaction as ModalSubmitInteraction,
 					);
+				} catch (error) {}
+			}
+		} else if (interaction.isButton()) {
+			const command = availableCommands.find(command =>
+				customIdMatch(command.buttonCustomIds, interaction.customId),
+			);
+
+			if (command && command.onButton) {
+				try {
+					command.onButton(interaction as ButtonInteraction);
 				} catch (error) {}
 			}
 		}

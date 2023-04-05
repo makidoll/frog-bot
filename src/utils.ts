@@ -72,3 +72,32 @@ export function shuffleArray(array: any[]) {
 		array[j] = temp;
 	}
 }
+
+export function customIdMatch(
+	customIds: string[] | null,
+	queryCustomId: string,
+) {
+	// matches if equal but if it ends with *, will do starts with
+
+	if (customIds == null) {
+		customIds = [];
+	}
+
+	for (const customId of customIds) {
+		if (
+			customId == queryCustomId ||
+			(customId.endsWith("*") &&
+				queryCustomId.startsWith(customId.slice(0, -1)))
+		) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+export function shortenYoutubeLink(youtubeLink: string) {
+	const url = new URL(youtubeLink);
+	const id = url.searchParams.get("v");
+	return "https://youtu.be/" + id;
+}

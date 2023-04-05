@@ -3,6 +3,7 @@ import {
 	SlashCommandSubcommandsOnlyBuilder,
 } from "@discordjs/builders";
 import {
+	ButtonInteraction,
 	ChatInputCommandInteraction,
 	ModalSubmitInteraction,
 } from "discord.js";
@@ -30,6 +31,10 @@ export interface Command {
 		| Omit<SlashCommandBuilder, "addSubcommandGroup" | "addSubcommand">
 		| SlashCommandSubcommandsOnlyBuilder;
 	onInteraction: (interaction: ChatInputCommandInteraction) => any;
+
 	modalSubmitCustomIds?: string[];
 	onModalSubmit?: (interaction: ModalSubmitInteraction) => any;
+
+	buttonCustomIds?: string[];
+	onButton?: (interaction: ButtonInteraction) => any;
 }

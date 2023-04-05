@@ -1,9 +1,89 @@
-import { SlashCommandBuilder } from "@discordjs/builders";
-import { MessageFlags } from "discord-api-types/v10";
-import { GuildMember } from "discord.js";
+import { ButtonStyle, MessageFlags } from "discord-api-types/v10";
+import {
+	ActionRowBuilder,
+	ButtonBuilder,
+	ButtonInteraction,
+	ChatInputCommandInteraction,
+	GuildMember,
+	SlashCommandBuilder,
+} from "discord.js";
 import { Categories, Command, ServerExclusiveCategories } from "../../command";
 import { froglog } from "../../froglog";
 import { MusicQueue } from "../../services/music-queue";
+import { formatDuration } from "../../utils";
+import { LoopCommand } from "./loop-command";
+import { SkipCommand } from "./skip-command";
+import { StopCommand } from "./stop-command";
+
+async function playInteraction(
+	search: string,
+	interaction: ChatInputCommandInteraction | ButtonInteraction,
+) {
+	const member = interaction.member as GuildMember;
+	const channel = member.voice.channel;
+
+	if (channel == null) {
+		interaction.reply("aw ribbit... you need to be in a voice channel");
+		return;
+	}
+
+	await interaction.reply({
+		content: "🔍 ribbit, searching for: **" + search + "**",
+		flags: MessageFlags.SuppressEmbeds,
+	});
+
+	try {
+		const info = await MusicQueue.instance.getInfo(search);
+
+		const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+			new ButtonBuilder()
+				.setCustomId("play-skip")
+				.setLabel("skip")
+				.setStyle(ButtonStyle.Secondary)
+				.setEmoji("⏭️"),
+			new ButtonBuilder()
+				.setCustomId("play-loop")
+				.setLabel("loop")
+				.setStyle(ButtonStyle.Secondary)
+				.setEmoji("🔁"),
+			new ButtonBuilder()
+				.setCustomId("play-stop")
+				.setLabel("stop")
+				.setStyle(ButtonStyle.Secondary)
+				.setEmoji("⏹️"),
+			new ButtonBuilder()
+				.setCustomId("play-queue:" + info.videoUrl)
+				.setLabel("add this to queue")
+				.setStyle(ButtonStyle.Secondary)
+				.setEmoji("▶️"),
+		);
+
+		await interaction.followUp({
+			content:
+				"🎶 ribbit, found song!\nit's **" +
+				formatDuration(info.seconds) +
+				"** long, froggy adding to queue...\n" +
+				info.videoUrl,
+			components: [row],
+		});
+
+		const playOdemonGoodbye = process.env.DEV
+			? true
+			: ServerExclusiveCategories[Categories.mechanyx].includes(
+					interaction.guildId,
+			  );
+
+		await MusicQueue.instance.addToQueue(
+			channel,
+			info.url,
+			info.title,
+			playOdemonGoodbye,
+		);
+	} catch (error) {
+		froglog.error(error);
+		interaction.followUp("aw ribbit... something went wrong :(");
+	}
+}
 
 export const PlayCommand: Command = {
 	category: Categories.music,
@@ -18,84 +98,22 @@ export const PlayCommand: Command = {
 		),
 	onInteraction: async interaction => {
 		const search = interaction.options.getString("search", true);
+		await playInteraction(search, interaction);
+	},
 
-		const member = interaction.member as GuildMember;
-		const channel = member.voice.channel;
-
-		if (channel == null) {
-			interaction.reply("aw ribbit... you need to be in a voice channel");
-			return;
-		}
-
-		await interaction.reply({
-			content: "🔍 ribbit, searching for: **" + search + "**",
-			flags: MessageFlags.SuppressEmbeds,
-		});
-
-		try {
-			const info = await MusicQueue.instance.getInfo(search);
-
-			// await interaction.followUp(
-			// 	"🎶 ribbit, found: **" +
-			// 		title +
-			// 		"**\nit's **" +
-			// 		duration_string +
-			// 		"** long, froggy adding to queue...",
-			// );
-
-			// const embed = new EmbedBuilder()
-			// 	.setColor(0x0099ff)
-			// 	.setTitle(info.title)
-			// 	.setURL(info.webpage_url)
-			// 	.setAuthor({
-			// 		name: info.uploader,
-			// 		// iconURL: "",
-			// 		url: info.uploader_url,
-			// 	})
-			// 	.setImage(info.thumbnail)
-			// 	.setFields({
-			// 		name: "Duration",
-			// 		value: info.duration_string,
-			// 		inline: true,
-			// 	});
-
-			// await interaction.followUp({
-			// 	content: "🎶 ribbit found song! froggy adding to queue...",
-			// 	embeds: [embed.data],
-			// });
-
-			// await interaction.followUp(
-			// 	"🎶 ribbit, found: **" +
-			// 		title +
-			// 		"**\nit's **" +
-			// 		duration_string +
-			// 		"** long, froggy adding to queue...",
-			// );
-
-			await interaction.followUp(
-				"🎶 ribbit, found song!\nit's **" +
-					info.duration_string +
-					"** long, froggy adding to queue...\n" +
-					info.webpage_url,
+	buttonCustomIds: ["play-skip", "play-loop", "play-stop", "play-queue:*"],
+	onButton(interaction) {
+		if (interaction.customId == "play-skip") {
+			SkipCommand.onInteraction(interaction as any);
+		} else if (interaction.customId == "play-loop") {
+			LoopCommand.onInteraction(interaction as any);
+		} else if (interaction.customId == "play-stop") {
+			StopCommand.onInteraction(interaction as any);
+		} else if (interaction.customId.startsWith("play-queue:")) {
+			playInteraction(
+				interaction.customId.slice("play-queue:".length),
+				interaction as any,
 			);
-
-			const playOdemonGoodbye = process.env.DEV
-				? true
-				: ServerExclusiveCategories[Categories.mechanyx].includes(
-						interaction.guildId,
-				  );
-
-			await MusicQueue.instance.addToQueue(
-				channel,
-				info.url,
-				info.title,
-				playOdemonGoodbye,
-			);
-
-			// TODO: add buttons to loop and re-add to queue
-		} catch (error) {
-			froglog.error(error);
-			interaction.followUp("aw ribbit... something went wrong :(");
 		}
 	},
 };

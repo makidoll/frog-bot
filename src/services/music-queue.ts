@@ -390,7 +390,7 @@ export class MusicQueue {
 	private createAudioResource(
 		url: string,
 		isFile: boolean,
-		metadata = {},
+		metadata: any = {},
 		seekSeconds = 0,
 	) {
 		// https://github.com/skick1234/DisTube/blob/stable/src/core/DisTubeStream.ts
@@ -417,7 +417,7 @@ export class MusicQueue {
 			// https://ffmpeg.org/ffmpeg-filters.html#loudnorm
 			// loudnorm sounds better than dynaudnorm=p=0.9:s=5
 			"-filter:a",
-			"loudnorm,volume=0.25",
+			"loudnorm,volume=" + (metadata.goodbye ? 0.4 : 0.25),
 			// https://github.com/discordjs/voice/blob/main/src/audio/TransformerGraph.ts
 			"-analyzeduration",
 			"0",
@@ -462,8 +462,6 @@ export class MusicQueue {
 		if (Math.random() >= 1 - cursedChance) {
 			filename = "bybye_ribbit_cursed.mp3";
 		}
-
-		// TODO: should be 0.5 volume but when recreated through database loading, will reset
 
 		return this.createAudioResource(
 			path.resolve(__dirname, "../../assets/", filename),

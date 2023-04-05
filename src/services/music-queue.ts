@@ -19,6 +19,7 @@ import { FFmpeg } from "prism-media";
 import { froglog } from "../froglog";
 import { ToolName, ToolsManager, which } from "../tools-manager";
 import { formatDuration } from "../utils";
+import { Database } from "./database";
 
 interface Queue {
 	channel: VoiceBasedChannel;
@@ -80,15 +81,13 @@ export class MusicQueue {
 	}
 
 	async getFfmpegExtensions() {
-		const ffmpegExtensionsKey = "extensions for " + this.pathToFfmpeg;
-		const cachedFfmpegExtensions = await ToolsManager.instance.getKeyValue(
-			"ffmpeg",
-			ffmpegExtensionsKey,
-		);
+		const dbExts = await Database.instance.ffmpegExts.findOne({
+			_id: this.pathToFfmpeg,
+		});
 
-		if (cachedFfmpegExtensions != null) {
+		if (dbExts != null) {
 			froglog.info("Found cached ffmpeg file extensions");
-			this.ffmpegExtensions = cachedFfmpegExtensions;
+			this.ffmpegExtensions = dbExts.exts;
 			return;
 		}
 
@@ -130,11 +129,10 @@ export class MusicQueue {
 
 		this.ffmpegExtensions = exts;
 
-		await ToolsManager.instance.setKeyValue(
-			"ffmpeg",
-			ffmpegExtensionsKey,
+		await Database.instance.ffmpegExts.insertOne({
+			_id: this.pathToFfmpeg,
 			exts,
-		);
+		});
 
 		froglog.info("Done!");
 	}

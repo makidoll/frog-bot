@@ -29,6 +29,7 @@ import { RemoveBgCommand } from "./commands/other/remove-bg-command";
 import { froglog } from "./froglog";
 import { initReactionRoles } from "./reaction-roles";
 import { initReminders } from "./reminders";
+import { Database } from "./services/database";
 import { HtmlRenderer } from "./services/html-renderer";
 import { MusicQueue } from "./services/music-queue";
 import { ToolsManager } from "./tools-manager";
@@ -65,6 +66,7 @@ export const availableCommands: Command[] = [
 		froglog.debug("Found DEV env");
 	}
 
+	await Database.instance.init();
 	await ToolsManager.instance.init();
 	await HtmlRenderer.instance.init();
 	await MusicQueue.instance.init();

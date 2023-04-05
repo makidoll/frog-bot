@@ -38,12 +38,15 @@ export const HelpCommand: Command = {
 
 		const totalServers = interaction.client.guilds.cache.size;
 
-		content +=
+		const facts = [
+			"suggest new commands with **/featurepls** and i'll try my best~",
+			"see me hoppy! 🐛 https://github.com/makifoxgirl/frog-bot",
 			"oh also i'm part of **" +
-			plural(totalServers, "server") +
-			"**, yay!\n";
+				plural(totalServers, "server") +
+				"**, yay!",
+		];
 
-		content += "see me hoppy! 🐛 https://github.com/makifoxgirl/frog-bot";
+		content += facts.map(line => "• " + line).join("\n");
 
 		interaction.reply({
 			content,

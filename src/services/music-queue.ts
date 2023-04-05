@@ -336,11 +336,11 @@ export class MusicQueue {
 						"-reconnect_delay_max",
 						"5",
 				  ]),
+			// seek seconds. needs to be placed before -i or will take a long time
+			...(seekSeconds > 0 ? ["-ss", String(seekSeconds)] : []),
 			// input
 			"-i",
 			url,
-			// seek seconds
-			...(seekSeconds > 0 ? ["-ss", String(seekSeconds)] : []),
 			// normalize audio https://superuser.com/a/323127
 			// https://ffmpeg.org/ffmpeg-filters.html#dynaudnorm
 			// https://ffmpeg.org/ffmpeg-filters.html#loudnorm

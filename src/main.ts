@@ -144,6 +144,9 @@ export const availableCommands: Command[] = [
 
 		initReminders(client);
 
+		// load music from database if bot restarted
+		await MusicQueue.instance.loadFromDatabase(client);
+
 		const rest = new REST({ version: "10" }).setToken(
 			process.env.BOT_TOKEN,
 		);

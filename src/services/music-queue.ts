@@ -12,18 +12,19 @@ import {
 	VoiceConnection,
 	VoiceConnectionStatus,
 } from "@discordjs/voice";
-import { VoiceBasedChannel } from "discord.js";
+import { Client, VoiceBasedChannel } from "discord.js";
 import * as execa from "execa";
 import * as path from "path";
 import { FFmpeg } from "prism-media";
 import { froglog } from "../froglog";
 import { ToolName, ToolsManager, which } from "../tools-manager";
 import { formatDuration } from "../utils";
-import { Database } from "./database";
+import { Database, MusicAudioQueueDocument } from "./database";
 
-interface Queue {
+interface AudioQueue {
 	channel: VoiceBasedChannel;
 	current: AudioResource;
+	currentStarted: number; // Date.now()
 	resources: AudioResource[];
 	looping: boolean;
 	skipping: boolean;
@@ -44,7 +45,7 @@ export class MusicQueue {
 	private voiceConnections = new Map<string, VoiceConnection>();
 	private audioPlayers = new Map<string, AudioPlayer>();
 
-	private audioQueue = new Map<string, Queue>();
+	private audioQueue = new Map<string, AudioQueue>();
 
 	private pathToFfmpeg = "";
 	private ffmpegExtensions: string[] = [];
@@ -54,13 +55,93 @@ export class MusicQueue {
 
 		await this.getFfmpegExtensions();
 
-		// TODO: add system that saves queue so when frog bot restarts, everything reconnects
-
 		const reaperInterval = 1000 * 60; // every minute
 		setInterval(this.reaperCallback.bind(this), reaperInterval);
 	}
 
-	reaperCallback() {
+	private async syncToDatabase() {
+		froglog.debug("Music audio queue syncing to database");
+
+		// remove all from db that doesnt exist anymore
+
+		const dbAllAudioQueue = await Database.instance.musicAudioQueue.find(
+			{},
+		);
+
+		for (const dbAudioQueue of dbAllAudioQueue) {
+			// if current audio queue doesnt have id from db, just delete from db
+			if (!this.audioQueue.has(dbAudioQueue._id)) {
+				await Database.instance.musicAudioQueue.removeOne(
+					{ _id: dbAudioQueue._id },
+					{},
+				);
+			}
+		}
+
+		// then either create or update current to database
+
+		for (const [channelId, audioQueue] of this.audioQueue.entries()) {
+			const document: MusicAudioQueueDocument = {
+				_id: channelId,
+				current: audioQueue.current.metadata,
+				currentStarted: audioQueue.currentStarted,
+				resources: audioQueue.resources.map(
+					resource => resource.metadata as any,
+				),
+				looping: audioQueue.looping,
+			};
+
+			// doesnt error if not found
+			const updated = await Database.instance.musicAudioQueue.updateOne(
+				{
+					_id: channelId,
+				},
+				document,
+			);
+
+			if (updated == 0) {
+				await Database.instance.musicAudioQueue.insertOne(document);
+			}
+		}
+	}
+
+	async loadFromDatabase(client: Client) {
+		const dbAllAudioQueue = await Database.instance.musicAudioQueue.find(
+			{},
+		);
+
+		for (const dbAudioQueue of dbAllAudioQueue) {
+			let channel: VoiceBasedChannel;
+			try {
+				channel = (await client.channels.fetch(
+					dbAudioQueue._id,
+				)) as VoiceBasedChannel;
+			} catch (error) {}
+			if (channel == null) continue;
+
+			// TODO: will skip a bit, is this bad?
+			const seekMs = Date.now() - dbAudioQueue.currentStarted;
+			const seekSeconds = seekMs / 1000;
+
+			await this.addToQueue(
+				channel,
+				dbAudioQueue.current.url,
+				dbAudioQueue.current.title,
+				false,
+				seekSeconds,
+			);
+
+			// update queue
+			const audioQueue = this.audioQueue.get(channel.id);
+			audioQueue.current.metadata = dbAudioQueue.current;
+			audioQueue.resources = dbAudioQueue.resources.map(r =>
+				this.createAudioResource(r.url, r.isFile, r),
+			);
+			audioQueue.looping = dbAudioQueue.looping;
+		}
+	}
+
+	private reaperCallback() {
 		for (const queue of this.audioQueue.values()) {
 			if (queue == null) continue;
 
@@ -80,7 +161,7 @@ export class MusicQueue {
 		}
 	}
 
-	async getFfmpegExtensions() {
+	private async getFfmpegExtensions() {
 		const dbExts = await Database.instance.ffmpegExts.findOne({
 			_id: this.pathToFfmpeg,
 		});
@@ -137,7 +218,7 @@ export class MusicQueue {
 		froglog.info("Done!");
 	}
 
-	fetchLengthInSeconds(input: string) {
+	private fetchLengthInSeconds(input: string) {
 		// start ffmpeg but don't output. this will error but
 		// it'll print the duration. it doesn't come with ffprobe
 
@@ -235,7 +316,11 @@ export class MusicQueue {
 		};
 	}
 
-	strInputToFfmpegStream(url: string, isFile: boolean) {
+	private strInputToFfmpegStream(
+		url: string,
+		isFile: boolean,
+		seekSeconds = 0,
+	) {
 		// https://github.com/skick1234/DisTube/blob/stable/src/core/DisTubeStream.ts
 
 		const args = [
@@ -253,6 +338,8 @@ export class MusicQueue {
 			// input
 			"-i",
 			url,
+			// seek seconds
+			...(seekSeconds > 0 ? ["-ss", String(seekSeconds)] : []),
 			// normalize audio https://superuser.com/a/323127
 			// https://ffmpeg.org/ffmpeg-filters.html#dynaudnorm
 			// https://ffmpeg.org/ffmpeg-filters.html#loudnorm
@@ -350,11 +437,18 @@ export class MusicQueue {
 		}
 
 		this.audioQueue.delete(channel.id);
+
+		this.syncToDatabase();
 	}
 
-	createAudioResource(url: string, isFile: boolean, metadata = {}) {
+	private createAudioResource(
+		url: string,
+		isFile: boolean,
+		metadata = {},
+		seekSeconds = 0,
+	) {
 		const audioResource = createAudioResource(
-			this.strInputToFfmpegStream(url, isFile),
+			this.strInputToFfmpegStream(url, isFile, seekSeconds),
 			{
 				inputType: StreamType.OggOpus,
 				inlineVolume: true, // still works with ffmpeg stream
@@ -365,13 +459,13 @@ export class MusicQueue {
 		return audioResource;
 	}
 
-	recreateAudioResource(audioResource: AudioResource) {
+	private recreateAudioResource(audioResource: AudioResource) {
 		const metadata = audioResource.metadata as any;
 		const { url, isFile } = metadata;
 		return this.createAudioResource(url, isFile, metadata);
 	}
 
-	getOdemonGoodbyeResource() {
+	private getOdemonGoodbyeResource() {
 		// thank you odemon <3
 
 		const cursedChance = 0.05; // %
@@ -388,7 +482,7 @@ export class MusicQueue {
 		);
 	}
 
-	stateChangeCallback(channel: VoiceBasedChannel) {
+	private stateChangeCallback(channel: VoiceBasedChannel) {
 		return async (
 			oldState: AudioPlayerState,
 			newState: AudioPlayerState,
@@ -413,7 +507,10 @@ export class MusicQueue {
 				(queue.current.metadata as any).goodbye == null
 			) {
 				queue.current = this.recreateAudioResource(queue.current);
+				queue.currentStarted = Date.now();
 				player.play(queue.current);
+
+				this.syncToDatabase();
 			} else {
 				// if we're looping this'll make sure we dont skip again
 				queue.skipping = false;
@@ -422,13 +519,17 @@ export class MusicQueue {
 					// disconnect if empty
 					// wait half a second just incase its still streaming
 					setTimeout(() => {
+						// will sync to database
 						this.disconnectAndCleanup(channel);
 					}, 500);
 				} else {
 					// shift song and play
 					const audioResource = queue.resources.shift();
 					queue.current = audioResource;
+					queue.currentStarted = Date.now();
 					player.play(audioResource);
+
+					this.syncToDatabase();
 				}
 			}
 		};
@@ -439,8 +540,14 @@ export class MusicQueue {
 		url: string,
 		title: string,
 		playOdemonGoodbye = false,
+		seekSeconds: number = 0,
 	) {
-		const audioResource = this.createAudioResource(url, false, { title });
+		const audioResource = this.createAudioResource(
+			url,
+			false,
+			{ title },
+			seekSeconds,
+		);
 
 		const foundQueue = this.audioQueue.get(channel.id);
 		if (foundQueue != null) {
@@ -462,6 +569,8 @@ export class MusicQueue {
 				);
 			}
 
+			this.syncToDatabase();
+
 			return;
 		}
 
@@ -470,6 +579,7 @@ export class MusicQueue {
 		this.audioQueue.set(channel.id, {
 			channel,
 			current: audioResource,
+			currentStarted: Date.now() - seekSeconds * 1000,
 			resources: playOdemonGoodbye
 				? [this.getOdemonGoodbyeResource()]
 				: [],
@@ -492,6 +602,8 @@ export class MusicQueue {
 		// outsourced because its best we dont reference anything from here except channel
 
 		player.on("stateChange", this.stateChangeCallback(channel));
+
+		this.syncToDatabase();
 	}
 
 	skipCurrentSong(channel: VoiceBasedChannel) {
@@ -514,6 +626,8 @@ export class MusicQueue {
 
 		// when song ends, will check in state change
 		queue.looping = !queue.looping;
+
+		this.syncToDatabase();
 
 		return queue.looping;
 	}

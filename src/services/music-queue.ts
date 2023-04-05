@@ -60,7 +60,9 @@ export class MusicQueue {
 	}
 
 	reaperCallback() {
-		for (const queue of Object.values(this.audioQueue)) {
+		for (const queue of this.audioQueue.values()) {
+			if (queue == null) continue;
+
 			// check if there's anyone connected, excluding bots
 
 			let anyoneConnected = false;
@@ -287,7 +289,7 @@ export class MusicQueue {
 	private async ensureConnection(
 		channel: VoiceBasedChannel,
 	): Promise<VoiceConnection> {
-		let connection = this.voiceConnections[channel.id];
+		let connection = this.voiceConnections.get(channel.id);
 
 		if (
 			connection == null ||
@@ -300,7 +302,7 @@ export class MusicQueue {
 				adapterCreator: channel.guild.voiceAdapterCreator as any,
 			});
 
-			this.voiceConnections[channel.id] = connection;
+			this.voiceConnections.set(channel.id, connection);
 
 			await entersState(connection, VoiceConnectionStatus.Ready, 30_000);
 
@@ -314,7 +316,7 @@ export class MusicQueue {
 		channel: VoiceBasedChannel,
 		connection: VoiceConnection,
 	) {
-		let player = this.audioPlayers[channel.id];
+		let player = this.audioPlayers.get(channel.id);
 
 		if (player == null) {
 			player = createAudioPlayer({
@@ -323,7 +325,7 @@ export class MusicQueue {
 				},
 			});
 
-			this.audioPlayers[channel.id] = player;
+			this.audioPlayers.set(channel.id, player);
 		}
 
 		// doesn't subscribe twice, checked with .listeners.length
@@ -333,19 +335,23 @@ export class MusicQueue {
 	}
 
 	async disconnectAndCleanup(channel: VoiceBasedChannel) {
-		if (this.voiceConnections[channel.id] != null) {
-			this.voiceConnections[channel.id].removeAllListeners();
-			this.voiceConnections[channel.id].disconnect();
-			delete this.voiceConnections[channel.id];
+		const connection = this.voiceConnections.get(channel.id);
+
+		if (connection != null) {
+			connection.removeAllListeners();
+			connection.disconnect();
+			this.voiceConnections.delete(channel.id);
 		}
 
-		if (this.audioPlayers[channel.id] != null) {
-			this.audioPlayers[channel.id].removeAllListeners();
-			this.audioPlayers[channel.id].stop(); // not necessary
-			delete this.audioPlayers[channel.id];
+		const player = this.audioPlayers.get(channel.id);
+
+		if (player != null) {
+			player.removeAllListeners();
+			player.stop(); // not necessary
+			this.audioPlayers.delete(channel.id);
 		}
 
-		delete this.audioQueue[channel.id];
+		this.audioQueue.delete(channel.id);
 	}
 
 	createAudioResource(url: string, isFile: boolean, metadata = {}) {
@@ -393,8 +399,11 @@ export class MusicQueue {
 			if (newState.status != AudioPlayerStatus.Idle) return;
 
 			// lets hope this never happens
-			const queue = this.audioQueue[channel.id];
-			if (queue == null) this.disconnectAndCleanup(channel);
+			const queue = this.audioQueue.get(channel.id);
+			if (queue == null) {
+				this.disconnectAndCleanup(channel);
+				return;
+			}
 
 			const connection = await this.ensureConnection(channel);
 			const player = await this.ensurePlayer(channel, connection);
@@ -405,6 +414,7 @@ export class MusicQueue {
 				// dont loop goodbye
 				(queue.current.metadata as any).goodbye == null
 			) {
+				// TODO: why does the loudness normalization fail
 				queue.current = this.recreateAudioResource(queue.current);
 				player.play(queue.current);
 			} else {
@@ -435,7 +445,7 @@ export class MusicQueue {
 	) {
 		const audioResource = this.createAudioResource(url, false, { title });
 
-		const foundQueue = this.audioQueue[channel.id];
+		const foundQueue = this.audioQueue.get(channel.id);
 		if (foundQueue != null) {
 			// already a queue available, so add song
 			// but we should add it before a found goodbye resource
@@ -460,7 +470,7 @@ export class MusicQueue {
 
 		// no queue found so lets make one and immediately play
 
-		this.audioQueue[channel.id] = {
+		this.audioQueue.set(channel.id, {
 			channel,
 			current: audioResource,
 			resources: playOdemonGoodbye
@@ -468,7 +478,7 @@ export class MusicQueue {
 				: [],
 			looping: false,
 			skipping: false,
-		};
+		});
 
 		const connection = await this.ensureConnection(channel);
 		const player = await this.ensurePlayer(channel, connection);
@@ -488,21 +498,21 @@ export class MusicQueue {
 	}
 
 	skipCurrentSong(channel: VoiceBasedChannel) {
-		if (this.audioPlayers[channel.id] == null)
-			throw new Error("Player not found");
+		const player = this.audioPlayers.get(channel.id);
+		if (player == null) throw new Error("Player not found");
 
-		const queue = this.audioQueue[channel.id];
+		const queue = this.audioQueue.get(channel.id);
 		if (queue == null) throw new Error("Queue not found");
 
 		// if we're looping, it won't know if its an intentional skip or not
 		// will be set to false right after state change
 		queue.skipping = true;
 
-		this.audioPlayers[channel.id].stop(); // should run state change
+		player.stop(); // should run state change
 	}
 
 	toggleLoop(channel: VoiceBasedChannel) {
-		const queue = this.audioQueue[channel.id];
+		const queue = this.audioQueue.get(channel.id);
 		if (queue == null) throw new Error("Queue not found");
 
 		// when song ends, will check in state change

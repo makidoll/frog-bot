@@ -601,11 +601,18 @@ export class MusicQueue {
 		const queue = this.audioQueue.get(channel.id);
 		if (queue == null) throw new Error("Queue not found");
 
+		const nextSongTitle =
+			queue.resources.length > 0
+				? (queue.resources[0].metadata as any).title
+				: null;
+
 		// if we're looping, it won't know if its an intentional skip or not
 		// will be set to false right after state change
 		queue.skipping = true;
 
 		player.stop(); // should run state change
+
+		return nextSongTitle;
 	}
 
 	toggleLoop(channel: VoiceBasedChannel) {

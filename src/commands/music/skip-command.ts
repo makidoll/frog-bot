@@ -18,8 +18,16 @@ export const SkipCommand: Command = {
 		}
 
 		try {
-			MusicQueue.instance.skipCurrentSong(channel);
-			await interaction.reply("⏭️ ribbit, skipped current song");
+			const nextSongTitle = MusicQueue.instance.skipCurrentSong(channel);
+			if (nextSongTitle == null || nextSongTitle == "") {
+				await interaction.reply(
+					"⏭️ ribbit, skipped current song, dunno whats next",
+				);
+			} else {
+				await interaction.reply(
+					`⏭️ ribbit, skipped current song, next up: **${nextSongTitle}**`,
+				);
+			}
 		} catch (error) {
 			await interaction.reply("aw ribbit, couldn't skip current song");
 		}

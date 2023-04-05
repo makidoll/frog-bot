@@ -413,7 +413,10 @@ export class MusicQueue {
 
 				if (queue.resources.length == 0) {
 					// disconnect if empty
-					this.disconnectAndCleanup(channel);
+					// wait half a second just incase its still streaming
+					setTimeout(() => {
+						this.disconnectAndCleanup(channel);
+					}, 500);
 				} else {
 					// shift song and play
 					const audioResource = queue.resources.shift();

@@ -10,6 +10,10 @@ make sure these are installed
 -   ffmpeg
 -   [rembg](https://pypi.org/project/rembg/)
 
+autoinstalls:
+
+-   webkit (playwright)
+
 copy `.env.sample` to `.env` and set your token
 
 ```bash

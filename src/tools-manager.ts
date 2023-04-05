@@ -7,10 +7,8 @@ import { froglog } from "./froglog";
 import { Database } from "./services/database";
 
 interface ToolInfo {
-	getLatestVersionAndDownloadUrl?: () => Promise<{
-		latestVersion: string;
-		latestDownloadUrl: string;
-	}>;
+	getLatestVersion?: () => Promise<string>;
+	getToolBuffer?: (version: string) => Promise<Buffer>;
 	overrideInstalledPath?: () => Promise<string>;
 	available?: boolean;
 }
@@ -34,25 +32,35 @@ const osSwitch = (dict: { linux: string; windows: string; macos: string }) =>
 			: "linux"
 	];
 
-async function githubGetLatestVersionAndDownloadUrl(
-	repo: string,
-	filename: string,
-) {
+async function githubGetLatestVersion(repo: string): Promise<string> {
 	const releases = await axios(
 		"https://api.github.com/repos/" + repo + "/releases/latest",
 	);
 
 	const latestVersion = releases.data.tag_name;
 
-	const latestDownloadUrl =
+	return latestVersion;
+}
+
+async function githubGetToolBuffer(
+	repo: string,
+	filename: string,
+	version: string,
+): Promise<Buffer> {
+	const downloadUrl =
 		"https://github.com/" +
 		repo +
 		"/releases/download/" +
-		latestVersion +
+		version +
 		"/" +
 		filename;
 
-	return { latestVersion, latestDownloadUrl };
+	const request = await axios({
+		url: downloadUrl,
+		responseType: "arraybuffer",
+	});
+
+	return request.data;
 }
 
 export async function which(name: string) {
@@ -70,14 +78,16 @@ export async function which(name: string) {
 export class ToolsManager {
 	tools: { [key in ToolName]: ToolInfo } = {
 		[ToolName.yt_dlp]: {
-			getLatestVersionAndDownloadUrl: () =>
-				githubGetLatestVersionAndDownloadUrl(
+			getLatestVersion: () => githubGetLatestVersion("yt-dlp/yt-dlp"),
+			getToolBuffer: version =>
+				githubGetToolBuffer(
 					"yt-dlp/yt-dlp",
 					osSwitch({
 						linux: "yt-dlp",
 						windows: "yt-dlp.exe",
 						macos: "yt-dlp_macos",
 					}),
+					version,
 				),
 		},
 		[ToolName.gifski]: {
@@ -126,7 +136,22 @@ export class ToolsManager {
 		return path.resolve(__dirname, "../tools/");
 	}
 
+	private getPathToInstallTo(name: ToolName) {
+		return path.resolve(this.getToolsPath(), name + osExt);
+	}
+
 	private async getInstalledVersion(name: ToolName) {
+		// if file not present, no version is installed
+
+		const installedPath = this.getPathToInstallTo(name);
+		try {
+			await fs.stat(installedPath);
+		} catch (error) {
+			return null;
+		}
+
+		// fetch from database instead
+
 		const installedTool = await Database.instance.installedTools.findOne({
 			_id: name,
 		});
@@ -146,10 +171,6 @@ export class ToolsManager {
 				version,
 			});
 		}
-	}
-
-	private getPathToInstallTo(name: ToolName) {
-		return path.resolve(this.getToolsPath(), name + osExt);
 	}
 
 	getPath(name: ToolName) {
@@ -194,7 +215,7 @@ export class ToolsManager {
 			}
 
 			// fail if functions not found
-			if (toolInfo.getLatestVersionAndDownloadUrl == null) {
+			if (toolInfo.getLatestVersion == null) {
 				froglog.error(
 					`Tool "${name}" missing download function for installation`,
 				);
@@ -203,21 +224,17 @@ export class ToolsManager {
 
 			const installedVersion = await this.getInstalledVersion(name);
 
-			const { latestVersion, latestDownloadUrl } =
-				await toolInfo.getLatestVersionAndDownloadUrl();
+			const latestVersion = await toolInfo.getLatestVersion();
 
 			if (latestVersion != installedVersion) {
 				froglog.info(
 					`Updating "${name}" to latest "${latestVersion}"...`,
 				);
 
-				const toolRequest = await axios({
-					url: latestDownloadUrl,
-					responseType: "arraybuffer",
-				});
+				const toolBuffer = await toolInfo.getToolBuffer(latestVersion);
 
 				const installPath = this.getPathToInstallTo(name);
-				await fs.writeFile(installPath, toolRequest.data);
+				await fs.writeFile(installPath, toolBuffer);
 
 				await this.setInstalledVersion(name, latestVersion);
 

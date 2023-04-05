@@ -241,20 +241,6 @@ export class ToolsManager {
 		}
 	}
 
-	getPath(name: ToolName) {
-		const toolInfo = this.tools[name];
-
-		if (toolInfo.available == false) {
-			return null;
-		}
-
-		if (toolInfo.overrideInstalledPath != null) {
-			return toolInfo.overrideInstalledPath();
-		}
-
-		return this.getPathToInstallTo(name);
-	}
-
 	async init() {
 		// ensure tools folder exists
 		fs.mkdir(this.getToolsPath(), { recursive: true });
@@ -343,5 +329,19 @@ export class ToolsManager {
 		await Database.instance.setKeyValue("last-installed-tools", Date.now());
 
 		froglog.info("Finished checking installed tools!");
+	}
+
+	getPath(name: ToolName) {
+		const toolInfo = this.tools[name];
+
+		if (toolInfo.available == false) {
+			return null;
+		}
+
+		if (toolInfo.overrideInstalledPath != null) {
+			return toolInfo.overrideInstalledPath();
+		}
+
+		return this.getPathToInstallTo(name);
 	}
 }

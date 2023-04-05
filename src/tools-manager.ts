@@ -298,6 +298,7 @@ export class ToolsManager {
 					latestVersion = await toolInfo.getLatestVersion();
 				} else {
 					froglog.info(`Skipping "${name}" to avoid rate limit`);
+					toolInfo.available = true;
 					continue;
 				}
 			}

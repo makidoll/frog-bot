@@ -417,7 +417,7 @@ export class MusicQueue {
 			// https://ffmpeg.org/ffmpeg-filters.html#loudnorm
 			// loudnorm sounds better than dynaudnorm=p=0.9:s=5
 			"-filter:a",
-			"loudnorm,volume=" + (metadata.goodbye ? 0.4 : 0.25),
+			"loudnorm,volume=" + (metadata.goodbye ? 0.5 : 0.25),
 			// https://github.com/discordjs/voice/blob/main/src/audio/TransformerGraph.ts
 			"-analyzeduration",
 			"0",

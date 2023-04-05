@@ -8,4 +8,6 @@ if (global.froglog == null) {
 	});
 }
 
+// TODO: only debug when developing
+
 export const froglog = global.froglog as ololog;

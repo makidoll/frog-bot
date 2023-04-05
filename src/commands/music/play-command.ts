@@ -91,6 +91,8 @@ export const PlayCommand: Command = {
 				info.title,
 				playOdemonGoodbye,
 			);
+
+			// TODO: add buttons to loop and re-add to queue
 		} catch (error) {
 			froglog.error(error);
 			interaction.followUp("aw ribbit... something went wrong :(");

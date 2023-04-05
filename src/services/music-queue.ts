@@ -138,6 +138,10 @@ export class MusicQueue {
 				this.createAudioResource(r.url, r.isFile, r),
 			);
 			audioQueue.looping = dbAudioQueue.looping;
+
+			froglog.info(
+				"Loaded music queue from db for channel: " + channel.id,
+			);
 		}
 	}
 

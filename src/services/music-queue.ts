@@ -349,11 +349,16 @@ export class MusicQueue {
 	}
 
 	createAudioResource(url: string, isFile: boolean, metadata = {}) {
-		return createAudioResource(this.strInputToFfmpegStream(url, isFile), {
-			inputType: StreamType.OggOpus,
-			inlineVolume: true, // still works with ffmpeg stream
-			metadata: { ...metadata, url, isFile },
-		});
+		const audioResource = createAudioResource(
+			this.strInputToFfmpegStream(url, isFile),
+			{
+				inputType: StreamType.OggOpus,
+				inlineVolume: true, // still works with ffmpeg stream
+				metadata: { ...metadata, url, isFile },
+			},
+		);
+		audioResource.volume.setVolume(0.25);
+		return audioResource;
 	}
 
 	recreateAudioResource(audioResource: AudioResource) {
@@ -426,7 +431,6 @@ export class MusicQueue {
 		playOdemonGoodbye = false,
 	) {
 		const audioResource = this.createAudioResource(url, false, { title });
-		audioResource.volume.setVolume(0.25);
 
 		const foundQueue = this.audioQueue[channel.id];
 		if (foundQueue != null) {

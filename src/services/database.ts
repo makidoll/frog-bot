@@ -2,9 +2,9 @@ import Datastore = require("nedb-promises");
 import * as path from "path";
 import { froglog } from "../froglog";
 
-export interface FfmpegExtsDocument {
-	_id: string; // path to ffmpeg
-	exts: string[];
+interface KeyValueDocument {
+	_id: string;
+	value: any;
 }
 
 export interface MusicAudioQueueDocument {
@@ -32,7 +32,8 @@ export class Database {
 
 	private constructor() {}
 
-	public ffmpegExts: Datastore<FfmpegExtsDocument>;
+	private keyValue: Datastore<KeyValueDocument>;
+
 	public musicAudioQueue: Datastore<MusicAudioQueueDocument>;
 	public installedTools: Datastore<InstalledToolsDocument>;
 
@@ -47,12 +48,25 @@ export class Database {
 	}
 
 	async init() {
-		this.ffmpegExts = await this.initDb("ffmpeg-exts.db");
 		this.musicAudioQueue = await this.initDb("music-audio-queue.db");
 		this.installedTools = await this.initDb("installed-tools.db");
+		this.keyValue = await this.initDb("key-value.db");
 
 		froglog.info(
 			'Initializated databases in folder\n  "' + this.dbDir + '"',
 		);
+	}
+
+	async getKeyValue<T>(key: string): Promise<T> {
+		const doc = await this.keyValue.findOne({ _id: key });
+		if (doc == null) return null;
+		return doc.value;
+	}
+
+	async setKeyValue(key: string, value: any) {
+		const updated = await this.keyValue.updateOne({ _id: key }, { value });
+		if (updated == 0) {
+			await this.keyValue.insertOne({ _id: key, value });
+		}
 	}
 }

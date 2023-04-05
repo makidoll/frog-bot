@@ -162,13 +162,13 @@ export class MusicQueue {
 	}
 
 	private async getFfmpegExtensions() {
-		const dbExts = await Database.instance.ffmpegExts.findOne({
-			_id: this.pathToFfmpeg,
-		});
+		const dbKey = "exts-for-" + this.pathToFfmpeg;
+
+		const dbExts = await Database.instance.getKeyValue<string[]>(dbKey);
 
 		if (dbExts != null) {
 			froglog.info("Found cached ffmpeg file extensions");
-			this.ffmpegExtensions = dbExts.exts;
+			this.ffmpegExtensions = dbExts;
 			return;
 		}
 
@@ -210,10 +210,7 @@ export class MusicQueue {
 
 		this.ffmpegExtensions = exts;
 
-		await Database.instance.ffmpegExts.insertOne({
-			_id: this.pathToFfmpeg,
-			exts,
-		});
+		await Database.instance.setKeyValue(dbKey, exts);
 
 		froglog.info("Done!");
 	}

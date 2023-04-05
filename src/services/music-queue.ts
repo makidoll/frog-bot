@@ -414,7 +414,6 @@ export class MusicQueue {
 				// dont loop goodbye
 				(queue.current.metadata as any).goodbye == null
 			) {
-				// TODO: why does the loudness normalization fail
 				queue.current = this.recreateAudioResource(queue.current);
 				player.play(queue.current);
 			} else {

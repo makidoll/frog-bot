@@ -8,6 +8,15 @@ if (global.froglog == null) {
 	});
 }
 
-// TODO: only debug when developing
+const globalFroglog = global.froglog as ololog;
 
-export const froglog = global.froglog as ololog;
+export const froglog = {
+	error: globalFroglog.error,
+	info: globalFroglog.info,
+	warn: globalFroglog.warn,
+	debug: (...args) => {
+		if (process.env.DEV) {
+			globalFroglog.debug(...args);
+		}
+	},
+};

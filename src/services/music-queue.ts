@@ -18,7 +18,7 @@ import * as path from "path";
 import { FFmpeg } from "prism-media";
 import { froglog } from "../froglog";
 import { ToolName, ToolsManager, which } from "../tools-manager";
-import { shortenYoutubeLink } from "../utils";
+import { tryShortenYoutubeLink } from "../utils";
 import { Database, MusicAudioQueueDocument } from "./database";
 
 export interface AudioQueueMetadata {
@@ -332,7 +332,7 @@ export class MusicQueue {
 			title,
 			url,
 			seconds: duration,
-			videoUrl: shortenYoutubeLink(webpage_url),
+			videoUrl: tryShortenYoutubeLink(webpage_url),
 			goodbye: false,
 			isFile: false,
 		};

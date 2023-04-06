@@ -1,5 +1,5 @@
 import axios from "axios";
-import { ClientUser, Guild, User } from "discord.js";
+import { ClientUser, Guild, ImageURLOptions, User } from "discord.js";
 
 export async function downloadToBuffer(url: string) {
 	try {
@@ -25,11 +25,14 @@ export async function getUsernameAndAvatarURL(
 	guild: Guild,
 ) {
 	const member = await guild.members.fetch({ user });
+	const options: ImageURLOptions = {
+		extension: "png",
+		size: 1024,
+		forceStatic: true,
+	};
 	return {
 		username: member?.displayName ?? user.username,
-		avatarURL:
-			member?.displayAvatarURL() ??
-			user.avatarURL({ extension: "png", size: 1024, forceStatic: true }),
+		avatarURL: member?.displayAvatarURL(options) ?? user.avatarURL(options),
 	};
 }
 
@@ -45,6 +48,15 @@ export function plural(n: number, single: string, plural: string = null) {
 	if (plural == null) plural = single + "s";
 	if (n == 1 || n == -1) return n + " " + single;
 	else return n + " " + plural;
+}
+
+export function possessiveEnding(name: string) {
+	if (name.endsWith("s")) return "'";
+	return "'s";
+}
+
+export function possessive(name: string) {
+	return name + possessiveEnding(name);
 }
 
 export function formatDuration(s: number) {
@@ -101,4 +113,16 @@ export function tryShortenYoutubeLink(youtubeLink: string) {
 	if (!url.hostname.endsWith("youtube.com")) return youtubeLink;
 	const id = url.searchParams.get("v");
 	return "https://youtu.be/" + id;
+}
+
+export function generateRandomId(length: number) {
+	const dict =
+		"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+	let output = "";
+	for (let i = 0; i < length; i++) {
+		output += dict[Math.floor(Math.random() * dict.length)];
+	}
+
+	return output;
 }

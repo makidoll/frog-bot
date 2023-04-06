@@ -1,0 +1,192 @@
+<html>
+	<head>
+		<!-- render as 512 x 320 -->
+		<style>
+			@font-face {
+				font-family: "Littlefox";
+				font-style: normal;
+				font-weight: 400;
+				src: url(../Littlefox-Regular.woff2) format("woff2");
+			}
+
+			* {
+				margin: 0;
+				font-weight: 400;
+			}
+
+			body {
+				font-family: "Littlefox";
+				overflow: hidden;
+			}
+
+			.lobby {
+				width: 512px;
+				height: 320px;
+				background-color: #1d1f21;
+				color: #fff;
+				position: relative;
+				overflow: hidden;
+			}
+
+			.background {
+				position: absolute;
+				width: calc(100% + 16px);
+				height: calc(100% + 16px);
+				left: -8px;
+				top: -8px;
+				background-image: linear-gradient(
+						0deg,
+						rgba(29, 31, 33, 0.9),
+						rgba(29, 31, 33, 0.9)
+					),
+					url("./board.png");
+				background-position: center;
+				background-size: cover;
+				background-repeat: no-repeat;
+				filter: blur(4px);
+			}
+
+			.content {
+				position: absolute;
+				width: 100%;
+				height: 100%;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+			}
+
+			.players {
+				display: flex;
+				flex-direction: row;
+				align-items: center;
+				justify-content: center;
+				gap: 16px;
+				/* margin-top: 24px;
+				margin-bottom: 24px; */
+				flex-grow: 1;
+			}
+
+			.info {
+				background-color: rgba(29, 31, 33, 0.6);
+				width: 100%;
+				text-align: center;
+				padding: 12px 0;
+			}
+
+			.player {
+				width: 96px;
+				height: 136px;
+			}
+
+			.player-avatar {
+				width: 96px;
+				height: 96px;
+				border-radius: 999px;
+				background-position: center;
+				background-repeat: no-repeat;
+				background-size: cover;
+				background-color: rgba(29, 31, 33, 0.6);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				font-size: 32px;
+				color: rgba(255, 255, 255, 0.2);
+				text-align: center;
+				line-height: 24px;
+			}
+
+			.player-avatar > p {
+				margin-top: -8px;
+			}
+
+			.player-name {
+				width: 96px;
+				height: 32px;
+				margin-top: 8px;
+				text-align: center;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+
+			.player-name.no-frog {
+				opacity: 0.4;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="lobby">
+			<div class="background"></div>
+			<div class="content">
+				<div class="info">
+					<h1>snakes and ladders!</h1>
+					<h3>hopefully will have a frog themed board soon</h3>
+				</div>
+				<div class="players">
+					<div class="player" id="player-0">
+						<div class="player-avatar">
+							<p>no<br />frog</p>
+						</div>
+						<div class="player-name no-frog">player 1 join!</div>
+					</div>
+					<div class="player" id="player-1">
+						<div class="player-avatar">
+							<p>no<br />frog</p>
+						</div>
+						<div class="player-name no-frog">player 2 join!</div>
+					</div>
+					<div class="player" id="player-2">
+						<div class="player-avatar">
+							<p>no<br />frog</p>
+						</div>
+						<div class="player-name no-frog">player 3 join!</div>
+					</div>
+					<div class="player" id="player-3">
+						<div class="player-avatar">
+							<p>no<br />frog</p>
+						</div>
+						<div class="player-name no-frog">player 4 join!</div>
+					</div>
+				</div>
+				<div class="info" id="start-text">
+					<h2>need 1 more player to start</h2>
+				</div>
+			</div>
+		</div>
+		<script src="../textFit.min.js"></script>
+		<script>
+			textFit(document.getElementsByClassName("player-name"), {
+				maxFontSize: 80,
+			});
+
+			function join(index, name, avatar) {
+				const playerDiv = document.getElementById("player-" + index);
+
+				const avatarDiv = playerDiv.querySelector(".player-avatar");
+				avatarDiv.innerHTML = "";
+				avatarDiv.style.backgroundImage = `url(${avatar})`;
+
+				const nameDiv = playerDiv.querySelector(".player-name");
+				nameDiv.className = nameDiv.className.replace("no-frog", "");
+				nameDiv.textContent = name;
+
+				textFit(nameDiv, {
+					maxFontSize: 80,
+				});
+			}
+
+			function updateStartText(text) {
+				document.querySelector("#start-text>h2").textContent = text;
+			}
+
+			// join(
+			// 	0,
+			// 	"Maki 1",
+			// 	"https://cdn.discordapp.com/avatars/977105048305807390/1f0478dd7208222a1fc140f9b032d604.png",
+			// );
+
+			// updateStartText("ready to start!");
+		</script>
+	</body>
+</html>

@@ -13,6 +13,7 @@ import {
 import { Command, ServerExclusiveCategories } from "./command";
 import { CouchCommand } from "./commands/frends/couch-command";
 import { FrugCommand } from "./commands/frends/frug-command";
+import { SnakesAndLaddersCommand } from "./commands/games/snakes-and-ladders";
 import { VapourHoldCommand } from "./commands/mechanyx/vapour-hold";
 import { CasCommand } from "./commands/memes-gifs/cas-command";
 import { PetpetCommand } from "./commands/memes-gifs/petpet-command";
@@ -58,6 +59,8 @@ export const availableCommands: Command[] = [
 	StopCommand,
 	SkipCommand,
 	LoopCommand,
+	// > games
+	// SnakesAndLaddersCommand,
 	// > mechanyx
 	VapourHoldCommand,
 ];

@@ -1,0 +1,228 @@
+<html>
+	<head>
+		<!-- render as 512 x 512 -->
+		<style>
+			@font-face {
+				font-family: "Littlefox";
+				font-style: normal;
+				font-weight: 400;
+				src: url(../Littlefox-Regular.woff2) format("woff2");
+			}
+
+			* {
+				margin: 0;
+				font-weight: 400;
+			}
+
+			body {
+				font-family: "Littlefox";
+				overflow: hidden;
+			}
+
+			#game {
+				width: 512px;
+				height: 512px;
+				background-image: url(./board.png);
+				background-position: 0 0;
+				background-size: 100% 100%;
+				background-repeat: no-repeat;
+			}
+
+			.player {
+				position: absolute;
+				width: 50px;
+				height: 50px;
+				z-index: 999;
+			}
+
+			.player-avatar {
+				width: 50px;
+				height: 50px;
+				border-radius: 999px;
+				box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+				background-size: cover;
+				background-position: center;
+				background-repeat: no-repeat;
+				background-image: rgba(0, 0, 0, 0.4);
+			}
+
+			.player-name {
+				height: 20px;
+				margin-top: -16px;
+				width: 60px;
+				margin-left: -5px;
+				text-align: center;
+				vertical-align: middle;
+				color: #fff;
+				text-shadow: 0 0 4px rgba(0, 0, 0, 1), 0 0 8px rgba(0, 0, 0, 1);
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: flex-end;
+			}
+
+			.player-square {
+				width: 50px;
+				height: 50px;
+				position: absolute;
+				/* background-color: blue; */
+			}
+		</style>
+	</head>
+	<body>
+		<div id="game"></div>
+		<script src="../textFit.min.js"></script>
+		<script>
+			const topLeft = { x: 18, y: 19 };
+			const bottomRight = { x: 443, y: 444 };
+			const size = 10;
+
+			const gameDiv = document.getElementById("game");
+
+			function squareIndexToCoords(squareIndex) {
+				if (squareIndex < 0) squareIndex = 0;
+				if (squareIndex >= size * size) squareIndex = size * size - 1;
+
+				let y = size - 1 - Math.floor(squareIndex / size);
+				let x = squareIndex % size;
+				if (y % 2 == 0) x = size - 1 - x;
+
+				const xDistance = (bottomRight.x - topLeft.x) / (size - 1);
+				const yDistance = (bottomRight.y - topLeft.y) / (size - 1);
+
+				const left = topLeft.x + xDistance * x;
+				const top = topLeft.y + xDistance * y;
+
+				return {
+					x,
+					y,
+					left,
+					top,
+				};
+			}
+
+			let squareDivs = [];
+
+			// add player squares
+			for (
+				let squareIndex = 0;
+				squareIndex < size * size;
+				squareIndex++
+			) {
+				const { x, y, left, top } = squareIndexToCoords(squareIndex);
+
+				const playerSquare = document.createElement("div");
+				playerSquare.className = "player-square";
+				playerSquare.style.left = left + "px";
+				playerSquare.style.top = top + "px";
+				gameDiv.appendChild(playerSquare);
+				squareDivs.push(playerSquare);
+			}
+
+			let playerDivs = [];
+
+			function setPlayers(players) {
+				if (players.length > 4) return;
+
+				if (playerDivs.length != 0) {
+					for (const playerDiv of playerDivs) {
+						playerDiv.remove();
+					}
+					playerDivs = [];
+				}
+
+				for (let i = 0; i < players.length; i++) {
+					const player = players[i];
+
+					const playerDiv = document.createElement("div");
+					playerDiv.className = "player";
+					playerDivs.push(playerDiv);
+
+					const playerAvatar = document.createElement("div");
+					playerAvatar.className = "player-avatar";
+					playerAvatar.style.backgroundImage = `url(${player.avatar})`;
+					playerDiv.appendChild(playerAvatar);
+
+					const playerName = document.createElement("div");
+					playerName.className = "player-name";
+					playerName.textContent = player.name;
+					playerDiv.appendChild(playerName);
+
+					// add to game and text fit
+					gameDiv.appendChild(playerDiv);
+
+					textFit(playerName, {
+						maxFontSize: 80,
+					});
+				}
+			}
+
+			function setScaleAndPos(div, scale, x, y) {
+				div.style.transform = `scale(${scale})`;
+				div.style.left = `${x}px`;
+				div.style.top = `${y}px`;
+			}
+
+			function realignPlayersInSquares() {
+				for (let squareDiv of squareDivs) {
+					if (squareDiv.children.length == 0) continue;
+
+					const playersInSquare = squareDiv.children;
+
+					if (playersInSquare.length == 1) {
+						setScaleAndPos(playersInSquare[0], 0.9, 0, 0);
+					} else if (playersInSquare.length == 2) {
+						setScaleAndPos(playersInSquare[0], 0.55, -10, -10);
+						setScaleAndPos(playersInSquare[1], 0.55, 10, 10);
+					} else if (playersInSquare.length == 3) {
+						setScaleAndPos(playersInSquare[0], 0.44, 0, -11);
+						setScaleAndPos(playersInSquare[1], 0.44, -11, 11);
+						setScaleAndPos(playersInSquare[2], 0.44, 11, 11);
+					} else if (playersInSquare.length == 4) {
+						setScaleAndPos(playersInSquare[0], 0.44, -11, -11);
+						setScaleAndPos(playersInSquare[1], 0.44, 11, -11);
+						setScaleAndPos(playersInSquare[2], 0.44, -11, 11);
+						setScaleAndPos(playersInSquare[3], 0.44, 11, 11);
+					}
+				}
+			}
+
+			function movePlayer(playerIndex, position) {
+				if (position < 0 || position > size * size - 1) return;
+
+				const squareIndex = position - 1;
+				const squareDiv = squareDivs[squareIndex];
+				const playerDiv = playerDivs[playerIndex];
+				squareDiv.appendChild(playerDiv);
+
+				realignPlayersInSquares();
+			}
+
+			// setPlayers([
+			// 	{
+			// 		name: "Maki 1",
+			// 		avatar: "https://cdn.discordapp.com/avatars/977105048305807390/1f0478dd7208222a1fc140f9b032d604.png",
+			// 	},
+			// 	{
+			// 		name: "Maki 2",
+			// 		avatar: "https://cdn.discordapp.com/avatars/977105048305807390/1f0478dd7208222a1fc140f9b032d604.png",
+			// 	},
+			// 	{
+			// 		name: "Maki 3",
+			// 		avatar: "https://cdn.discordapp.com/avatars/977105048305807390/1f0478dd7208222a1fc140f9b032d604.png",
+			// 	},
+			// 	{
+			// 		name: "Maki 4",
+			// 		avatar: "https://cdn.discordapp.com/avatars/977105048305807390/1f0478dd7208222a1fc140f9b032d604.png",
+			// 	},
+			// ]);
+
+			// movePlayer(0, 0);
+			// movePlayer(1, 0);
+			// movePlayer(2, 0);
+			// movePlayer(3, 0);
+
+			// movePlayer(0, 1);
+		</script>
+	</body>
+</html>

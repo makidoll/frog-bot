@@ -14,6 +14,7 @@ export enum Categories {
 	memes = "😂 memes",
 	memesGifs = "🎞️ memes but gifs",
 	music = "🎶 music",
+	games = "🎮 games",
 	mechanyx = "<:SteamHeart:472359081693413379> mechanyx",
 }
 

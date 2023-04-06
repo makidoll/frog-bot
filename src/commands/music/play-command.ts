@@ -41,6 +41,7 @@ async function playInteraction(
 				.setLabel("skip")
 				.setStyle(ButtonStyle.Secondary)
 				.setEmoji("⏭️"),
+			// TODO: make button turn red or green
 			new ButtonBuilder()
 				.setCustomId("play-loop")
 				.setLabel("loop")

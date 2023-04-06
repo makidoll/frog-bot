@@ -98,7 +98,7 @@ export function customIdMatch(
 
 export function tryShortenYoutubeLink(youtubeLink: string) {
 	const url = new URL(youtubeLink);
-	if (url.hostname.endsWith("youtube.com")) return youtubeLink;
+	if (!url.hostname.endsWith("youtube.com")) return youtubeLink;
 	const id = url.searchParams.get("v");
 	return "https://youtu.be/" + id;
 }

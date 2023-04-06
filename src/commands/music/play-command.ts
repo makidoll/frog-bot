@@ -75,6 +75,7 @@ async function playInteraction(
 
 		await MusicQueue.instance.addToQueue(
 			channel,
+			interaction.channel,
 			metadata,
 			playOdemonGoodbyeAfter,
 		);

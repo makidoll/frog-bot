@@ -12,7 +12,7 @@ import {
 	VoiceConnection,
 	VoiceConnectionStatus,
 } from "@discordjs/voice";
-import { Client, VoiceBasedChannel } from "discord.js";
+import { Client, GuildTextBasedChannel, VoiceBasedChannel } from "discord.js";
 import * as execa from "execa";
 import * as path from "path";
 import { FFmpeg } from "prism-media";
@@ -30,12 +30,15 @@ export interface AudioQueueMetadata {
 	isFile: boolean;
 }
 
+// should reflect in database.ts
 interface AudioQueue {
 	channel: VoiceBasedChannel;
 	current: AudioResource<AudioQueueMetadata>;
 	currentStarted: number; // Date.now()
 	resources: AudioResource<AudioQueueMetadata>[];
 	looping: boolean;
+	lastTextChannel: GuildTextBasedChannel;
+	// ephemeral
 	skipping: boolean;
 }
 
@@ -98,6 +101,7 @@ export class MusicQueue {
 					resource => resource.metadata as any,
 				),
 				looping: audioQueue.looping,
+				lastTextChannel: audioQueue.lastTextChannel.id,
 			};
 
 			// doesnt error if not found
@@ -120,6 +124,7 @@ export class MusicQueue {
 		);
 
 		for (const dbAudioQueue of dbAllAudioQueue) {
+			// if we cant find the voice channel, continue
 			let channel: VoiceBasedChannel;
 			try {
 				channel = (await client.channels.fetch(
@@ -128,12 +133,21 @@ export class MusicQueue {
 			} catch (error) {}
 			if (channel == null) continue;
 
+			// for letting people know bot disconnected due to inactivity
+			let textChannel: GuildTextBasedChannel; // can be null
+			try {
+				textChannel = (await client.channels.fetch(
+					dbAudioQueue.lastTextChannel,
+				)) as GuildTextBasedChannel;
+			} catch (error) {}
+
 			// TODO: will skip a bit, is this bad?
 			const seekMs = Date.now() - dbAudioQueue.currentStarted;
 			const seekSeconds = seekMs / 1000;
 
 			await this.addToQueue(
 				channel,
+				textChannel,
 				dbAudioQueue.current,
 				false, // will be stored in resources
 				seekSeconds,
@@ -168,8 +182,13 @@ export class MusicQueue {
 			}
 
 			if (!anyoneConnected) {
-				// TODO: message channel with disconnected due to inactivity
 				this.disconnectAndCleanup(queue.channel);
+
+				if (queue.lastTextChannel != null) {
+					queue.lastTextChannel.send(
+						"🪫 ribbit, i left because nobody was listening. *sad frog noises*",
+					);
+				}
 			}
 		}
 	}
@@ -527,6 +546,7 @@ export class MusicQueue {
 
 	async addToQueue(
 		channel: VoiceBasedChannel,
+		textChannel: GuildTextBasedChannel,
 		metadata: AudioQueueMetadata,
 		playOdemonGoodbyeAfter = false,
 		seekSeconds: number = 0,
@@ -553,6 +573,8 @@ export class MusicQueue {
 				);
 			}
 
+			foundQueue.lastTextChannel = textChannel;
+
 			this.syncToDatabase();
 
 			return;
@@ -569,6 +591,7 @@ export class MusicQueue {
 				: [],
 			looping: false,
 			skipping: false,
+			lastTextChannel: textChannel,
 		});
 
 		const connection = await this.ensureConnection(channel);

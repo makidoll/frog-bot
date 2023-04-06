@@ -8,12 +8,14 @@ interface KeyValueDocument {
 	value: any;
 }
 
+// should reflect in music-queue.ts
 export interface MusicAudioQueueDocument {
 	_id: string; // channel id
 	current: AudioQueueMetadata;
 	currentStarted: number; // used for continuing playback
 	resources: AudioQueueMetadata[];
 	looping: boolean;
+	lastTextChannel: string; // channel id
 }
 
 export interface InstalledToolsDocument {

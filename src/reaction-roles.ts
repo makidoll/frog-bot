@@ -121,9 +121,15 @@ export async function initReactionRoles(client: Client) {
 		froglog.info("Initialized reaction roles");
 	} catch (error) {
 		if (error.code == 50001) {
-			froglog.error(
-				"Failed to initialize reaction roles, missing access. Intented if developing",
-			);
+			if (process.env.DEV) {
+				froglog.debug(
+					"Failed to initialize reaction roles, missing access. Intended when developing",
+				);
+			} else {
+				froglog.error(
+					"Failed to initialize reaction roles, missing access",
+				);
+			}
 		} else {
 			froglog.error(error);
 		}

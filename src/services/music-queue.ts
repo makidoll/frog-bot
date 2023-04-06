@@ -307,6 +307,8 @@ export class MusicQueue {
 			}
 		}
 
+		// TODO: livestream support maybe?
+
 		const isUrlWithoutHttp =
 			/^youtube\.com/i.test(search) || /^youtu\.be/i.test(search);
 

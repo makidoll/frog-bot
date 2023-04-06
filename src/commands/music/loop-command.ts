@@ -21,7 +21,7 @@ export const LoopCommand: Command = {
 			const looping = MusicQueue.instance.toggleLoop(channel);
 			if (looping) {
 				await interaction.reply(
-					"🔁 🟢 ribbit, **enabled looping** foreverrrrr!",
+					"🔁 🟢 ribbit, **enabled looping** forever current song!",
 				);
 			} else {
 				await interaction.reply(

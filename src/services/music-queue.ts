@@ -18,14 +18,23 @@ import * as path from "path";
 import { FFmpeg } from "prism-media";
 import { froglog } from "../froglog";
 import { ToolName, ToolsManager, which } from "../tools-manager";
-import { formatDuration, shortenYoutubeLink } from "../utils";
+import { shortenYoutubeLink } from "../utils";
 import { Database, MusicAudioQueueDocument } from "./database";
+
+export interface AudioQueueMetadata {
+	title: string;
+	url: string;
+	seconds: number;
+	videoUrl: string;
+	goodbye: boolean;
+	isFile: boolean;
+}
 
 interface AudioQueue {
 	channel: VoiceBasedChannel;
-	current: AudioResource;
+	current: AudioResource<AudioQueueMetadata>;
 	currentStarted: number; // Date.now()
-	resources: AudioResource[];
+	resources: AudioResource<AudioQueueMetadata>[];
 	looping: boolean;
 	skipping: boolean;
 }
@@ -125,8 +134,7 @@ export class MusicQueue {
 
 			await this.addToQueue(
 				channel,
-				dbAudioQueue.current.url,
-				dbAudioQueue.current.title,
+				dbAudioQueue.current,
 				false, // will be stored in resources
 				seekSeconds,
 			);
@@ -134,8 +142,8 @@ export class MusicQueue {
 			// update queue
 			const audioQueue = this.audioQueue.get(channel.id);
 			audioQueue.current.metadata = dbAudioQueue.current;
-			audioQueue.resources = dbAudioQueue.resources.map(r =>
-				this.createAudioResource(r.url, r.isFile, r),
+			audioQueue.resources = dbAudioQueue.resources.map(metadata =>
+				this.createAudioResource(metadata),
 			);
 			audioQueue.looping = dbAudioQueue.looping;
 
@@ -160,6 +168,7 @@ export class MusicQueue {
 			}
 
 			if (!anyoneConnected) {
+				// TODO: message channel with disconnected due to inactivity
 				this.disconnectAndCleanup(queue.channel);
 			}
 		}
@@ -258,12 +267,7 @@ export class MusicQueue {
 		});
 	}
 
-	async getInfo(search: string): Promise<{
-		title: string;
-		url: string;
-		seconds: number;
-		videoUrl: string;
-	}> {
+	async getInfo(search: string): Promise<AudioQueueMetadata> {
 		const isUrl = /^https?:\/\//i.test(search);
 
 		if (isUrl) {
@@ -278,6 +282,8 @@ export class MusicQueue {
 					url: search,
 					seconds,
 					videoUrl: search,
+					goodbye: false,
+					isFile: false,
 				};
 			}
 		}
@@ -301,24 +307,15 @@ export class MusicQueue {
 			args,
 		);
 
-		const {
-			title,
-			url,
-			duration,
-			// thumbnail,
-			// uploader,
-			// uploader_url,
-			webpage_url,
-		} = JSON.parse(stdout);
+		const { title, url, duration, webpage_url } = JSON.parse(stdout);
 
 		return {
 			title,
 			url,
 			seconds: duration,
-			// thumbnail,
-			// uploader,
-			// uploader_url,
 			videoUrl: shortenYoutubeLink(webpage_url),
+			goodbye: false,
+			isFile: false,
 		};
 	}
 
@@ -392,17 +389,12 @@ export class MusicQueue {
 		this.syncToDatabase();
 	}
 
-	private createAudioResource(
-		url: string,
-		isFile: boolean,
-		metadata: any = {},
-		seekSeconds = 0,
-	) {
+	private createAudioResource(metadata: AudioQueueMetadata, seekSeconds = 0) {
 		// https://github.com/skick1234/DisTube/blob/stable/src/core/DisTubeStream.ts
 
 		const args = [
 			// fixes youtube links from stopping
-			...(isFile
+			...(metadata.isFile
 				? []
 				: [
 						"-reconnect",
@@ -416,7 +408,7 @@ export class MusicQueue {
 			...(seekSeconds > 0 ? ["-ss", String(seekSeconds)] : []),
 			// input
 			"-i",
-			url,
+			metadata.url,
 			// normalize audio https://superuser.com/a/323127
 			// https://ffmpeg.org/ffmpeg-filters.html#dynaudnorm
 			// https://ffmpeg.org/ffmpeg-filters.html#loudnorm
@@ -448,17 +440,17 @@ export class MusicQueue {
 		// create resource
 		return createAudioResource(stream, {
 			inputType: StreamType.OggOpus,
-			metadata: { ...metadata, url, isFile },
+			metadata,
 		});
 	}
 
-	private recreateAudioResource(audioResource: AudioResource) {
-		const metadata = audioResource.metadata as any;
-		const { url, isFile } = metadata;
-		return this.createAudioResource(url, isFile, metadata);
+	private recreateAudioResource(
+		audioResource: AudioResource<AudioQueueMetadata>,
+	) {
+		return this.createAudioResource(audioResource.metadata);
 	}
 
-	private getOdemonGoodbyeResource() {
+	private async getOdemonGoodbyeResource() {
 		// thank you odemon <3
 
 		const cursedChance = 0.05; // %
@@ -468,11 +460,16 @@ export class MusicQueue {
 			filename = "bybye_ribbit_cursed.mp3";
 		}
 
-		return this.createAudioResource(
-			path.resolve(__dirname, "../../assets/", filename),
-			true,
-			{ title: "frog bot goodbye", goodbye: true },
-		);
+		const filePath = path.resolve(__dirname, "../../assets/", filename);
+
+		return this.createAudioResource({
+			title: "frog bot says goodbye",
+			url: filePath,
+			seconds: await this.fetchLengthInSeconds(filePath), // should i be concerned
+			videoUrl: "",
+			goodbye: true,
+			isFile: true,
+		});
 	}
 
 	private stateChangeCallback(channel: VoiceBasedChannel) {
@@ -497,7 +494,7 @@ export class MusicQueue {
 				queue.looping &&
 				queue.skipping == false &&
 				// dont loop goodbye
-				(queue.current.metadata as any).goodbye == null
+				!queue.current.metadata.goodbye
 			) {
 				queue.current = this.recreateAudioResource(queue.current);
 				queue.currentStarted = Date.now();
@@ -530,17 +527,11 @@ export class MusicQueue {
 
 	async addToQueue(
 		channel: VoiceBasedChannel,
-		url: string,
-		title: string,
-		playOdemonGoodbye = false,
+		metadata: AudioQueueMetadata,
+		playOdemonGoodbyeAfter = false,
 		seekSeconds: number = 0,
 	) {
-		const audioResource = this.createAudioResource(
-			url,
-			false,
-			{ title },
-			seekSeconds,
-		);
+		const audioResource = this.createAudioResource(metadata, seekSeconds);
 
 		const foundQueue = this.audioQueue.get(channel.id);
 		if (foundQueue != null) {
@@ -573,8 +564,8 @@ export class MusicQueue {
 			channel,
 			current: audioResource,
 			currentStarted: Date.now() - seekSeconds * 1000,
-			resources: playOdemonGoodbye
-				? [this.getOdemonGoodbyeResource()]
+			resources: playOdemonGoodbyeAfter
+				? [await this.getOdemonGoodbyeResource()]
 				: [],
 			looping: false,
 			skipping: false,
@@ -608,7 +599,7 @@ export class MusicQueue {
 
 		const nextSongTitle =
 			queue.resources.length > 0
-				? (queue.resources[0].metadata as any).title
+				? queue.resources[0].metadata.title
 				: null;
 
 		// if we're looping, it won't know if its an intentional skip or not

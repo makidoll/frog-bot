@@ -33,7 +33,7 @@ async function playInteraction(
 	});
 
 	try {
-		const info = await MusicQueue.instance.getInfo(search);
+		const metadata = await MusicQueue.instance.getInfo(search);
 
 		const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
 			new ButtonBuilder()
@@ -52,7 +52,7 @@ async function playInteraction(
 				.setStyle(ButtonStyle.Secondary)
 				.setEmoji("⏹️"),
 			new ButtonBuilder()
-				.setCustomId("play-queue:" + info.videoUrl)
+				.setCustomId("play-queue:" + metadata.videoUrl)
 				.setLabel("add this to queue")
 				.setStyle(ButtonStyle.Secondary)
 				.setEmoji("▶️"),
@@ -61,13 +61,13 @@ async function playInteraction(
 		await interaction.followUp({
 			content:
 				"🎶 ribbit, found song!\nit's **" +
-				formatDuration(info.seconds) +
+				formatDuration(metadata.seconds) +
 				"** long, froggy adding to queue...\n" +
-				info.videoUrl,
+				metadata.videoUrl,
 			components: [row],
 		});
 
-		const playOdemonGoodbye = process.env.DEV
+		const playOdemonGoodbyeAfter = process.env.DEV
 			? true
 			: ServerExclusiveCategories[Categories.mechanyx].includes(
 					interaction.guildId,
@@ -75,9 +75,8 @@ async function playInteraction(
 
 		await MusicQueue.instance.addToQueue(
 			channel,
-			info.url,
-			info.title,
-			playOdemonGoodbye,
+			metadata,
+			playOdemonGoodbyeAfter,
 		);
 	} catch (error) {
 		froglog.error(error);

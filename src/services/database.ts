@@ -1,6 +1,7 @@
 import Datastore = require("nedb-promises");
 import * as path from "path";
 import { froglog } from "../froglog";
+import { AudioQueueMetadata } from "./music-queue";
 
 interface KeyValueDocument {
 	_id: string;
@@ -9,9 +10,9 @@ interface KeyValueDocument {
 
 export interface MusicAudioQueueDocument {
 	_id: string; // channel id
-	current: any; // metadata with url and filename
+	current: AudioQueueMetadata;
 	currentStarted: number; // used for continuing playback
-	resources: any[]; // metadata like above
+	resources: AudioQueueMetadata[];
 	looping: boolean;
 }
 

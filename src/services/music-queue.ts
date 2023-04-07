@@ -12,10 +12,16 @@ import {
 	VoiceConnection,
 	VoiceConnectionStatus,
 } from "@discordjs/voice";
-import { Client, GuildTextBasedChannel, VoiceBasedChannel } from "discord.js";
+import {
+	Client,
+	GuildTextBasedChannel,
+	Message,
+	VoiceBasedChannel,
+} from "discord.js";
 import * as execa from "execa";
 import * as path from "path";
 import { FFmpeg } from "prism-media";
+import { getPlayInteractionComponents } from "../commands/music/play-command";
 import { froglog } from "../froglog";
 import { ToolName, ToolsManager, which } from "../tools-manager";
 import { tryShortenYoutubeLink } from "../utils";
@@ -28,10 +34,15 @@ export interface AudioQueueMetadata {
 	videoUrl: string;
 	goodbye: boolean;
 	isFile: boolean;
+	followUp?: {
+		message: Message<boolean>;
+		textChannel: GuildTextBasedChannel;
+	};
+	followUpId?: { message: string; textChannel: string };
 }
 
 // should reflect in database.ts
-interface AudioQueue {
+export interface AudioQueue {
 	channel: VoiceBasedChannel;
 	current: AudioResource<AudioQueueMetadata>;
 	currentStarted: number; // Date.now()
@@ -71,6 +82,53 @@ export class MusicQueue {
 		setInterval(this.reaperCallback.bind(this), reaperInterval);
 	}
 
+	private metadataToDatabaseMetadata(
+		metadata: AudioQueueMetadata,
+	): AudioQueueMetadata {
+		return {
+			...metadata,
+			followUp: null,
+			followUpId:
+				metadata.followUp == null
+					? { message: null, textChannel: null }
+					: {
+							message: metadata.followUp.message.id,
+							textChannel: metadata.followUp.textChannel.id,
+					  },
+		};
+	}
+
+	private async databaseMetadataToMetadata(
+		client: Client,
+		metadata: AudioQueueMetadata,
+	): Promise<AudioQueueMetadata> {
+		const channelId = metadata.followUpId?.textChannel;
+		const messageId = metadata.followUpId?.message;
+		if (channelId == null || messageId == null) return metadata;
+
+		// try to get text channel
+		let textChannel: GuildTextBasedChannel; // can be null
+		try {
+			textChannel = (await client.channels.fetch(
+				channelId,
+			)) as GuildTextBasedChannel;
+		} catch (error) {}
+		if (textChannel == null) return metadata;
+
+		metadata.followUp = { textChannel, message: null };
+
+		// try to get message
+		let message: Message<boolean>; // can be null
+		try {
+			message = await textChannel.messages.fetch(messageId);
+		} catch (error) {}
+		if (message == null) return metadata;
+
+		metadata.followUp.message = message;
+
+		return metadata;
+	}
+
 	private async syncToDatabase() {
 		froglog.debug("Music audio queue syncing to database");
 
@@ -95,10 +153,12 @@ export class MusicQueue {
 		for (const [channelId, audioQueue] of this.audioQueue.entries()) {
 			const document: MusicAudioQueueDocument = {
 				_id: channelId,
-				current: audioQueue.current.metadata,
+				current: this.metadataToDatabaseMetadata(
+					audioQueue.current.metadata,
+				),
 				currentStarted: audioQueue.currentStarted,
-				resources: audioQueue.resources.map(
-					resource => resource.metadata as any,
+				resources: audioQueue.resources.map(({ metadata }) =>
+					this.metadataToDatabaseMetadata(metadata),
 				),
 				looping: audioQueue.looping,
 				lastTextChannel: audioQueue.lastTextChannel.id,
@@ -140,6 +200,25 @@ export class MusicQueue {
 					dbAudioQueue.lastTextChannel,
 				)) as GuildTextBasedChannel;
 			} catch (error) {}
+
+			// convert metadata from database so channels are fetch for
+			// loop buttons on follow ups
+			try {
+				dbAudioQueue.current = await this.databaseMetadataToMetadata(
+					client,
+					dbAudioQueue.current,
+				);
+			} catch (error) {}
+			for (let i = 0; i < dbAudioQueue.resources.length; i++) {
+				try {
+					dbAudioQueue.resources[i] =
+						await this.databaseMetadataToMetadata(
+							client,
+							dbAudioQueue.resources[i],
+						);
+				} catch (error) {}
+			}
+			// wahoo
 
 			// TODO: will skip a bit, is this bad?
 			const seekMs = Date.now() - dbAudioQueue.currentStarted;
@@ -645,6 +724,40 @@ export class MusicQueue {
 
 		this.syncToDatabase();
 
+		// try edit current interactions
+		try {
+			if (queue.current.metadata.followUp != null) {
+				queue.current.metadata.followUp.message.edit({
+					components: getPlayInteractionComponents(
+						queue.current.metadata,
+						queue,
+					),
+				});
+			}
+		} catch (error) {
+			console.error(error);
+		}
+
+		// try all future interactions
+		for (const resource of queue.resources) {
+			try {
+				if (resource.metadata.followUp == null) continue;
+				resource.metadata.followUp.message.edit({
+					components: getPlayInteractionComponents(
+						resource.metadata,
+						queue,
+					),
+				});
+			} catch (error) {
+				console.error(error);
+			}
+		}
+
 		return queue.looping;
+	}
+
+	getAudioQueue(channel: VoiceBasedChannel): AudioQueue | null {
+		const queue = this.audioQueue.get(channel.id);
+		return queue;
 	}
 }

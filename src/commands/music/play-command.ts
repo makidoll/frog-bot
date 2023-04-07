@@ -5,15 +5,53 @@ import {
 	ButtonInteraction,
 	ChatInputCommandInteraction,
 	GuildMember,
+	GuildTextBasedChannel,
 	SlashCommandBuilder,
 } from "discord.js";
 import { Categories, Command, ServerExclusiveCategories } from "../../command";
 import { froglog } from "../../froglog";
-import { MusicQueue } from "../../services/music-queue";
+import {
+	AudioQueue,
+	AudioQueueMetadata,
+	MusicQueue,
+} from "../../services/music-queue";
 import { formatDuration } from "../../utils";
 import { LoopCommand } from "./loop-command";
 import { SkipCommand } from "./skip-command";
 import { StopCommand } from "./stop-command";
+
+export function getPlayInteractionComponents(
+	metadata: AudioQueueMetadata,
+	queue?: AudioQueue,
+) {
+	let looping = false;
+	if (queue != null) looping = queue.looping;
+
+	const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+		new ButtonBuilder()
+			.setCustomId("play-skip")
+			.setLabel("skip")
+			.setStyle(ButtonStyle.Secondary)
+			.setEmoji("⏭️"),
+		new ButtonBuilder()
+			.setCustomId("play-loop")
+			.setLabel(looping ? "🟢 loop" : "🔴 loop")
+			.setStyle(ButtonStyle.Secondary)
+			.setEmoji("🔁"),
+		new ButtonBuilder()
+			.setCustomId("play-stop")
+			.setLabel("stop")
+			.setStyle(ButtonStyle.Secondary)
+			.setEmoji("⏹️"),
+		new ButtonBuilder()
+			.setCustomId("play-queue:" + metadata.videoUrl)
+			.setLabel("add this to queue")
+			.setStyle(ButtonStyle.Secondary)
+			.setEmoji("▶️"),
+	);
+
+	return [row];
+}
 
 async function playInteraction(
 	search: string,
@@ -34,38 +72,17 @@ async function playInteraction(
 
 	try {
 		const metadata = await MusicQueue.instance.getInfo(search);
+		const queue = MusicQueue.instance.getAudioQueue(channel);
 
-		const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-			new ButtonBuilder()
-				.setCustomId("play-skip")
-				.setLabel("skip")
-				.setStyle(ButtonStyle.Secondary)
-				.setEmoji("⏭️"),
-			// TODO: make button turn red or green
-			new ButtonBuilder()
-				.setCustomId("play-loop")
-				.setLabel("loop")
-				.setStyle(ButtonStyle.Secondary)
-				.setEmoji("🔁"),
-			new ButtonBuilder()
-				.setCustomId("play-stop")
-				.setLabel("stop")
-				.setStyle(ButtonStyle.Secondary)
-				.setEmoji("⏹️"),
-			new ButtonBuilder()
-				.setCustomId("play-queue:" + metadata.videoUrl)
-				.setLabel("add this to queue")
-				.setStyle(ButtonStyle.Secondary)
-				.setEmoji("▶️"),
-		);
+		const components = getPlayInteractionComponents(metadata, queue);
 
-		await interaction.followUp({
+		const followUp = await interaction.followUp({
 			content:
 				"🎶 ribbit, found song!\nit's **" +
 				formatDuration(metadata.seconds) +
 				"** long, froggy adding to queue...\n" +
 				metadata.videoUrl,
-			components: [row],
+			components,
 		});
 
 		const playOdemonGoodbyeAfter = process.env.DEV
@@ -73,6 +90,12 @@ async function playInteraction(
 			: ServerExclusiveCategories[Categories.mechanyx].includes(
 					interaction.guildId,
 			  );
+
+		// so it can toggle loop button
+		metadata.followUp = {
+			message: followUp,
+			textChannel: followUp.channel as GuildTextBasedChannel,
+		};
 
 		await MusicQueue.instance.addToQueue(
 			channel,

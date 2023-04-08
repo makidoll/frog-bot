@@ -184,65 +184,68 @@ export class MusicQueue {
 		);
 
 		for (const dbAudioQueue of dbAllAudioQueue) {
-			// if we cant find the voice channel, continue
-			let channel: VoiceBasedChannel;
 			try {
-				channel = (await client.channels.fetch(
+				// get voice channel. error will get caught
+				const channel = (await client.channels.fetch(
 					dbAudioQueue._id,
 				)) as VoiceBasedChannel;
-			} catch (error) {}
-			if (channel == null) continue;
 
-			// for letting people know bot disconnected due to inactivity
-			let textChannel: GuildTextBasedChannel; // can be null
-			try {
-				textChannel = (await client.channels.fetch(
-					dbAudioQueue.lastTextChannel,
-				)) as GuildTextBasedChannel;
-			} catch (error) {}
-
-			// convert metadata from database so channels are fetch for
-			// loop buttons on follow ups
-			try {
-				dbAudioQueue.current = await this.databaseMetadataToMetadata(
-					client,
-					dbAudioQueue.current,
-				);
-			} catch (error) {}
-			for (let i = 0; i < dbAudioQueue.resources.length; i++) {
+				// for letting people know bot disconnected due to inactivity
+				let textChannel: GuildTextBasedChannel; // can be null
 				try {
-					dbAudioQueue.resources[i] =
+					textChannel = (await client.channels.fetch(
+						dbAudioQueue.lastTextChannel,
+					)) as GuildTextBasedChannel;
+				} catch (error) {}
+
+				// convert metadata from database so channels are fetch for
+				// loop buttons on follow ups
+				try {
+					dbAudioQueue.current =
 						await this.databaseMetadataToMetadata(
 							client,
-							dbAudioQueue.resources[i],
+							dbAudioQueue.current,
 						);
 				} catch (error) {}
+				for (let i = 0; i < dbAudioQueue.resources.length; i++) {
+					try {
+						dbAudioQueue.resources[i] =
+							await this.databaseMetadataToMetadata(
+								client,
+								dbAudioQueue.resources[i],
+							);
+					} catch (error) {}
+				}
+
+				// TODO: will skip a bit, is this bad?
+				const seekMs = Date.now() - dbAudioQueue.currentStarted;
+				const seekSeconds = seekMs / 1000;
+
+				await this.addToQueue(
+					channel,
+					textChannel,
+					dbAudioQueue.current,
+					false, // will be stored in resources
+					seekSeconds,
+				);
+
+				// update queue
+				const audioQueue = this.audioQueue.get(channel.id);
+				audioQueue.current.metadata = dbAudioQueue.current;
+				audioQueue.resources = dbAudioQueue.resources.map(metadata =>
+					this.createAudioResource(metadata),
+				);
+				audioQueue.looping = dbAudioQueue.looping;
+
+				froglog.info(
+					"Loaded music queue from db for channel: " + channel.id,
+				);
+			} catch (error) {
+				froglog.error(
+					"Failed to load music queue from db for channel: " +
+						dbAudioQueue._id,
+				);
 			}
-			// wahoo
-
-			// TODO: will skip a bit, is this bad?
-			const seekMs = Date.now() - dbAudioQueue.currentStarted;
-			const seekSeconds = seekMs / 1000;
-
-			await this.addToQueue(
-				channel,
-				textChannel,
-				dbAudioQueue.current,
-				false, // will be stored in resources
-				seekSeconds,
-			);
-
-			// update queue
-			const audioQueue = this.audioQueue.get(channel.id);
-			audioQueue.current.metadata = dbAudioQueue.current;
-			audioQueue.resources = dbAudioQueue.resources.map(metadata =>
-				this.createAudioResource(metadata),
-			);
-			audioQueue.looping = dbAudioQueue.looping;
-
-			froglog.info(
-				"Loaded music queue from db for channel: " + channel.id,
-			);
 		}
 	}
 

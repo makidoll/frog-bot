@@ -241,12 +241,15 @@ export class MusicQueue {
 					"Loaded music queue from db for channel: " + channel.id,
 				);
 			} catch (error) {
+				console.error(error);
 				froglog.error(
 					"Failed to load music queue from db for channel: " +
 						dbAudioQueue._id,
 				);
 			}
 		}
+
+		await this.syncToDatabase();
 	}
 
 	private reaperCallback() {

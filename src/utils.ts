@@ -126,3 +126,20 @@ export function generateRandomId(length: number) {
 
 	return output;
 }
+
+export function splitArrayInto<T>(array: T[], size: number): T[][] {
+	size = Math.floor(size);
+
+	// 10 into sizes of 2 is 5 arrays
+
+	const totalArrays = Math.ceil(array.length / size);
+	const outputArrays: T[][] = [];
+
+	for (let i = 0; i < totalArrays; i++) {
+		outputArrays.push(
+			array.slice(i * size, Math.min(i * size + size, array.length)),
+		);
+	}
+
+	return outputArrays;
+}

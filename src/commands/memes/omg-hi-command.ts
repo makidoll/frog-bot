@@ -17,10 +17,7 @@ export const OmgHiCommand: Command = {
 				.setRequired(true),
 		),
 	onInteraction: async interaction => {
-		const user: ClientUser = interaction.options.getUser(
-			"friend",
-			false,
-		) as any;
+		const user = interaction.options.getUser("friend", false);
 
 		const { username, avatarURL } = await getUsernameAndAvatarURL(
 			user ? user : interaction.user,

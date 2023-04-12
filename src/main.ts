@@ -1,7 +1,7 @@
 import "dotenv/config"; // loads .env file to process.env
 
 import { REST } from "@discordjs/rest";
-import { Routes } from "discord-api-types/v9";
+import { Routes } from "discord-api-types/v10";
 import {
 	ActivityType,
 	ButtonInteraction,

@@ -1,0 +1,122 @@
+<html>
+	<head>
+		<style>
+			@font-face {
+				font-family: "ArialMT";
+				font-style: normal;
+				font-weight: 500;
+				src: url(./ArialMT.woff2) format("woff2");
+			}
+
+			* {
+				margin: 0;
+			}
+
+			/* body {
+				background-image: url("nokia-excel.png");
+				background-position: 0 0;
+				background-size: calc(1440px * 0.5) calc(1080px * 0.5);
+				background-repeat: no-repeat;
+				backdrop-filter: none;
+				isolation: isolate;
+			} */
+
+			.container {
+				position: relative;
+				width: calc(1440px * 0.5);
+				height: calc(1080px * 0.5);
+				isolation: isolate;
+			}
+
+			.svg {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+			}
+
+			.text {
+				font-family: "ArialMT";
+				position: absolute;
+				top: calc(44px);
+				left: 254px;
+				font-size: 20.1px;
+				font-weight: 400;
+				transform-origin: 0 0;
+				transform: rotate(33.9deg) scale(0.91, 1);
+				filter: blur(1px);
+				color: #003388;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				width: 473px;
+			}
+
+			.original {
+				background-image: url("original.png");
+				background-position: 0 0;
+				background-size: 100% 100%;
+				background-repeat: no-repeat;
+				width: calc(1440px * 0.5);
+				height: calc(1080px * 0.5);
+				position: absolute;
+				top: 0;
+				left: 0;
+			}
+
+			/* .left-blur {
+				position: absolute;
+				width: 200px;
+				height: 200px;
+				top: 67px;
+				left: 434px;
+				transform-origin: 0 0;
+				transform: rotate(calc(33.9deg + 90deg));
+				overflow: hidden;
+				mask: linear-gradient(to bottom, transparent 0%, black 50%);
+				backdrop-filter: blur(4px) brightness(2);
+			}
+
+			.right-blur {
+				position: absolute;
+				width: 200px;
+				height: 200px;
+				top: 280px;
+				left: 375px;
+				transform-origin: 0 0;
+				transform: rotate(calc(33.9deg - 90deg));
+				overflow: hidden;
+				mask: linear-gradient(to bottom, transparent 0%, black 50%);
+				backdrop-filter: blur(2px) brightness(1.2);
+			} */
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<div class="text" id="text">
+				WHERE YOU AT?&nbsp;&nbsp;HOLLA WHEN YOU GET THIS
+			</div>
+			<!-- cant screenshot backdrop filter :(  -->
+			<!-- <div class="left-blur"></div>
+			<div class="right-blur"></div> -->
+			<!-- <div class="original" id="original" style="display: none"></div> -->
+		</div>
+		<script>
+			// const test = false;
+
+			// if (test) {
+			// 	let showOriginal = false;
+			// 	setInterval(() => {
+			// 		showOriginal = !showOriginal;
+			// 		document.getElementById("original").style.display =
+			// 			showOriginal ? "block" : "none";
+			// 	}, 500);
+			// }
+
+			function setText(text) {
+				document.getElementById("text").textContent = text;
+			}
+		</script>
+	</body>
+</html>

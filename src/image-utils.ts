@@ -1,6 +1,7 @@
 import * as execa from "execa";
 import * as fs from "fs/promises";
 import * as os from "os";
+import { Writable } from "stream";
 import * as tmp from "tmp-promise";
 import { ToolName, ToolsManager, which } from "./tools-manager";
 
@@ -159,4 +160,76 @@ export async function rembg(
 	);
 
 	return stdout as any;
+}
+
+export interface LayerImage {
+	buffer: Buffer;
+	width: number;
+	height: number;
+	x: number;
+	y: number;
+}
+
+export async function layerImages(
+	width: number,
+	height: number,
+	layers: LayerImage[],
+): Promise<Buffer> {
+	const magick = await getMagickPath("convert");
+
+	// magick -size 100x100 xc:skyblue \
+	// balloon.gif  -geometry  +5+10  -composite \
+	// medical.gif  -geometry +35+30  -composite \
+	// present.gif  -geometry +62+50  -composite \
+	// shading.gif  -geometry +10+55  -composite \
+	// compose.gif
+
+	// pipe index starts at 3
+
+	const subprocess = execa(
+		magick.path,
+		[
+			...magick.args,
+			// define size
+			"-size",
+			width + "x" + height,
+			"xc:none",
+			// images
+			...layers
+				.map((layer, i) => [
+					"fd:" + (i + 3),
+					"-geometry",
+					layer.width +
+						"x" +
+						layer.height +
+						"+" +
+						layer.x +
+						"+" +
+						layer.y,
+					"-composite",
+				])
+				.flat(),
+			// output to png
+			"png:-",
+		],
+		{
+			stdio: [
+				"pipe", // stdin
+				"pipe", // stdout
+				"pipe", // stderr
+				...new Array(layers.length).fill(null).map(() => "pipe"),
+			] as "pipe"[],
+			encoding: null,
+		},
+	);
+
+	for (let i = 0; i < layers.length; i++) {
+		(subprocess.stdio[i + 3] as Writable).write(layers[i].buffer);
+	}
+
+	for (let i = 0; i < layers.length; i++) {
+		(subprocess.stdio[i + 3] as Writable).end();
+	}
+
+	return (await subprocess.finally()).stdout as any;
 }

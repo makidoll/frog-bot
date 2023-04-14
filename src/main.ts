@@ -13,13 +13,13 @@ import {
 import { Command, ServerExclusiveCategories } from "./command";
 import { CouchCommand } from "./commands/frends/couch-command";
 import { FrugCommand } from "./commands/frends/frug-command";
-import { SnakesAndLaddersCommand } from "./commands/games/snakes-and-ladders";
 import { VapourHoldCommand } from "./commands/mechanyx/vapour-hold";
 import { CasCommand } from "./commands/memes-gifs/cas-command";
 import { PetpetCommand } from "./commands/memes-gifs/petpet-command";
 import { SquishyCommand } from "./commands/memes-gifs/squishy-command";
 import { ComfyCommand } from "./commands/memes/comfy-command";
 import { DeepfryCommand } from "./commands/memes/deepfry-command";
+import { NokiaExcelCommand } from "./commands/memes/nokia-excel-command";
 import { OmgHiCommand } from "./commands/memes/omg-hi-command";
 import { LoopCommand } from "./commands/music/loop-command";
 import { PlayCommand } from "./commands/music/play-command";
@@ -54,6 +54,7 @@ export const availableCommands: Command[] = [
 	CasCommand,
 	PetpetCommand,
 	SquishyCommand,
+	NokiaExcelCommand,
 	// > music
 	PlayCommand,
 	StopCommand,

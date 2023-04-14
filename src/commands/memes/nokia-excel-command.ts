@@ -14,10 +14,10 @@ export const NokiaExcelCommand: Command = {
 			option
 				.setName("text")
 				.setDescription("to put on nokia on excel")
-				.setRequired(false),
+				.setRequired(true),
 		),
 	onInteraction: async interaction => {
-		const text = interaction.options.getString("text", false);
+		const text = interaction.options.getString("text", true);
 
 		const textBuffer = await HtmlRenderer.instance.renderHtml(
 			"file://" +

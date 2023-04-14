@@ -9,7 +9,7 @@ export const NokiaExcelCommand: Command = {
 	category: Categories.memes,
 	command: new SlashCommandBuilder()
 		.setName("nokia-excel")
-		.setDescription("📝 put message on nokia on excel")
+		.setDescription("📱📝 put message on nokia on excel")
 		.addStringOption(option =>
 			option
 				.setName("text")

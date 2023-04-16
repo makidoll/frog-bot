@@ -1,7 +1,7 @@
 import axios from "axios";
-import * as decompress from "decompress";
-import * as decompressTarxz from "decompress-tarxz";
-import * as execa from "execa";
+import decompress from "decompress";
+import decompressTarxz from "decompress-tarxz";
+import execa from "execa";
 import * as fs from "fs/promises";
 import * as os from "os";
 import * as path from "path";

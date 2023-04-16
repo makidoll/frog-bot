@@ -18,7 +18,7 @@ import {
 	Message,
 	VoiceBasedChannel,
 } from "discord.js";
-import * as execa from "execa";
+import execa from "execa";
 import * as path from "path";
 import { FFmpeg } from "prism-media";
 import { getPlayInteractionComponents } from "../commands/music/play-command";

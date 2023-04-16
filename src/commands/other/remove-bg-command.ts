@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import * as sharp from "sharp";
+import sharp from "sharp";
 import { Categories, Command } from "../../command.js";
 import { froglog } from "../../froglog.js";
 import { rembg } from "../../image-utils.js";

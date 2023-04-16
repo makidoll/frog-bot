@@ -1,4 +1,4 @@
-import * as execa from "execa";
+import execa from "execa";
 import * as fs from "fs/promises";
 import * as os from "os";
 import { Writable } from "stream";

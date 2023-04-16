@@ -2,7 +2,7 @@ module.exports = {
 	apps: [
 		{
 			name: "Frog Bot",
-			script: "dist/main.js",
+			script: "npm run start",
 		},
 	],
 };

@@ -2,8 +2,7 @@
 	"name": "frog-bot",
 	"private": true,
 	"scripts": {
-		"start": "tsc -w",
-		"build": "tsc",
+		"start": "tsx ./src/main.ts",
 		"install-deps": "playwright install-deps"
 	},
 	"dependencies": {
@@ -35,6 +34,6 @@
 		"@types/decompress": "^4.2.4",
 		"@types/sharp": "^0.31.1",
 		"@types/xml2js": "^0.4.11",
-		"typescript": "^4.9.5"
+		"tsx": "^3.12.6"
 	}
 }

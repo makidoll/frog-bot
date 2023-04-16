@@ -1,9 +1,9 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { ClientUser } from "discord.js";
-import * as execa from "execa";
+import execa from "execa";
 import * as fs from "fs/promises";
 import * as path from "path";
-import * as sharp from "sharp";
+import sharp from "sharp";
 import { Writable } from "stream";
 import { Categories, Command } from "../../command.js";
 import { froglog } from "../../froglog.js";

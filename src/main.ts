@@ -115,7 +115,7 @@ export const availableCommands: Command[] = [
 		"like bug 🐛",
 		"bee movie 🐝",
 		"wormclub 🪱",
-		"do drugs 🍄",
+		"do shrooms 🍄",
 		"crab rave 🦀",
 		"lobster cop 🦞",
 		"shrimptje 🦐",

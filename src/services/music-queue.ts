@@ -55,6 +55,14 @@ export interface AudioQueue {
 	skipping: boolean;
 }
 
+interface YtDlpFormat {
+	resolution: string;
+	abr: number;
+	vbr: number;
+	url: string;
+	protocol: string;
+}
+
 export class MusicQueue {
 	private static _instance: MusicQueue;
 
@@ -373,6 +381,55 @@ export class MusicQueue {
 		});
 	}
 
+	/*
+	private getBestFormat(
+		formats: YtDlpFormat[],
+		type: "audioThenVideo" | "video" = "audioThenVideo",
+	) {
+		if (formats.length == 0) {
+			throw new Error("No formats available");
+		}
+
+		let highestFormats: YtDlpFormat[] = [];
+
+		if (type == "audioThenVideo") {
+			const audioFormats: any[] = formats
+				.filter(f => f.resolution == "audio only" && f.abr)
+				.sort((a, b) => b.abr - a.abr); // sort by highest first
+
+			if (audioFormats.length == 0) {
+				// only video formats available, livestreams for example
+				return this.getBestFormat(formats, "video");
+			}
+
+			const highestAbr = audioFormats[0].abr;
+			highestFormats = audioFormats.filter(f => f.abr == highestAbr);
+		} else {
+			// get highest for video
+
+			const videoFormats: any[] = formats
+				.filter(f => f.resolution != "audio only" && f.vbr)
+				.sort((a, b) => b.vbr - a.vbr); // sort by highest first
+
+			const highestVbr = videoFormats[0].vbr;
+			highestFormats = videoFormats.filter(f => f.vbr == highestVbr);
+		}
+
+		if (highestFormats.length == 1) {
+			// only one format available
+			return highestFormats[0].url;
+		}
+
+		for (let format of highestFormats) {
+			if (format.protocol == "https") return format.url;
+			if (format.protocol == "http") return format.url;
+		}
+
+		// just return first i guess
+		return highestFormats[0].url;
+	}
+	*/
+
 	async getYtDlpInfo(search: string): Promise<AudioQueueMetadata[]> {
 		const isUrl = /^https?:\/\//i.test(search);
 
@@ -398,6 +455,7 @@ export class MusicQueue {
 		}
 
 		// TODO: livestream support maybe?
+		// getBestFormat function helps with this but ffmpeg wont keep playing
 
 		const isUrlWithoutHttp =
 			/^youtube\.com/i.test(search) || /^youtu\.be/i.test(search);
@@ -406,6 +464,8 @@ export class MusicQueue {
 			"--no-warnings",
 			"--ignore-errors",
 			"-J", // single json, -j is multi line json
+			// we're doing this ourselves
+			// ok we're not. todo above related
 			"-f",
 			"bestaudio",
 			isUrl || isUrlWithoutHttp
@@ -440,7 +500,11 @@ export class MusicQueue {
 
 		for (const ytDlpEntry of ytDlpEntries) {
 			try {
-				const { title, url, duration, webpage_url } = ytDlpEntry;
+				const { title, url, formats, duration, webpage_url } =
+					ytDlpEntry;
+
+				// const url = this.getBestFormat(formats);
+				// console.log(url);
 
 				results.push({
 					title,
@@ -453,6 +517,7 @@ export class MusicQueue {
 				});
 			} catch (error) {
 				// ignore i guess
+				console.error(error);
 			}
 		}
 

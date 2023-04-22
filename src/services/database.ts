@@ -13,9 +13,8 @@ export interface MusicAudioQueueDocument {
 	_id: string; // channel id
 	current: AudioQueueMetadata;
 	currentStarted: number; // used for continuing playback
-	resources: AudioQueueMetadata[];
+	resourcesMetadatas: AudioQueueMetadata[];
 	looping: boolean;
-	lastTextChannel: string; // channel id
 }
 
 export interface InstalledToolsDocument {

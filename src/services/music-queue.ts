@@ -21,6 +21,7 @@ import {
 import execa from "execa";
 import * as path from "path";
 import { FFmpeg } from "prism-media";
+import { Categories, ServerExclusiveCategories } from "../command";
 import { getPlayInteractionComponents } from "../commands/music/play-command";
 import { froglog } from "../froglog";
 import { ToolName, ToolsManager, which } from "../tools-manager";
@@ -32,13 +33,15 @@ export interface AudioQueueMetadata {
 	url: string;
 	seconds: number;
 	videoUrl: string;
+	playlistUrl: string;
 	goodbye: boolean;
 	isFile: boolean;
-	followUp?: {
-		message: Message<boolean>;
-		textChannel: GuildTextBasedChannel;
-	};
-	followUpId?: { message: string; textChannel: string };
+	// for updating loop button and knowing where to leave message
+	followUpMessage?: Message<boolean>;
+	textChannel?: GuildTextBasedChannel;
+	// for database
+	followUpMessageId?: string;
+	textChannelId?: string;
 }
 
 // should reflect in database.ts
@@ -46,9 +49,8 @@ export interface AudioQueue {
 	channel: VoiceBasedChannel;
 	current: AudioResource<AudioQueueMetadata>;
 	currentStarted: number; // Date.now()
-	resources: AudioResource<AudioQueueMetadata>[];
+	resourcesMetadatas: AudioQueueMetadata[];
 	looping: boolean;
-	lastTextChannel: GuildTextBasedChannel;
 	// ephemeral
 	skipping: boolean;
 }
@@ -85,16 +87,20 @@ export class MusicQueue {
 	private metadataToDatabaseMetadata(
 		metadata: AudioQueueMetadata,
 	): AudioQueueMetadata {
+		const followUpMessageId =
+			metadata.followUpMessage == null
+				? null
+				: metadata.followUpMessage.id;
+
+		const textChannelId =
+			metadata.textChannel == null ? null : metadata.textChannel.id;
+
 		return {
 			...metadata,
-			followUp: null,
-			followUpId:
-				metadata.followUp == null
-					? { message: null, textChannel: null }
-					: {
-							message: metadata.followUp.message.id,
-							textChannel: metadata.followUp.textChannel.id,
-					  },
+			followUpMessage: null,
+			textChannel: null,
+			followUpMessageId,
+			textChannelId,
 		};
 	}
 
@@ -102,29 +108,32 @@ export class MusicQueue {
 		client: Client,
 		metadata: AudioQueueMetadata,
 	): Promise<AudioQueueMetadata> {
-		const channelId = metadata.followUpId?.textChannel;
-		const messageId = metadata.followUpId?.message;
-		if (channelId == null || messageId == null) return metadata;
+		const textChannelId = metadata.textChannelId;
+		const followUpMessageId = metadata.followUpMessageId;
+
+		if (textChannelId == null || followUpMessageId == null) return metadata;
 
 		// try to get text channel
 		let textChannel: GuildTextBasedChannel; // can be null
 		try {
 			textChannel = (await client.channels.fetch(
-				channelId,
+				textChannelId,
 			)) as GuildTextBasedChannel;
 		} catch (error) {}
 		if (textChannel == null) return metadata;
 
-		metadata.followUp = { textChannel, message: null };
+		metadata.textChannel = textChannel;
 
 		// try to get message
-		let message: Message<boolean>; // can be null
+		let followUpMessage: Message<boolean>; // can be null
 		try {
-			message = await textChannel.messages.fetch(messageId);
+			followUpMessage = await textChannel.messages.fetch(
+				followUpMessageId,
+			);
 		} catch (error) {}
-		if (message == null) return metadata;
+		if (followUpMessage == null) return metadata;
 
-		metadata.followUp.message = message;
+		metadata.followUpMessage = followUpMessage;
 
 		return metadata;
 	}
@@ -157,11 +166,10 @@ export class MusicQueue {
 					audioQueue.current.metadata,
 				),
 				currentStarted: audioQueue.currentStarted,
-				resources: audioQueue.resources.map(({ metadata }) =>
-					this.metadataToDatabaseMetadata(metadata),
+				resourcesMetadatas: audioQueue.resourcesMetadatas.map(
+					metadata => this.metadataToDatabaseMetadata(metadata),
 				),
 				looping: audioQueue.looping,
-				lastTextChannel: audioQueue.lastTextChannel.id,
 			};
 
 			// doesnt error if not found
@@ -190,14 +198,6 @@ export class MusicQueue {
 					dbAudioQueue._id,
 				)) as VoiceBasedChannel;
 
-				// for letting people know bot disconnected due to inactivity
-				let textChannel: GuildTextBasedChannel; // can be null
-				try {
-					textChannel = (await client.channels.fetch(
-						dbAudioQueue.lastTextChannel,
-					)) as GuildTextBasedChannel;
-				} catch (error) {}
-
 				// convert metadata from database so channels are fetch for
 				// loop buttons on follow ups
 				try {
@@ -207,12 +207,16 @@ export class MusicQueue {
 							dbAudioQueue.current,
 						);
 				} catch (error) {}
-				for (let i = 0; i < dbAudioQueue.resources.length; i++) {
+				for (
+					let i = 0;
+					i < dbAudioQueue.resourcesMetadatas.length;
+					i++
+				) {
 					try {
-						dbAudioQueue.resources[i] =
+						dbAudioQueue.resourcesMetadatas[i] =
 							await this.databaseMetadataToMetadata(
 								client,
-								dbAudioQueue.resources[i],
+								dbAudioQueue.resourcesMetadatas[i],
 							);
 					} catch (error) {}
 				}
@@ -223,18 +227,14 @@ export class MusicQueue {
 
 				await this.addToQueue(
 					channel,
-					textChannel,
-					dbAudioQueue.current,
-					false, // will be stored in resources
+					[dbAudioQueue.current],
 					seekSeconds,
 				);
 
 				// update queue
 				const audioQueue = this.audioQueue.get(channel.id);
 				audioQueue.current.metadata = dbAudioQueue.current;
-				audioQueue.resources = dbAudioQueue.resources.map(metadata =>
-					this.createAudioResource(metadata),
-				);
+				audioQueue.resourcesMetadatas = dbAudioQueue.resourcesMetadatas;
 				audioQueue.looping = dbAudioQueue.looping;
 
 				froglog.info(
@@ -269,8 +269,10 @@ export class MusicQueue {
 			if (!anyoneConnected) {
 				this.disconnectAndCleanup(queue.channel);
 
-				if (queue.lastTextChannel != null) {
-					queue.lastTextChannel.send(
+				const textChannel = queue.current?.metadata?.textChannel;
+
+				if (textChannel != null) {
+					textChannel.send(
 						"🪫 ribbit, i left because nobody was listening. *sad frog noises*",
 					);
 				}
@@ -371,7 +373,7 @@ export class MusicQueue {
 		});
 	}
 
-	async getInfo(search: string): Promise<AudioQueueMetadata> {
+	async getYtDlpInfo(search: string): Promise<AudioQueueMetadata[]> {
 		const isUrl = /^https?:\/\//i.test(search);
 
 		if (isUrl) {
@@ -381,14 +383,17 @@ export class MusicQueue {
 			if (this.ffmpegExtensions.includes(ext)) {
 				const seconds = await this.fetchLengthInSeconds(search);
 
-				return {
-					title: search,
-					url: search,
-					seconds,
-					videoUrl: search,
-					goodbye: false,
-					isFile: false,
-				};
+				return [
+					{
+						title: search,
+						url: search,
+						seconds,
+						videoUrl: search,
+						playlistUrl: null,
+						goodbye: false,
+						isFile: false,
+					},
+				];
 			}
 		}
 
@@ -398,7 +403,9 @@ export class MusicQueue {
 			/^youtube\.com/i.test(search) || /^youtu\.be/i.test(search);
 
 		const args = [
-			"-j",
+			"--no-warnings",
+			"--ignore-errors",
+			"-J", // single json, -j is multi line json
 			"-f",
 			"bestaudio",
 			isUrl || isUrlWithoutHttp
@@ -411,18 +418,45 @@ export class MusicQueue {
 		const { stdout } = await execa(
 			await ToolsManager.instance.getPath(ToolName.yt_dlp),
 			args,
+			{
+				timeout: 0,
+				maxBuffer: 100_000_000, // 100 MB
+				reject: false, // dont error, can happen when video deleted in playlist
+			},
 		);
 
-		const { title, url, duration, webpage_url } = JSON.parse(stdout);
+		const results: AudioQueueMetadata[] = [];
 
-		return {
-			title,
-			url,
-			seconds: duration,
-			videoUrl: tryShortenYoutubeLink(webpage_url),
-			goodbye: false,
-			isFile: false,
-		};
+		const ytDlpResult = JSON.parse(stdout);
+		let ytDlpEntries: any[] = [];
+		let playlistUrl = null;
+
+		if (ytDlpResult._type == "video") {
+			ytDlpEntries.push(ytDlpResult);
+		} else if (ytDlpResult._type == "playlist") {
+			ytDlpEntries = ytDlpResult.entries;
+			playlistUrl = ytDlpResult.webpage_url;
+		}
+
+		for (const ytDlpEntry of ytDlpEntries) {
+			try {
+				const { title, url, duration, webpage_url } = ytDlpEntry;
+
+				results.push({
+					title,
+					url,
+					seconds: duration,
+					videoUrl: tryShortenYoutubeLink(webpage_url),
+					playlistUrl,
+					goodbye: false,
+					isFile: false,
+				});
+			} catch (error) {
+				// ignore i guess
+			}
+		}
+
+		return results;
 	}
 
 	private async ensureConnection(
@@ -490,6 +524,8 @@ export class MusicQueue {
 			this.audioPlayers.delete(channel.id);
 		}
 
+		// TODO: will queue.current linger ffmpeg process?
+
 		this.audioQueue.delete(channel.id);
 
 		this.syncToDatabase();
@@ -556,7 +592,7 @@ export class MusicQueue {
 		return this.createAudioResource(audioResource.metadata);
 	}
 
-	private async getOdemonGoodbyeResource() {
+	private async getOdemonGoodbyeMetadata(): Promise<AudioQueueMetadata> {
 		// thank you odemon <3
 
 		const cursedChance = 0.05; // %
@@ -568,14 +604,15 @@ export class MusicQueue {
 
 		const filePath = path.resolve(__dirname, "../../assets/", filename);
 
-		return this.createAudioResource({
+		return {
 			title: "frog bot says goodbye",
 			url: filePath,
 			seconds: await this.fetchLengthInSeconds(filePath), // should i be concerned
-			videoUrl: "",
+			videoUrl: null,
+			playlistUrl: null,
 			goodbye: true,
 			isFile: true,
-		});
+		};
 	}
 
 	private stateChangeCallback(channel: VoiceBasedChannel) {
@@ -611,7 +648,7 @@ export class MusicQueue {
 				// if we're looping this'll make sure we dont skip again
 				queue.skipping = false;
 
-				if (queue.resources.length == 0) {
+				if (queue.resourcesMetadatas.length == 0) {
 					// disconnect if empty
 					// wait half a second just incase its still streaming
 					setTimeout(() => {
@@ -620,10 +657,11 @@ export class MusicQueue {
 					}, 500);
 				} else {
 					// shift song and play
-					const audioResource = queue.resources.shift();
-					queue.current = audioResource;
+					const metadata = queue.resourcesMetadatas.shift();
+					const resource = this.createAudioResource(metadata);
+					queue.current = resource;
 					queue.currentStarted = Date.now();
-					player.play(audioResource);
+					player.play(resource);
 
 					this.syncToDatabase();
 				}
@@ -633,34 +671,30 @@ export class MusicQueue {
 
 	async addToQueue(
 		channel: VoiceBasedChannel,
-		textChannel: GuildTextBasedChannel,
-		metadata: AudioQueueMetadata,
-		playOdemonGoodbyeAfter = false,
-		seekSeconds: number = 0,
+		metadatas: AudioQueueMetadata[],
+		seekSecondsForFirst = 0,
 	) {
-		const audioResource = this.createAudioResource(metadata, seekSeconds);
-
 		const foundQueue = this.audioQueue.get(channel.id);
 		if (foundQueue != null) {
 			// already a queue available, so add song
 			// but we should add it before a found goodbye resource
 
-			const goodbyeIndex = foundQueue.resources.findIndex(
-				resource => (resource.metadata as any).goodbye,
+			const goodbyeIndex = foundQueue.resourcesMetadatas.findIndex(
+				resource => resource.goodbye,
 			);
 
-			if (goodbyeIndex == -1) {
-				foundQueue.resources.push(audioResource);
-			} else {
-				// add right before last resource
-				foundQueue.resources.splice(
-					foundQueue.resources.length - 1,
-					0,
-					audioResource,
-				);
+			for (const metadata of metadatas) {
+				if (goodbyeIndex == -1) {
+					foundQueue.resourcesMetadatas.push(metadata);
+				} else {
+					// add right before last resource
+					foundQueue.resourcesMetadatas.splice(
+						foundQueue.resourcesMetadatas.length - 1,
+						0,
+						metadata,
+					);
+				}
 			}
-
-			foundQueue.lastTextChannel = textChannel;
 
 			this.syncToDatabase();
 
@@ -669,28 +703,43 @@ export class MusicQueue {
 
 		// no queue found so lets make one and immediately play
 
+		const resourcesMetadatas = metadatas;
+
+		const currentMetadata = resourcesMetadatas.shift();
+		const current = this.createAudioResource(
+			currentMetadata,
+			seekSecondsForFirst,
+		);
+
+		const playOdemonGoodbyeAfter = process.env.DEV
+			? true
+			: ServerExclusiveCategories[Categories.mechanyx].includes(
+					channel.guildId,
+			  );
+
+		if (playOdemonGoodbyeAfter) {
+			resourcesMetadatas.push(await this.getOdemonGoodbyeMetadata());
+		}
+
 		this.audioQueue.set(channel.id, {
 			channel,
-			current: audioResource,
-			currentStarted: Date.now() - seekSeconds * 1000,
-			resources: playOdemonGoodbyeAfter
-				? [await this.getOdemonGoodbyeResource()]
-				: [],
+			current,
+			currentStarted: Date.now() - seekSecondsForFirst * 1000,
+			resourcesMetadatas,
 			looping: false,
 			skipping: false,
-			lastTextChannel: textChannel,
 		});
 
 		const connection = await this.ensureConnection(channel);
 		const player = await this.ensurePlayer(channel, connection);
 
 		// when audio resource fails, throw so command can follow up nicely
-		if (audioResource.ended) {
+		if (current.ended) {
 			this.disconnectAndCleanup(channel);
 			throw new Error("Audio resource ended early");
 		}
 
-		player.play(audioResource);
+		player.play(current);
 
 		// listen to state change when song finishes
 		// outsourced because its best we dont reference anything from here except channel
@@ -708,8 +757,8 @@ export class MusicQueue {
 		if (queue == null) throw new Error("Queue not found");
 
 		const nextSongTitle =
-			queue.resources.length > 0
-				? queue.resources[0].metadata.title
+			queue.resourcesMetadatas.length > 0
+				? queue.resourcesMetadatas[0].title
 				: null;
 
 		// if we're looping, it won't know if its an intentional skip or not
@@ -732,8 +781,8 @@ export class MusicQueue {
 
 		// try edit current interactions
 		try {
-			if (queue.current.metadata.followUp != null) {
-				queue.current.metadata.followUp.message.edit({
+			if (queue.current.metadata.followUpMessage != null) {
+				queue.current.metadata.followUpMessage.edit({
 					components: getPlayInteractionComponents(
 						queue.current.metadata,
 						queue,
@@ -745,14 +794,11 @@ export class MusicQueue {
 		}
 
 		// try all future interactions
-		for (const resource of queue.resources) {
+		for (const metadata of queue.resourcesMetadatas) {
 			try {
-				if (resource.metadata.followUp == null) continue;
-				resource.metadata.followUp.message.edit({
-					components: getPlayInteractionComponents(
-						resource.metadata,
-						queue,
-					),
+				if (metadata.followUpMessage == null) continue;
+				metadata.followUpMessage.edit({
+					components: getPlayInteractionComponents(metadata, queue),
 				});
 			} catch (error) {
 				console.error(error);

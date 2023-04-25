@@ -90,6 +90,8 @@ export class MusicQueue {
 
 		const reaperInterval = 1000 * 60; // every minute
 		setInterval(this.reaperCallback.bind(this), reaperInterval);
+
+		// TODO: allow moving bot whilst playing
 	}
 
 	private metadataToDatabaseMetadata(

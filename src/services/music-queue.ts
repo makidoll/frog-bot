@@ -651,12 +651,6 @@ export class MusicQueue {
 		});
 	}
 
-	private recreateAudioResource(
-		audioResource: AudioResource<AudioQueueMetadata>,
-	) {
-		return this.createAudioResource(audioResource.metadata);
-	}
-
 	private async getOdemonGoodbyeMetadata(): Promise<AudioQueueMetadata> {
 		// thank you odemon <3
 
@@ -702,13 +696,18 @@ export class MusicQueue {
 				queue.looping &&
 				queue.skipping == false &&
 				// dont loop goodbye
-				!queue.current.metadata.goodbye
+				!queue.current?.metadata?.goodbye
 			) {
-				queue.current = this.recreateAudioResource(queue.current);
-				queue.currentStarted = Date.now();
-				player.play(queue.current);
+				// adding timeout might help?
+				setTimeout(() => {
+					const metadata = queue.current.metadata;
+					const resource = this.createAudioResource(metadata);
+					queue.current = resource;
+					queue.currentStarted = Date.now();
+					player.play(queue.current);
 
-				this.syncToDatabase();
+					this.syncToDatabase();
+				}, 500);
 			} else {
 				// if we're looping this'll make sure we dont skip again
 				queue.skipping = false;

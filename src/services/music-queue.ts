@@ -95,20 +95,12 @@ export class MusicQueue {
 	private metadataToDatabaseMetadata(
 		metadata: AudioQueueMetadata,
 	): AudioQueueMetadata {
-		const followUpMessageId =
-			metadata.followUpMessage == null
-				? null
-				: metadata.followUpMessage.id;
-
-		const textChannelId =
-			metadata.textChannel == null ? null : metadata.textChannel.id;
-
 		return {
 			...metadata,
 			followUpMessage: null,
 			textChannel: null,
-			followUpMessageId,
-			textChannelId,
+			followUpMessageId: metadata?.followUpMessage?.id,
+			textChannelId: metadata?.textChannel?.id,
 		};
 	}
 

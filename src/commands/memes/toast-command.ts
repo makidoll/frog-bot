@@ -1,23 +1,22 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { ClientUser } from "discord.js";
 import * as path from "path";
 import { Categories, Command } from "../../command";
 import { HtmlRenderer } from "../../services/html-renderer";
 import { downloadToDataUri, getUsernameAndAvatarURL } from "../../utils";
 
-export const OmgHiCommand: Command = {
+export const ToastCommand: Command = {
 	category: Categories.memes,
 	command: new SlashCommandBuilder()
-		.setName("omghi")
-		.setDescription("😔 im so depressed, but omg hi!! a frend!")
+		.setName("toast")
+		.setDescription("🍞 put fren on toast")
 		.addUserOption(option =>
 			option
 				.setName("friend")
-				.setDescription("need fren")
-				.setRequired(true),
+				.setDescription("need fren or it'll be self")
+				.setRequired(false),
 		),
 	onInteraction: async interaction => {
-		const user = interaction.options.getUser("friend", true);
+		const user = interaction.options.getUser("friend", false);
 
 		const { username, avatarURL } = await getUsernameAndAvatarURL(
 			user ? user : interaction.user,
@@ -26,11 +25,11 @@ export const OmgHiCommand: Command = {
 
 		const buffer = await HtmlRenderer.instance.renderHtml(
 			"file://" +
-				path.resolve(__dirname, "../../../assets/omg-hi/omg-hi.html"),
+				path.resolve(__dirname, "../../../assets/toast/toast.html"),
 			async page => {
 				await page.setViewportSize({
-					width: 493,
-					height: 579,
+					width: 800,
+					height: 600,
 				});
 				await page.evaluate(
 					"setNameAndAvatar(" +

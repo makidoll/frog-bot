@@ -1,0 +1,103 @@
+<html>
+	<head>
+		<style>
+			@font-face {
+				font-family: "Littlefox";
+				font-style: normal;
+				font-weight: 400;
+				src: url(../Littlefox-Regular.woff2) format("woff2");
+			}
+
+			* {
+				margin: 0;
+			}
+
+			body {
+				font-family: "Littlefox";
+				overflow: hidden;
+			}
+
+			.toast {
+				background-image: url(toast.jpg);
+				background-position: center;
+				background-repeat: no-repeat;
+				background-size: cover;
+				width: 800px;
+				height: 600px;
+			}
+
+			.avatar {
+				position: absolute;
+				margin: auto;
+				width: 340px;
+				height: 340px;
+				top: 80px;
+				left: 225px;
+				transform: rotate(-3deg);
+				filter: grayscale(1) blur(2px) brightness(0.7);
+				/* border-radius: 999px; */
+				mask-image: radial-gradient(
+					rgba(0, 0, 0, 1) 50%,
+					transparent 75%
+				);
+			}
+
+			.name {
+				position: absolute;
+				margin: auto;
+				width: 340px;
+				height: 80px;
+				top: 430px;
+				left: 240px;
+				transform: rotate(-3deg);
+				filter: blur(2px);
+				/* background-color: red; */
+				font-size: 80px;
+				text-align: center;
+				color: #000;
+			}
+
+			.first {
+				mix-blend-mode: overlay;
+			}
+
+			.second {
+				mix-blend-mode: soft-light;
+				opacity: 1;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="toast">
+			<img class="avatar first" />
+			<img class="avatar second" />
+			<img class="avatar second" />
+			<div class="name first"></div>
+			<div class="name second"></div>
+			<div class="name second"></div>
+		</div>
+		<script src="../textFit.min.js"></script>
+		<script>
+			const avatarEls = document.getElementsByClassName("avatar");
+			const nameEls = document.getElementsByClassName("name");
+
+			function setNameAndAvatar(name, avatar) {
+				for (const avatarEl of avatarEls) {
+					avatarEl.src = avatar;
+				}
+
+				for (const nameEl of nameEls) {
+					nameEl.textContent = name;
+					textFit(nameEl, {
+						maxFontSize: 80,
+					});
+				}
+			}
+
+			setNameAndAvatar(
+				"maki",
+				"https://cdn.discordapp.com/icons/1086714710008791121/a551b02fc31578adb57d7078a87df448.webp",
+			);
+		</script>
+	</body>
+</html>

@@ -21,6 +21,7 @@ import { ComfyCommand } from "./commands/memes/comfy-command";
 import { DeepfryCommand } from "./commands/memes/deepfry-command";
 import { NokiaExcelCommand } from "./commands/memes/nokia-excel-command";
 import { OmgHiCommand } from "./commands/memes/omg-hi-command";
+import { ToastCommand } from "./commands/memes/toast-command";
 import { LoopCommand } from "./commands/music/loop-command";
 import { PlayCommand } from "./commands/music/play-command";
 import { SkipCommand } from "./commands/music/skip-command";
@@ -50,6 +51,7 @@ export const availableCommands: Command[] = [
 	ComfyCommand,
 	DeepfryCommand,
 	OmgHiCommand,
+	ToastCommand,
 	// > memes gifs
 	CasCommand,
 	PetpetCommand,

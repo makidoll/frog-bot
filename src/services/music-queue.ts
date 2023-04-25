@@ -495,7 +495,11 @@ export class MusicQueue {
 			ytDlpEntries.push(ytDlpResult);
 		} else if (ytDlpResult._type == "playlist") {
 			ytDlpEntries = ytDlpResult.entries;
-			playlistUrl = ytDlpResult.webpage_url;
+
+			// only set playlist url if there's more than one song
+			if (ytDlpResult.entries.length > 1) {
+				playlistUrl = ytDlpResult.webpage_url;
+			}
 		}
 
 		for (const ytDlpEntry of ytDlpEntries) {

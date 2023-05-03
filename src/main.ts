@@ -37,12 +37,14 @@ import { HtmlRenderer } from "./services/html-renderer";
 import { MusicQueue } from "./services/music-queue";
 import { ToolsManager } from "./tools-manager";
 import { customIdMatch, shuffleArray } from "./utils";
+import { YtDlpCommand } from "./commands/other/yt-dlp";
 
 // export const commandPrefix = "frog ";
 export const availableCommands: Command[] = [
 	// > other
 	HelpCommand,
 	RemoveBgCommand,
+	YtDlpCommand,
 	FeatureplsCommand,
 	// > frends
 	CouchCommand,

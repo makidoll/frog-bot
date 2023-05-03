@@ -143,3 +143,15 @@ export function splitArrayInto<T>(array: T[], size: number): T[][] {
 
 	return outputArrays;
 }
+
+export function formatBytes(bytes: number) {
+	if (bytes < 1000) return Math.floor(bytes) + " B";
+	bytes /= 1000;
+	if (bytes < 1000) return Math.floor(bytes) + " kB";
+	bytes /= 1000;
+	if (bytes < 1000) return bytes.toFixed(2) + " MB";
+	bytes /= 1000;
+	if (bytes < 1000) return bytes.toFixed(2) + " GB";
+	bytes /= 1000;
+	return bytes.toFixed(2) + " TB";
+}

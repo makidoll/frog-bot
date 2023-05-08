@@ -13,6 +13,7 @@ import {
 import { Command, ServerExclusiveCategories } from "./command";
 import { CouchCommand } from "./commands/frends/couch-command";
 import { FrugCommand } from "./commands/frends/frug-command";
+import { SaveAllImagesToFolderCommand } from "./commands/makis-home/save-all-images-to-folder-command";
 import { VapourHoldCommand } from "./commands/mechanyx/vapour-hold";
 import { CasCommand } from "./commands/memes-gifs/cas-command";
 import { PetpetCommand } from "./commands/memes-gifs/petpet-command";
@@ -29,6 +30,7 @@ import { StopCommand } from "./commands/music/stop-command";
 import { FeatureplsCommand } from "./commands/other/featurepls-command";
 import { HelpCommand } from "./commands/other/help-command";
 import { RemoveBgCommand } from "./commands/other/remove-bg-command";
+import { YtDlpCommand } from "./commands/other/yt-dlp";
 import { froglog } from "./froglog";
 import { initReactionRoles } from "./reaction-roles";
 import { initReminders } from "./reminders";
@@ -37,7 +39,6 @@ import { HtmlRenderer } from "./services/html-renderer";
 import { MusicQueue } from "./services/music-queue";
 import { ToolsManager } from "./tools-manager";
 import { customIdMatch, shuffleArray } from "./utils";
-import { YtDlpCommand } from "./commands/other/yt-dlp";
 
 // export const commandPrefix = "frog ";
 export const availableCommands: Command[] = [
@@ -68,6 +69,8 @@ export const availableCommands: Command[] = [
 	// SnakesAndLaddersCommand,
 	// > mechanyx
 	VapourHoldCommand,
+	// > maki's home
+	SaveAllImagesToFolderCommand,
 ];
 
 (async () => {

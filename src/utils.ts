@@ -1,5 +1,6 @@
 import axios from "axios";
 import { ClientUser, Guild, ImageURLOptions, User } from "discord.js";
+import * as fs from "fs/promises";
 
 export async function downloadToBuffer(url: string) {
 	try {
@@ -154,4 +155,12 @@ export function formatBytes(bytes: number) {
 	if (bytes < 1000) return bytes.toFixed(2) + " GB";
 	bytes /= 1000;
 	return bytes.toFixed(2) + " TB";
+}
+
+export async function fileExists(filePath: string) {
+	try {
+		const stat = await fs.stat(filePath);
+		return stat.isFile();
+	} catch (error) {}
+	return false;
 }

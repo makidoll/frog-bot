@@ -77,8 +77,8 @@ export const YtDlpCommand: Command = {
 				],
 			});
 		} catch (error) {
-			await interaction.editReply("aw ribbit... it failed sorry :(");
 			froglog.error(error);
+			await interaction.editReply("aw ribbit... it failed sorry :(");
 		}
 	},
 };

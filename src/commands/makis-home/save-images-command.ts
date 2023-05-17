@@ -1,12 +1,15 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { Categories, Command } from "../../command";
+import axios from "axios";
+import axiosRetry from "axios-retry";
 import { GuildTextBasedChannel, Message } from "discord.js";
 import * as fs from "fs/promises";
 import * as path from "path";
-import { fileExists, plural } from "../../utils";
 import slugify from "slugify";
-import axios from "axios";
+import { Categories, Command } from "../../command";
 import { froglog } from "../../froglog";
+import { fileExists, plural } from "../../utils";
+
+axiosRetry(axios, { retries: 3 });
 
 interface SaveImagesResult {
 	alreadySaved: number;
@@ -143,7 +146,7 @@ export const SaveImagesCommand: Command = {
 		async function updateReply() {
 			const content = channelsAndResults
 				.map(({ channel, output }) => `**${channel.name}:** ${output}`)
-				.join("\n");
+				.join("\n\n");
 			await interaction.editReply(content);
 		}
 

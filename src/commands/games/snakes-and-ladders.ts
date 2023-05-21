@@ -30,6 +30,11 @@ enum SnakesAndLaddersMoved {
 	Ladder = "Ladder",
 }
 
+// TODO: if 42 or 69 make funny message
+// TODO: fix lobby image cause its broken
+// TODO: add a line showing where you've went
+// TODO: when finishing, the end user is too high up left
+
 class SnakesAndLaddersGame {
 	gameId: string;
 

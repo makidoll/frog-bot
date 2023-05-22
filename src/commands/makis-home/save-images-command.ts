@@ -1,7 +1,15 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import axios from "axios";
 import axiosRetry from "axios-retry";
-import { GuildTextBasedChannel, Message } from "discord.js";
+import {
+	ActionRowBuilder,
+	ButtonBuilder,
+	ButtonInteraction,
+	ButtonStyle,
+	ChatInputCommandInteraction,
+	GuildTextBasedChannel,
+	Message,
+} from "discord.js";
 import * as fs from "fs/promises";
 import * as path from "path";
 import slugify from "slugify";
@@ -115,66 +123,94 @@ async function saveImages(
 	};
 }
 
+async function runCommand(
+	interaction: ChatInputCommandInteraction | ButtonInteraction,
+) {
+	await interaction.deferReply();
+
+	const channelIds = [
+		"1089890698926510120", // cute characters
+		"1089891680586563665", // cute clothes
+		"1089642397450903662", // uwaa whats this
+		"1095731990831059074", // mercy and friends
+		"1100935621289185380", // samus aran
+		"1107284614894071838", // jester flamboyancy
+	];
+
+	const channelsAndResults: {
+		channel: GuildTextBasedChannel;
+		output: string;
+	}[] = [];
+
+	for (const channelId of channelIds) {
+		const channel = await interaction.guild.channels.fetch(channelId);
+		channelsAndResults.push({
+			channel: channel as GuildTextBasedChannel,
+			output: "*fetching...*",
+		});
+	}
+
+	let done = false;
+
+	async function updateReply() {
+		const content = channelsAndResults
+			.map(({ channel, output }) => `**${channel.name}:** ${output}`)
+			.join("\n\n");
+
+		const components = done
+			? [
+					new ActionRowBuilder<ButtonBuilder>().addComponents(
+						new ButtonBuilder()
+							.setCustomId("save-images-run-again")
+							.setLabel("run save images again")
+							.setEmoji("🔄")
+							.setStyle(ButtonStyle.Secondary),
+					),
+			  ]
+			: [];
+
+		await interaction.editReply({
+			content,
+			components,
+		});
+	}
+
+	await updateReply();
+
+	for (let i = 0; i < channelsAndResults.length; i++) {
+		try {
+			const { alreadySaved, imagesAdded, saveDir } = await saveImages(
+				channelsAndResults[i].channel,
+			);
+
+			channelsAndResults[i].output = `ribbit! already saved **${plural(
+				alreadySaved,
+				"image",
+			)}** and added **${imagesAdded} more**\n\`${saveDir}\``;
+		} catch (error) {
+			froglog.error(error);
+
+			channelsAndResults[i].output = `aw ribbit... something went wrong`;
+		}
+
+		if (i >= channelsAndResults.length - 1) {
+			done = true;
+		}
+
+		await updateReply();
+	}
+}
+
 export const SaveImagesCommand: Command = {
 	category: Categories.makisHome,
 	command: new SlashCommandBuilder()
 		.setName("save-images")
 		.setDescription("🖼️ save images from certain channels to folders"),
 	onInteraction: async interaction => {
-		await interaction.deferReply();
-
-		const channelIds = [
-			"1089890698926510120", // cute characters
-			"1089891680586563665", // cute clothes
-			"1089642397450903662", // uwaa whats this
-			"1095731990831059074", // mercy and friends
-			"1100935621289185380", // samus aran
-			"1107284614894071838", // jester flamboyancy
-		];
-
-		const channelsAndResults: {
-			channel: GuildTextBasedChannel;
-			output: string;
-		}[] = [];
-
-		for (const channelId of channelIds) {
-			const channel = await interaction.guild.channels.fetch(channelId);
-			channelsAndResults.push({
-				channel: channel as GuildTextBasedChannel,
-				output: "*fetching...*",
-			});
-		}
-
-		async function updateReply() {
-			const content = channelsAndResults
-				.map(({ channel, output }) => `**${channel.name}:** ${output}`)
-				.join("\n\n");
-			await interaction.editReply(content);
-		}
-
-		await updateReply();
-
-		for (let i = 0; i < channelsAndResults.length; i++) {
-			try {
-				const { alreadySaved, imagesAdded, saveDir } = await saveImages(
-					channelsAndResults[i].channel,
-				);
-
-				channelsAndResults[
-					i
-				].output = `ribbit! already saved **${plural(
-					alreadySaved,
-					"image",
-				)}** and added **${imagesAdded} more**\n\`${saveDir}\``;
-			} catch (error) {
-				froglog.error(error);
-
-				channelsAndResults[
-					i
-				].output = `aw ribbit... something went wrong`;
-			}
-
-			await updateReply();
-		}
+		await runCommand(interaction);
+	},
+	buttonCustomIds: ["save-images-run-again"],
+	async onButton(interaction) {
+		await runCommand(interaction);
 	},
 };

@@ -19,16 +19,16 @@ import { plural } from "../../utils";
 
 axiosRetry(axios, { retries: 3 });
 
-interface SaveImagesResult {
+interface SaveAttachmentsResult {
 	total: number;
 	added: number;
 	removed: number;
 	saveDir: string;
 }
 
-async function saveImages(
+async function saveAttachments(
 	channel: GuildTextBasedChannel,
-): Promise<SaveImagesResult> {
+): Promise<SaveAttachmentsResult> {
 	let allMessages: Message<true>[] = [];
 
 	let allFetched = false;
@@ -50,31 +50,34 @@ async function saveImages(
 		lastMessageId = messages[messages.length - 1].id;
 	}
 
-	const images: { id: string; urls: string[] }[] = [];
+	const attachments: { id: string; urls: string[] }[] = [];
 
 	for (const message of allMessages) {
-		const attachments = Array.from(message.attachments.values());
-		if (attachments.length == 0) continue;
+		const messageAttachments = Array.from(message.attachments.values());
+		if (messageAttachments.length == 0) continue;
 
-		images.push({ id: message.id, urls: attachments.map(a => a.url) });
+		attachments.push({
+			id: message.id,
+			urls: messageAttachments.map(a => a.url),
+		});
 	}
 
 	let downloads: { filename: string; url: string }[] = [];
 
-	for (const image of images) {
-		if (image.urls.length == 1) {
-			const ext = path.extname(new URL(image.urls[0]).pathname);
+	for (const attachment of attachments) {
+		if (attachment.urls.length == 1) {
+			const ext = path.extname(new URL(attachment.urls[0]).pathname);
 			downloads.push({
-				filename: image.id + ext,
-				url: image.urls[0],
+				filename: attachment.id + ext,
+				url: attachment.urls[0],
 			});
 		} else {
 			downloads = [
 				...downloads,
-				...image.urls.map((url, i) => {
+				...attachment.urls.map((url, i) => {
 					const ext = path.extname(new URL(url).pathname);
 					return {
-						filename: image.id + "-" + (i + 1) + ext,
+						filename: attachment.id + "-" + (i + 1) + ext,
 						url,
 					};
 				}),
@@ -89,14 +92,14 @@ async function saveImages(
 
 	const saveDir = path.resolve(
 		__dirname,
-		"../../../images/",
+		"../../../attachments/",
 		slugify(channel.guild.name, slugifyOptions),
 		slugify(channel.name, slugifyOptions),
 	);
 
 	fs.mkdir(saveDir, { recursive: true });
 
-	// remove images that dont need to exist anymore
+	// remove attachments that dont need to exist anymore
 
 	let removed = 0;
 
@@ -176,8 +179,8 @@ async function runCommand(
 			? [
 					new ActionRowBuilder<ButtonBuilder>().addComponents(
 						new ButtonBuilder()
-							.setCustomId("save-images-run-again")
-							.setLabel("run save images again")
+							.setCustomId("save-attachments-run-again")
+							.setLabel("run save attachments again")
 							.setEmoji("🔄")
 							.setStyle(ButtonStyle.Secondary),
 					),
@@ -194,7 +197,7 @@ async function runCommand(
 
 	for (let i = 0; i < channelsAndResults.length; i++) {
 		try {
-			const { total, added, removed, saveDir } = await saveImages(
+			const { total, added, removed, saveDir } = await saveAttachments(
 				channelsAndResults[i].channel,
 			);
 
@@ -203,7 +206,7 @@ async function runCommand(
 
 			const output = `${addedText}, ${removedText}, total: ${plural(
 				total,
-				"image",
+				"attachment",
 			)}`;
 
 			channelsAndResults[i].output = output;
@@ -221,16 +224,16 @@ async function runCommand(
 	}
 }
 
-export const SaveImagesCommand: Command = {
+export const SaveAttachmentsCommand: Command = {
 	category: Categories.makisHome,
 	command: new SlashCommandBuilder()
-		.setName("save-images")
-		.setDescription("🖼️ save images from certain channels to folders"),
+		.setName("save-attachments")
+		.setDescription("🖼️ save attachments from certain channels to folders"),
 	onInteraction: async interaction => {
 		await interaction.deferReply();
 		await runCommand(interaction);
 	},
-	buttonCustomIds: ["save-images-run-again"],
+	buttonCustomIds: ["save-attachments-run-again"],
 	async onButton(interaction) {
 		await interaction.deferUpdate();
 		await runCommand(interaction);

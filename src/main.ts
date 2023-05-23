@@ -13,7 +13,7 @@ import {
 import { Command, ServerExclusiveCategories } from "./command";
 import { CouchCommand } from "./commands/frends/couch-command";
 import { FrugCommand } from "./commands/frends/frug-command";
-import { SaveImagesCommand } from "./commands/makis-home/save-images-command";
+import { SaveAttachmentsCommand } from "./commands/makis-home/save-attachments-command";
 import { VapourHoldCommand } from "./commands/mechanyx/vapour-hold-command";
 import { CasCommand } from "./commands/memes-gifs/cas-command";
 import { PetpetCommand } from "./commands/memes-gifs/petpet-command";
@@ -70,7 +70,7 @@ export const availableCommands: Command[] = [
 	// > mechanyx
 	VapourHoldCommand,
 	// > maki's home
-	SaveImagesCommand,
+	SaveAttachmentsCommand,
 ];
 
 (async () => {

@@ -15,13 +15,14 @@ import * as path from "path";
 import slugify from "slugify";
 import { Categories, Command } from "../../command";
 import { froglog } from "../../froglog";
-import { fileExists, plural } from "../../utils";
+import { plural } from "../../utils";
 
 axiosRetry(axios, { retries: 3 });
 
 interface SaveImagesResult {
-	alreadySaved: number;
-	imagesAdded: number;
+	total: number;
+	added: number;
+	removed: number;
 	saveDir: string;
 }
 
@@ -95,16 +96,29 @@ async function saveImages(
 
 	fs.mkdir(saveDir, { recursive: true });
 
-	let alreadySaved = 0;
-	let imagesAdded = 0;
+	// remove images that dont need to exist anymore
+
+	let removed = 0;
+
+	const alreadyFilenames = await fs.readdir(saveDir);
+
+	for (const alreadyFilename of alreadyFilenames) {
+		if (!downloads.find(d => d.filename == alreadyFilename)) {
+			await fs.rm(path.resolve(saveDir, alreadyFilename));
+			removed++;
+		}
+	}
+
+	// download and save
+
+	let added = 0;
 
 	for (const { url, filename } of downloads) {
-		const savePath = path.resolve(saveDir, filename);
-
-		if (await fileExists(savePath)) {
-			alreadySaved++;
+		if (alreadyFilenames.includes(filename)) {
 			continue;
 		}
+
+		const savePath = path.resolve(saveDir, filename);
 
 		const response = await axios(url, {
 			method: "GET",
@@ -113,12 +127,13 @@ async function saveImages(
 
 		await fs.writeFile(savePath, response.data);
 
-		imagesAdded++;
+		added++;
 	}
 
 	return {
-		alreadySaved,
-		imagesAdded,
+		total: downloads.length,
+		added,
+		removed,
 		saveDir,
 	};
 }
@@ -133,6 +148,7 @@ async function runCommand(
 		"1095731990831059074", // mercy and friends
 		"1100935621289185380", // samus aran
 		"1107284614894071838", // jester flamboyancy
+		"1110386667791069184", // transformation
 	];
 
 	const channelsAndResults: {
@@ -153,8 +169,8 @@ async function runCommand(
 
 	const updateReply = async () => {
 		const content = channelsAndResults
-			.map(({ channel, output }) => `**${channel.name}:** ${output}`)
-			.join("\n\n");
+			.map(({ channel, output }) => `\`${channel.name}:\` ${output}`)
+			.join("\n");
 
 		const components = done
 			? [
@@ -178,14 +194,19 @@ async function runCommand(
 
 	for (let i = 0; i < channelsAndResults.length; i++) {
 		try {
-			const { alreadySaved, imagesAdded, saveDir } = await saveImages(
+			const { total, added, removed, saveDir } = await saveImages(
 				channelsAndResults[i].channel,
 			);
 
-			channelsAndResults[i].output = `ribbit! already saved **${plural(
-				alreadySaved,
+			const addedText = added == 0 ? "+0" : `**+${added}**`;
+			const removedText = removed == 0 ? "-0" : `**-${removed}**`;
+
+			const output = `${addedText}, ${removedText}, total: ${plural(
+				total,
 				"image",
-			)}** and added **${imagesAdded} more**\n\`${saveDir}\``;
+			)}`;
+
+			channelsAndResults[i].output = output;
 		} catch (error) {
 			froglog.error(error);
 

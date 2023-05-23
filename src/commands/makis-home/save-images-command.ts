@@ -126,8 +126,6 @@ async function saveImages(
 async function runCommand(
 	interaction: ChatInputCommandInteraction | ButtonInteraction,
 ) {
-	await interaction.deferReply();
-
 	const channelIds = [
 		"1089890698926510120", // cute characters
 		"1089891680586563665", // cute clothes
@@ -144,6 +142,7 @@ async function runCommand(
 
 	for (const channelId of channelIds) {
 		const channel = await interaction.guild.channels.fetch(channelId);
+
 		channelsAndResults.push({
 			channel: channel as GuildTextBasedChannel,
 			output: "*fetching...*",
@@ -152,7 +151,7 @@ async function runCommand(
 
 	let done = false;
 
-	async function updateReply() {
+	const updateReply = async () => {
 		const content = channelsAndResults
 			.map(({ channel, output }) => `**${channel.name}:** ${output}`)
 			.join("\n\n");
@@ -173,7 +172,7 @@ async function runCommand(
 			content,
 			components,
 		});
-	}
+	};
 
 	await updateReply();
 
@@ -207,10 +206,12 @@ export const SaveImagesCommand: Command = {
 		.setName("save-images")
 		.setDescription("🖼️ save images from certain channels to folders"),
 	onInteraction: async interaction => {
+		await interaction.deferReply();
 		await runCommand(interaction);
 	},
 	buttonCustomIds: ["save-images-run-again"],
 	async onButton(interaction) {
+		await interaction.deferUpdate();
 		await runCommand(interaction);
 	},
 };

@@ -193,14 +193,15 @@ export async function transparentBackground(
 		},
 	);
 
-	// console.log(stdout);
-	// console.log(stderr);
-
 	await inputFile.cleanup();
 
 	const outputFilenames = await fs.readdir(outputDir.path);
 	if (outputFilenames.length == 0) {
 		await outputDir.cleanup();
+
+		console.log(stdout);
+		console.log(stderr);
+
 		throw new Error("No output files");
 	}
 

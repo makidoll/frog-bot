@@ -18,8 +18,9 @@ interface ToolInfo {
 export enum ToolName {
 	yt_dlp = "yt_dlp",
 	gifski = "gifski",
-	rembg = "rembg",
+	// rembg = "rembg",
 	magick = "magick",
+	transparent_background = "transparent_background",
 }
 
 const osPlatform = os.platform();
@@ -183,9 +184,13 @@ export class ToolsManager {
 					macos: await which("convert"),
 				}),
 		},
-		[ToolName.rembg]: {
+		// [ToolName.rembg]: {
+		// 	// python blelelele
+		// 	overrideInstalledPath: async () => which("rembg"),
+		// },
+		[ToolName.transparent_background]: {
 			// python blelelele
-			overrideInstalledPath: async () => which("rembg"),
+			overrideInstalledPath: async () => which("transparent-background"),
 		},
 	};
 

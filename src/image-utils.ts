@@ -1,6 +1,7 @@
 import execa from "execa";
 import * as fs from "fs/promises";
 import * as os from "os";
+import * as path from "path";
 import { Writable } from "stream";
 import * as tmp from "tmp-promise";
 import { ToolName, ToolsManager, which } from "./tools-manager";
@@ -145,6 +146,7 @@ export async function centerCompositeScale(
 	]);
 }
 
+/*
 export async function rembg(
 	file: Buffer,
 	postProcessMask: boolean = false,
@@ -160,6 +162,54 @@ export async function rembg(
 	);
 
 	return stdout as any;
+}
+*/
+
+export async function transparentBackground(
+	file: Buffer,
+	filename: string,
+	fast = false,
+): Promise<Buffer> {
+	const ext = path.extname(filename);
+	const inputFile = await tmp.file({ postfix: ext });
+
+	await fs.writeFile(inputFile.path, file);
+
+	const outputDir = await tmp.dir({
+		unsafeCleanup: true, // recursive
+	});
+
+	const { stdout, stderr } = await execa(
+		await ToolsManager.instance.getPath(ToolName.transparent_background),
+		[
+			"--source",
+			inputFile.path,
+			"--dest",
+			outputDir.path,
+			...(fast ? ["--fast"] : []),
+		],
+		{
+			reject: false,
+		},
+	);
+
+	// console.log(stdout);
+	// console.log(stderr);
+
+	await inputFile.cleanup();
+
+	const outputFilenames = await fs.readdir(outputDir.path);
+	if (outputFilenames.length == 0) {
+		await outputDir.cleanup();
+		throw new Error("No output files");
+	}
+
+	const outputPath = path.resolve(outputDir.path, outputFilenames[0]);
+	const outputBuffer = await fs.readFile(outputPath);
+
+	await outputDir.cleanup();
+
+	return outputBuffer;
 }
 
 export interface LayerImage {

@@ -11,7 +11,7 @@ import {
 	circleCrop,
 	getMagickPath,
 	makeGif,
-	rembg,
+	transparentBackground,
 } from "../../image-utils.js";
 import { downloadToBuffer, getUsernameAndAvatarURL } from "../../utils.js";
 
@@ -135,9 +135,11 @@ export const PetpetCommand: Command = {
 			if (justCircleCrop) {
 				avatarImage = await circleCrop(avatarImage);
 			} else {
-				// gifs dont do opacity so post process
-				// well, idk its prettier with dithered opacity so dont post process
-				avatarImage = await rembg(avatarImage, false);
+				avatarImage = await transparentBackground(
+					avatarImage,
+					new URL(avatarURL).pathname,
+					true,
+				);
 				avatarImage = await sharp(avatarImage).trim().png().toBuffer();
 			}
 

@@ -8,7 +8,8 @@ make sure these are system-wide installed:
 
 -   imagemagick
 -   ffmpeg
--   [rembg](https://pypi.org/project/rembg/)
+<!-- -   [rembg](https://pypi.org/project/rembg/) -->
+-   [transparent-background](https://pypi.org/project/transparent-background/) (uses InSPyReNet 2022)
 
 these will get automatically downloaded:
 

@@ -8,8 +8,8 @@ import { downloadToBuffer } from "../../utils.js";
 export const RemoveBgCommand: Command = {
 	category: Categories.other,
 	command: new SlashCommandBuilder()
-		.setName("removebg")
-		.setDescription("✂️ remove background using ai (u2net model)")
+		.setName("remove-bg")
+		.setDescription("✂️ remove background using ai (uses InSPyReNet 2022)")
 		.addAttachmentOption(option =>
 			option
 				.setName("image")

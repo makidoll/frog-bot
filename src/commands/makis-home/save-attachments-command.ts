@@ -147,6 +147,8 @@ async function runCommand(
 	const channelIds = [
 		"1089890698926510120", // cute characters
 		"1089891680586563665", // cute clothes
+		"1111560346717663292", // cute cybernetics
+		//
 		"1089642397450903662", // uwaa whats this
 		"1095731990831059074", // mercy and friends
 		"1100935621289185380", // samus aran

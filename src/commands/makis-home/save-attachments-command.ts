@@ -97,7 +97,7 @@ async function saveAttachments(
 		slugify(channel.name, slugifyOptions),
 	);
 
-	fs.mkdir(saveDir, { recursive: true });
+	await fs.mkdir(saveDir, { recursive: true });
 
 	// remove attachments that dont need to exist anymore
 

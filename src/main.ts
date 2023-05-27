@@ -25,6 +25,7 @@ import { OmgHiCommand } from "./commands/memes/omg-hi-command";
 import { ToastCommand } from "./commands/memes/toast-command";
 import { LoopCommand } from "./commands/music/loop-command";
 import { PlayCommand } from "./commands/music/play-command";
+import { ShowQueueCommand } from "./commands/music/show-queue-command";
 import { SkipCommand } from "./commands/music/skip-command";
 import { StopCommand } from "./commands/music/stop-command";
 import { FeatureplsCommand } from "./commands/other/featurepls-command";
@@ -65,6 +66,7 @@ export const availableCommands: Command[] = [
 	StopCommand,
 	SkipCommand,
 	LoopCommand,
+	ShowQueueCommand,
 	// > games
 	// SnakesAndLaddersCommand,
 	// > mechanyx

@@ -16,6 +16,7 @@ import {
 } from "../../services/music-queue";
 import { formatDuration } from "../../utils";
 import { LoopCommand } from "./loop-command";
+import { ShowQueueCommand } from "./show-queue-command";
 import { SkipCommand } from "./skip-command";
 import { StopCommand } from "./stop-command";
 
@@ -52,6 +53,11 @@ export function getPlayInteractionComponents(
 			.setLabel(`add ${isPlaylist ? "playlist" : "song"} to queue`)
 			.setStyle(ButtonStyle.Secondary)
 			.setEmoji("▶️"),
+		new ButtonBuilder()
+			.setCustomId("play-show-queue")
+			.setLabel("show queue")
+			.setStyle(ButtonStyle.Secondary)
+			.setEmoji("🧾"),
 	);
 
 	return [row];
@@ -141,7 +147,13 @@ export const PlayCommand: Command = {
 		await playInteraction(search, interaction);
 	},
 
-	buttonCustomIds: ["play-skip", "play-loop", "play-stop", "play-queue:*"],
+	buttonCustomIds: [
+		"play-skip",
+		"play-loop",
+		"play-stop",
+		"play-queue:*",
+		"play-show-queue",
+	],
 	onButton(interaction) {
 		if (interaction.customId == "play-skip") {
 			SkipCommand.onInteraction(interaction as any);
@@ -154,6 +166,8 @@ export const PlayCommand: Command = {
 				interaction.customId.slice("play-queue:".length),
 				interaction as any,
 			);
+		} else if (interaction.customId == "play-show-queue") {
+			ShowQueueCommand.onInteraction(interaction as any);
 		}
 	},
 };

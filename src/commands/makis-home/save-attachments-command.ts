@@ -145,6 +145,8 @@ async function runCommand(
 	interaction: ChatInputCommandInteraction | ButtonInteraction,
 ) {
 	const channelIds = [
+		"1089011638511878175", // memes i guess
+		//
 		"1089890698926510120", // cute characters
 		"1089891680586563665", // cute clothes
 		"1111560346717663292", // cute cybernetics

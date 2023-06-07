@@ -145,28 +145,40 @@ async function runCommand(
 	interaction: ChatInputCommandInteraction | ButtonInteraction,
 ) {
 	const channelIds = [
+		// media
 		"1089011638511878175", // memes i guess
-		//
+		// art
 		"1089890698926510120", // cute characters
 		"1089891680586563665", // cute clothes
 		"1111560346717663292", // cute cybernetics
-		//
+		// squishy squeak
 		"1089642397450903662", // uwaa whats this
 		"1095731990831059074", // mercy and friends
 		"1100935621289185380", // samus aran
 		"1107284614894071838", // jester flamboyancy
 		"1110386667791069184", // transformation
+		"1112773080251641867", // shiny latex
+		// video games
+		"1111793860302090311", // overwatch art
 	];
 
-	const channelsAndResults: {
-		channel: GuildTextBasedChannel;
-		output: string;
-	}[] = [];
+	const categoryResults: {
+		[categoryName: string]: {
+			channel: GuildTextBasedChannel;
+			output: string;
+		}[];
+	} = {};
 
 	for (const channelId of channelIds) {
 		const channel = await interaction.guild.channels.fetch(channelId);
 
-		channelsAndResults.push({
+		const categoryName = (channel.parent?.name ?? "").toLowerCase().trim();
+
+		if (categoryResults[categoryName] == null) {
+			categoryResults[categoryName] = [];
+		}
+
+		categoryResults[categoryName].push({
 			channel: channel as GuildTextBasedChannel,
 			output: "*fetching...*",
 		});
@@ -175,8 +187,17 @@ async function runCommand(
 	let done = false;
 
 	const updateReply = async () => {
-		const content = channelsAndResults
-			.map(({ channel, output }) => `\`${channel.name}:\` ${output}`)
+		const content = Object.keys(categoryResults)
+			.map(
+				categoryName =>
+					`### ${categoryName}\n` +
+					categoryResults[categoryName]
+						.map(
+							({ channel, output }) =>
+								`\`${channel.name}:\` ${output}`,
+						)
+						.join("\n"),
+			)
 			.join("\n");
 
 		const components = done
@@ -199,32 +220,46 @@ async function runCommand(
 
 	await updateReply();
 
-	for (let i = 0; i < channelsAndResults.length; i++) {
-		try {
-			const { total, added, removed, saveDir } = await saveAttachments(
-				channelsAndResults[i].channel,
-			);
+	const categoryResultsValues = Object.values(categoryResults);
 
-			const addedText = added == 0 ? "+0" : `**+${added}**`;
-			const removedText = removed == 0 ? "-0" : `**-${removed}**`;
+	for (
+		let categoryIndex = 0;
+		categoryIndex < categoryResultsValues.length;
+		categoryIndex++
+	) {
+		const channelsAndResults = categoryResultsValues[categoryIndex];
 
-			const output = `${addedText}, ${removedText}, total: ${plural(
-				total,
-				"attachment",
-			)}`;
+		for (let i = 0; i < channelsAndResults.length; i++) {
+			try {
+				const { total, added, removed, saveDir } =
+					await saveAttachments(channelsAndResults[i].channel);
 
-			channelsAndResults[i].output = output;
-		} catch (error) {
-			froglog.error(error);
+				const addedText = added == 0 ? "+0" : `**+${added}**`;
+				const removedText = removed == 0 ? "-0" : `**-${removed}**`;
 
-			channelsAndResults[i].output = `aw ribbit... something went wrong`;
+				const output = `${addedText}, ${removedText}, total: ${plural(
+					total,
+					"attachment",
+				)}`;
+
+				channelsAndResults[i].output = output;
+			} catch (error) {
+				froglog.error(error);
+
+				channelsAndResults[
+					i
+				].output = `aw ribbit... something went wrong`;
+			}
+
+			if (
+				categoryIndex >= categoryResultsValues.length - 1 &&
+				i >= channelsAndResults.length - 1
+			) {
+				done = true;
+			}
+
+			await updateReply();
 		}
-
-		if (i >= channelsAndResults.length - 1) {
-			done = true;
-		}
-
-		await updateReply();
 	}
 }
 

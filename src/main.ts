@@ -10,6 +10,7 @@ import {
 	ModalSubmitInteraction,
 	Partials,
 } from "discord.js";
+import { ChatBot } from "./chat-bot";
 import { Command, ServerExclusiveCategories } from "./command";
 import { CouchCommand } from "./commands/frends/couch-command";
 import { FrugCommand } from "./commands/frends/frug-command";
@@ -147,6 +148,8 @@ export const availableCommands: Command[] = [
 		});
 	};
 
+	const chatBot = new ChatBot();
+
 	client.on("ready", async () => {
 		froglog.info(`Logged in as: ${client.user.tag}`);
 
@@ -160,6 +163,8 @@ export const availableCommands: Command[] = [
 
 		// load music from database if bot restarted
 		await MusicQueue.instance.loadFromDatabase(client);
+
+		await chatBot.init(client);
 
 		const rest = new REST({ version: "10" }).setToken(
 			process.env.BOT_TOKEN,

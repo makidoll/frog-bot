@@ -45,14 +45,22 @@ export function getPlayInteractionComponents(
 			.setLabel("stop")
 			.setStyle(ButtonStyle.Secondary)
 			.setEmoji("⏹️"),
-		new ButtonBuilder()
+	);
+
+	try {
+		// url could be too long and can throw exception
+		const playButton = new ButtonBuilder()
 			.setCustomId(
 				"play-queue:" +
 					(isPlaylist ? metadata.playlistUrl : metadata.videoUrl),
 			)
 			.setLabel(`add ${isPlaylist ? "playlist" : "song"} to queue`)
 			.setStyle(ButtonStyle.Secondary)
-			.setEmoji("▶️"),
+			.setEmoji("▶️");
+		row.addComponents(playButton);
+	} catch (error) {}
+
+	row.addComponents(
 		new ButtonBuilder()
 			.setCustomId("play-show-queue")
 			.setLabel("show queue")

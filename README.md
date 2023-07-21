@@ -19,10 +19,9 @@ these will get automatically downloaded:
 
 copy `.env.sample` to `.env` and set your token
 
-```bash
-yarn
-yarn build
-```
+install packages with `yarn`
+
+install playwright deps with `sudo npx playwright install-deps`
 
 run with `node dist/main.js`
 

@@ -153,7 +153,8 @@ async function runCommand(
 		"1111560346717663292", // cute cybernetics
 		// squishy squeak
 		"1089642397450903662", // uwaa whats this
-		"1112773080251641867", // shiny latex
+		"1112773080251641867", // hexcorp drones
+		"1144405188023689357", // shiny latex
 		"1095731990831059074", // mercy and friends
 		"1100935621289185380", // samus aran
 		"1107284614894071838", // jester flamboyancy

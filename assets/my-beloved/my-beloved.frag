@@ -20,6 +20,8 @@ float invMix(float a, float b, float v)
     return (v - a) / (b - a);
 }
 
+#define DISCORD_BG vec3(0x2B, 0x2D, 0x31) / 255.0
+
 void main()
 {
     vec2 uv = gl_FragCoord.xy / u_resolution.xy;
@@ -66,8 +68,8 @@ void main()
         user_color = texture2D(u_tex_user_right, mapper_uv);
     }
 
-    // white background when tranparency
-    user_color.rgb = mix(vec3(1.0, 1.0, 1.0), user_color.rgb, user_color.a);
+    // discord background when theres tranparency
+    user_color.rgb = mix(DISCORD_BG, user_color.rgb, user_color.a);
     user_color.a = 1.0;
 
     vec3 dark = texture2D(u_tex_dark, uv).rgb;

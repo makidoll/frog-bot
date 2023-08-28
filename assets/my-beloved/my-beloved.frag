@@ -47,7 +47,7 @@ void main()
     vec2 mapper_uv = (mapper_id_uv) + (mapper.xy / mapper_const);
     mapper_uv.x -= (mapper_id_uv.y / mapper_const);
 
-    vec3 user_color = vec3(0.0);
+    vec4 user_color = vec4(0.0);
 
     if (mapper2_id < 0.5) {
         // mapper_uv isnt a square so lets transform it a little
@@ -58,15 +58,19 @@ void main()
         // glsl want textures flipped
         mapper_uv.y = 1.0 - mapper_uv.y;
 
-        user_color = texture2D(u_tex_user_left, mapper_uv).rgb;
+        user_color = texture2D(u_tex_user_left, mapper_uv);
     } else {
         // glsl want textures flipped
         mapper_uv.y = 1.0 - mapper_uv.y;
 
-        user_color = texture2D(u_tex_user_right, mapper_uv).rgb;
+        user_color = texture2D(u_tex_user_right, mapper_uv);
     }
+
+    // white background when tranparency
+    user_color.rgb = mix(vec3(1.0, 1.0, 1.0), user_color.rgb, user_color.a);
+    user_color.a = 1.0;
 
     vec3 dark = texture2D(u_tex_dark, uv).rgb;
 
-    gl_FragColor = vec4(user_color * neutral + dark, 1.0);
+    gl_FragColor = vec4(user_color.rgb * neutral + dark, 1.0);
 }

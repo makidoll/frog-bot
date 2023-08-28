@@ -1,11 +1,12 @@
 #ifdef GL_ES
-precision mediump float;
+precision highp float;
 #endif
 
 uniform float u_time;
 uniform vec2 u_resolution;
 
 uniform float u_mapper_aspect_ratio;
+uniform float u_mapper_id_fix;
 
 uniform sampler2D u_tex_dark;
 uniform sampler2D u_tex_mapper;
@@ -40,13 +41,13 @@ void main()
         return;
     }
 
-    const float mapper_const = 15.95;
+    const float mapper_const = 16.0;
     float mapper_id = mapper.b * mapper_const;
 
-    vec2 mapper_uv = vec2(
-        (mapper.x + (mod(mapper_id, 1.0) * mapper_const)) / mapper_const,
-        (mapper.y + floor(mapper_id)) / mapper_const
-    );
+    // u_mapper_id_fix is weird idk. check html file
+
+    vec2 mapper_id_uv = vec2(mod(mapper_id, u_mapper_id_fix), floor(mapper_id) / mapper_const);
+    vec2 mapper_uv = (mapper.xy / mapper_const) + (mapper_id_uv);
 
     vec3 user_color = vec3(0.0);
 

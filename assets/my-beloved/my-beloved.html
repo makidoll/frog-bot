@@ -15,11 +15,13 @@
 		<canvas id="canvas"></canvas>
 		<script src="../GlslCanvas.js"></script>
 		<script>
-			function generateMyBelovedTextImage(name) {
+			function generateMyBelovedTextImage(name, big) {
 				name = name.toLowerCase();
 
-				const w = 400;
-				const h = 350;
+				const scale = big ? 1 : 0.5;
+
+				const w = 400 * scale;
+				const h = 350 * scale;
 
 				const textCanvas = document.createElement("canvas");
 				textCanvas.width = w;
@@ -33,11 +35,11 @@
 				ctx.fillRect(0, 0, w, h);
 
 				ctx.fillStyle = "black";
-				ctx.font = "48px Arial";
+				ctx.font = 48 * scale + "px Arial";
 				ctx.textAlign = "center";
 
-				ctx.fillText(name, w / 2, 145, w);
-				ctx.fillText("my beloved", w / 2, 210, w);
+				ctx.fillText(name, w / 2, 145 * scale, w);
+				ctx.fillText("my beloved", w / 2, 210 * scale, w);
 
 				return ctx.getImageData(0, 0, w, h);
 			}
@@ -59,8 +61,17 @@
 					sandbox.uniformTexture(
 						`u_tex_${textureName}`,
 						data.images[textureName],
+						{
+							filtering: "nearest",
+						},
 					);
 				}
+
+				// 1.00666 on linux and 1.00333 on windows? what????
+				sandbox.setUniform(
+					"u_mapper_id_fix",
+					data.usingWindows ? 1.00333 : 1.00666,
+				);
 
 				sandbox.setUniform(
 					"u_mapper_aspect_ratio",
@@ -70,40 +81,43 @@
 				// 1 by 1
 				sandbox.uniformTexture("u_tex_user_left", data.images.avatar);
 
-				const textImage = generateMyBelovedTextImage(data.name);
+				const textImage = generateMyBelovedTextImage(
+					data.name,
+					data.big,
+				);
 				sandbox.uniformTexture("u_tex_user_right", textImage);
 			}
 
 			// for testing
 
-			/*
-			(async () => {
-				loadFrame({
-					name: "maki doll",
-					big: null,
-					fragCode: await (await fetch("my-beloved.frag")).text(),
-					images: {
-						avatar: "https://www.gravatar.com/avatar/1f57254654d0bad120ac992dd8aaf6b6.png?s=2048",
-						dark: "frames/25_dark.png",
-						mapper: "frames/25_mapper.png",
-						mapper2: "frames/25_mapper2.png",
-						neutral: "frames/25_neutral.png",
-					},
-				});
-				// loadFrame({
-				// 	name: "maki doll",
-				// 	big: true,
-				// 	fragCode: await (await fetch("my-beloved.frag")).text(),
-				// 	images: {
-				// 		avatar: "https://www.gravatar.com/avatar/1f57254654d0bad120ac992dd8aaf6b6.png?s=2048",
-				// 		dark: "frames_big/25_dark.png",
-				// 		mapper: "frames_big/25_mapper.png",
-				// 		mapper2: "frames_big/25_mapper2.png",
-				// 		neutral: "frames_big/25_neutral.png",
-				// 	},
-				// });
-			})();
-			*/
+			// (async () => {
+			// 	// loadFrame({
+			// 	// 	name: "maki doll",
+			// 	// 	big: null,
+			// 	// 	usingWindows: true,
+			// 	// 	fragCode: await (await fetch("my-beloved.frag")).text(),
+			// 	// 	images: {
+			// 	// 		avatar: "https://www.gravatar.com/avatar/1f57254654d0bad120ac992dd8aaf6b6.png?s=2048",
+			// 	// 		dark: "frames/25_dark.png",
+			// 	// 		mapper: "frames/25_mapper.png",
+			// 	// 		mapper2: "frames/25_mapper2.png",
+			// 	// 		neutral: "frames/25_neutral.png",
+			// 	// 	},
+			// 	// });
+			// 	loadFrame({
+			// 		name: "maki doll",
+			// 		big: true,
+			// 		usingWindows: true,
+			// 		fragCode: await (await fetch("my-beloved.frag")).text(),
+			// 		images: {
+			// 			avatar: "https://www.gravatar.com/avatar/1f57254654d0bad120ac992dd8aaf6b6.png?s=2048",
+			// 			dark: "frames_big/25_dark.png",
+			// 			mapper: "frames_big/25_mapper.png",
+			// 			mapper2: "frames_big/25_mapper2.png",
+			// 			neutral: "frames_big/25_neutral.png",
+			// 		},
+			// 	});
+			// })();
 		</script>
 	</body>
 </html>

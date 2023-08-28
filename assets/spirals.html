@@ -1,0 +1,341 @@
+<html>
+	<head>
+		<style>
+			body {
+				background: black;
+				margin: 0;
+				overflow: hidden;
+			}
+
+			@font-face {
+				font-family: "Littlefox";
+				font-style: normal;
+				font-weight: 400;
+				src: url(./Littlefox-Regular.woff2) format("woff2");
+			}
+
+			.spiral1,
+			.spiral2 {
+				position: absolute;
+				top: 0;
+				left: 0;
+				/* background-position: center;
+				background-size: 100% 100%;
+				background-repeat: no-repeat; */
+			}
+
+			@keyframes rotating {
+				0% {
+					transform: rotate(0deg);
+				}
+				100% {
+					transform: rotate(360deg);
+				}
+			}
+
+			.spiral1 {
+				animation: rotating 20s linear 0s infinite normal;
+			}
+
+			.spiral2 {
+				animation: rotating 6.66667s linear 0s infinite reverse;
+			}
+
+			.text {
+				position: absolute;
+				top: 0;
+				left: 0;
+				bottom: 0;
+				right: 0;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				color: #fff;
+				font-size: 128px;
+				font-weight: regular;
+				font-family: "Littlefox";
+				text-shadow: 0 0 32px rgba(0, 0, 0, 0.5);
+			}
+		</style>
+	</head>
+	<body>
+		<canvas class="spiral1"></canvas>
+		<canvas class="spiral2"></canvas>
+		<div class="text"></div>
+		<script>
+			// https://hypno.nimja.com/visual/102?set=none
+
+			const TAU = Math.PI * 2;
+
+			/*
+			{
+				width: 512,
+				height: 512,
+				x: 256,
+				y: 256,
+				radius: 512,
+				color: "red",
+				lineWidth: 0.1,
+				turns: 10,
+				curve: 0.4,
+				twist: 0,
+				arms: 1,
+			}
+			*/
+
+			function generateSpiral(props) {
+				function Spiral(turns, curve, steps) {
+					var t = this;
+
+					this.points = [];
+
+					for (var i = 0; i < steps; i++) {
+						var cur = i / (steps - 1);
+						var adjusted = Math.pow(cur, curve);
+						t.points.push({ r: cur, a: adjusted * TAU * turns });
+					}
+
+					this.split = function (ratio) {
+						var adjust, p;
+						for (var index in t.points) {
+							p = t.points[index];
+							if (p.r < ratio) {
+								adjust = p.a;
+							} else {
+								p.a = adjust - (p.a - adjust);
+							}
+						}
+					};
+					this.drawArm = function (
+						ctx,
+						pos,
+						ratio,
+						angle,
+						counterClockWise,
+					) {
+						var max = t.points.length - 1,
+							offset = TAU * (ratio / 2),
+							maxAngle = t.points[max].a;
+						counterClockWise = !!counterClockWise;
+						ctx.moveTo(pos.x, pos.y);
+
+						if (counterClockWise) {
+							t.drawArmEdge(ctx, pos, angle - offset, max, false);
+							ctx.arc(
+								pos.x,
+								pos.y,
+								pos.radius,
+								maxAngle + angle - offset,
+								maxAngle + angle + offset,
+								false,
+							);
+							t.drawArmEdge(ctx, pos, angle + offset, max, true);
+						} else {
+							t.drawArmEdge(ctx, pos, angle + offset, max, false);
+							ctx.arc(
+								pos.x,
+								pos.y,
+								pos.radius,
+								maxAngle + angle + offset,
+								maxAngle + angle - offset,
+								true,
+							);
+							t.drawArmEdge(ctx, pos, angle - offset, max, true);
+						}
+					};
+					this.drawArmEdge = function (
+						ctx,
+						pos,
+						angle,
+						max,
+						inwards,
+					) {
+						var index, p, x, y;
+						for (var i = 0; i <= max; i++) {
+							index = inwards ? max - i : i;
+							p = t.points[index];
+							x =
+								pos.x +
+								pos.radius * p.r * Math.cos(p.a + angle);
+							y =
+								pos.y +
+								pos.radius * p.r * Math.sin(p.a + angle);
+							ctx.lineTo(x, y);
+						}
+					};
+					this.makeSteps = function (max, colorCount) {
+						var steps = colorCount > 1 ? colorCount : max;
+						(size = 1 / (steps - 1)),
+							(offset = size * 0.5),
+							(maxStep = steps - 1),
+							(result = []);
+						for (var i = 0; i < steps; i++) {
+							result.push({
+								c: i / maxStep,
+								r: i * size + offset,
+							});
+						}
+						return result.reverse();
+					};
+				}
+
+				// const canvas = document.createElement("canvas");
+				const canvas = props.canvas;
+				canvas.width = props.width;
+				canvas.height = props.height;
+				const ctx = canvas.getContext("2d");
+
+				// document.body.appendChild(canvas);
+
+				const spiral = new Spiral(props.turns, props.curve, 3000);
+
+				const pos = {
+					w: props.width,
+					h: props.height,
+					x: props.x,
+					y: props.y,
+					radius: props.radius,
+				};
+
+				const addTwists = function (spiral, twist) {
+					if (twist == 0) {
+						return;
+					}
+					var part = 1 / (twist + 1);
+					for (var i = 0; i < twist; i++) {
+						spiral.split(part * 0.75 + part * i);
+					}
+				};
+
+				const drawFlatArms = function (spiral, ctx, color, arms) {
+					var part = 1 / arms;
+					ctx.clearRect(0, 0, pos.w, pos.h);
+					ctx.fillStyle = color;
+					for (var i = 0; i < arms; i++) {
+						ctx.beginPath();
+						spiral.drawArm(
+							ctx,
+							pos,
+							part * props.lineWidth,
+							TAU * i * part,
+						);
+						ctx.fill();
+					}
+				};
+
+				addTwists(spiral, props.twist);
+				drawFlatArms(spiral, ctx, props.color, props.arms);
+
+				return `url(${canvas.toDataURL("image/png")})`;
+			}
+
+			const body = document.body;
+			const spiral1 = document.querySelector(".spiral1");
+			const spiral2 = document.querySelector(".spiral2");
+
+			function resize() {
+				const w = window.innerWidth;
+				const h = window.innerHeight;
+
+				const maxSize = Math.max(w, h) * Math.SQRT2;
+
+				for (const el of [spiral1, spiral2]) {
+					el.style.width = el.style.height = maxSize + "px";
+
+					el.style.left = `-${
+						(maxSize - (window.innerWidth / maxSize) * maxSize) / 2
+					}px`;
+
+					el.style.top = `-${
+						(maxSize - (window.innerHeight / maxSize) * maxSize) / 2
+					}px`;
+				}
+
+				const props = {
+					width: maxSize,
+					height: maxSize,
+					x: maxSize / 2,
+					y: maxSize / 2,
+					radius: maxSize / 2,
+					lineWidth: 0.5,
+				};
+
+				generateSpiral({
+					...props,
+					canvas: spiral1,
+					color: "#e91e63",
+					arms: 30,
+					turns: 1,
+					curve: 0.4,
+					twist: 0,
+				});
+
+				generateSpiral({
+					...props,
+					canvas: spiral2,
+					color: "#08CBFF",
+					arms: 3,
+					turns: 3,
+					curve: 0.4,
+					twist: 0,
+				});
+			}
+
+			let needsResize = false;
+
+			setInterval(() => {
+				if (!needsResize) return;
+				resize();
+				needsResize = false;
+			}, 100);
+
+			resize();
+
+			window.addEventListener("resize", () => {
+				needsResize = true;
+			});
+
+			// words
+
+			const timeBetweenWords = 800;
+			const showWordFor = 200;
+
+			if (showWordFor > timeBetweenWords) {
+				throw new Error(
+					"showWordFor needs to be smaller than timeBetweenWords",
+				);
+			}
+
+			let words = [];
+			let wordIndex = -1;
+			let wordInterval = null;
+
+			const textDiv = document.querySelector(".text");
+
+			function setWords(newWords) {
+				words = newWords;
+
+				if (wordInterval) {
+					clearInterval(wordInterval);
+				}
+
+				wordInterval = setInterval(() => {
+					wordIndex++;
+					if (wordIndex > words.length - 1) {
+						wordIndex = 0;
+					}
+
+					const word = words[wordIndex];
+
+					textDiv.textContent = word;
+
+					setTimeout(() => {
+						textDiv.textContent = "";
+					}, showWordFor);
+				}, timeBetweenWords);
+			}
+
+			setWords(["you're", "so cute"]);
+		</script>
+	</body>
+</html>

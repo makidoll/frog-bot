@@ -67,12 +67,6 @@
 					);
 				}
 
-				// 1.00666 on linux and 1.00333 on windows? what????
-				sandbox.setUniform(
-					"u_mapper_id_fix",
-					data.usingWindows ? 1.00333 : 1.00666,
-				);
-
 				sandbox.setUniform(
 					"u_mapper_aspect_ratio",
 					data.big ? 1 : 3 / 4,
@@ -90,34 +84,34 @@
 
 			// for testing
 
-			// (async () => {
-			// 	// loadFrame({
-			// 	// 	name: "maki doll",
-			// 	// 	big: null,
-			// 	// 	usingWindows: true,
-			// 	// 	fragCode: await (await fetch("my-beloved.frag")).text(),
-			// 	// 	images: {
-			// 	// 		avatar: "https://www.gravatar.com/avatar/1f57254654d0bad120ac992dd8aaf6b6.png?s=2048",
-			// 	// 		dark: "frames/25_dark.png",
-			// 	// 		mapper: "frames/25_mapper.png",
-			// 	// 		mapper2: "frames/25_mapper2.png",
-			// 	// 		neutral: "frames/25_neutral.png",
-			// 	// 	},
-			// 	// });
-			// 	loadFrame({
-			// 		name: "maki doll",
-			// 		big: true,
-			// 		usingWindows: true,
-			// 		fragCode: await (await fetch("my-beloved.frag")).text(),
-			// 		images: {
-			// 			avatar: "https://www.gravatar.com/avatar/1f57254654d0bad120ac992dd8aaf6b6.png?s=2048",
-			// 			dark: "frames_big/25_dark.png",
-			// 			mapper: "frames_big/25_mapper.png",
-			// 			mapper2: "frames_big/25_mapper2.png",
-			// 			neutral: "frames_big/25_neutral.png",
-			// 		},
-			// 	});
-			// })();
+			/*
+			(async () => {
+				// loadFrame({
+				// 	name: "maki doll",
+				// 	big: null,
+				// 	fragCode: await (await fetch("my-beloved.frag")).text(),
+				// 	images: {
+				// 		avatar: "https://www.gravatar.com/avatar/1f57254654d0bad120ac992dd8aaf6b6.png?s=2048",
+				// 		dark: "frames/25_dark.png",
+				// 		mapper: "frames/25_mapper.png",
+				// 		mapper2: "frames/25_mapper2.png",
+				// 		neutral: "frames/25_neutral.png",
+				// 	},
+				// });
+				loadFrame({
+					name: "maki doll",
+					big: true,
+					fragCode: await (await fetch("my-beloved.frag")).text(),
+					images: {
+						avatar: "https://www.gravatar.com/avatar/1f57254654d0bad120ac992dd8aaf6b6.png?s=2048",
+						dark: "frames_big/25_dark.png",
+						mapper: "frames_big/25_mapper.png",
+						mapper2: "frames_big/25_mapper2.png",
+						neutral: "frames_big/25_neutral.png",
+					},
+				});
+			})();
+			*/
 		</script>
 	</body>
 </html>

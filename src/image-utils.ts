@@ -73,16 +73,22 @@ export async function makeGif(frames: Buffer[], fps: number, quality: number) {
 
 	const outputPath = await tmp.file({ postfix: ".gif" });
 
-	await execa(await ToolsManager.instance.getPath(ToolName.gifski), [
-		"--output",
-		outputPath.path,
-		"--fps",
-		fps.toString(),
-		"--quality",
-		quality.toString(),
-		"--nosort",
-		...framePaths.map(p => p.path),
-	]);
+	await execa(
+		await ToolsManager.instance.getPath(ToolName.gifski),
+		[
+			"--output",
+			outputPath.path,
+			"--fps",
+			fps.toString(),
+			"--quality",
+			quality.toString(),
+			"--nosort",
+			...framePaths.map(p => p.path),
+		],
+		{
+			stderr: "inherit",
+		},
+	);
 
 	const outputBuffer = await fs.readFile(outputPath.path);
 

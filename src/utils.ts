@@ -10,6 +10,7 @@ export async function downloadToBuffer(url: string) {
 		return "";
 	}
 }
+
 export async function downloadToDataUri(url: string) {
 	try {
 		const req = await axios({ url, responseType: "arraybuffer" });
@@ -19,6 +20,11 @@ export async function downloadToDataUri(url: string) {
 	} catch (error) {
 		return "";
 	}
+}
+
+export function bufferToDataUri(buffer: Buffer, contentType: string) {
+	const base64Data = buffer.toString("base64");
+	return "data:" + contentType + ";base64," + base64Data;
 }
 
 export async function getUsernameAndAvatarURL(
@@ -163,4 +169,10 @@ export async function fileExists(filePath: string) {
 		return stat.isFile();
 	} catch (error) {}
 	return false;
+}
+
+export async function wait(ms: number) {
+	await new Promise(resolve => {
+		setTimeout(resolve, ms);
+	});
 }

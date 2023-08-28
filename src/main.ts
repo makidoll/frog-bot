@@ -16,6 +16,7 @@ import { FrugCommand } from "./commands/frends/frug-command";
 import { SaveAttachmentsCommand } from "./commands/makis-home/save-attachments-command";
 import { VapourHoldCommand } from "./commands/mechanyx/vapour-hold-command";
 import { CasCommand } from "./commands/memes-gifs/cas-command";
+import { MyBelovedCommand } from "./commands/memes-gifs/my-beloved-command";
 import { PetpetCommand } from "./commands/memes-gifs/petpet-command";
 import { SquishyCommand } from "./commands/memes-gifs/squishy-command";
 import { ComfyCommand } from "./commands/memes/comfy-command";
@@ -56,11 +57,12 @@ export const availableCommands: Command[] = [
 	DeepfryCommand,
 	OmgHiCommand,
 	ToastCommand,
+	NokiaExcelCommand,
 	// > memes gifs
 	CasCommand,
 	PetpetCommand,
 	SquishyCommand,
-	NokiaExcelCommand,
+	MyBelovedCommand,
 	// > music
 	PlayCommand,
 	StopCommand,

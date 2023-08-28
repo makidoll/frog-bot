@@ -38,8 +38,9 @@
 				ctx.font = 48 * scale + "px Arial";
 				ctx.textAlign = "center";
 
-				ctx.fillText(name, w / 2, 145 * scale, w);
-				ctx.fillText("my beloved", w / 2, 210 * scale, w);
+				const maxWidth = w - 32 * scale;
+				ctx.fillText(name, w / 2, 145 * scale, maxWidth);
+				ctx.fillText("my beloved", w / 2, 210 * scale, maxWidth);
 
 				return ctx.getImageData(0, 0, w, h);
 			}
@@ -99,11 +100,11 @@
 				// 	},
 				// });
 				loadFrame({
-					name: "maki doll",
+					name: "maki doll the drone",
 					big: true,
 					fragCode: await (await fetch("my-beloved.frag")).text(),
 					images: {
-						avatar: "https://cdn.discordapp.com/avatars/253056561084104704/a3ff8c5ae6cebf14f52e2c223e05951d.png?size=4096",
+						avatar: "https://www.gravatar.com/avatar/1f57254654d0bad120ac992dd8aaf6b6.png?s=2048",
 						dark: "frames_big/25_dark.png",
 						mapper: "frames_big/25_mapper.png",
 						mapper2: "frames_big/25_mapper2.png",

@@ -1,4 +1,4 @@
-import { webkit, Browser, Page } from "playwright";
+import { chromium, Browser, Page } from "playwright";
 
 export class HtmlRenderer {
 	private static _instance: HtmlRenderer;
@@ -15,7 +15,7 @@ export class HtmlRenderer {
 	private browser: Browser;
 
 	async init() {
-		this.browser = await webkit.launch({
+		this.browser = await chromium.launch({
 			// headless: false,
 		});
 	}

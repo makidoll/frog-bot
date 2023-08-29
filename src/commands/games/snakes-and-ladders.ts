@@ -12,7 +12,7 @@ import { HtmlRenderer } from "../../services/html-renderer";
 import {
 	downloadToDataUri,
 	generateRandomId,
-	getUsernameAndAvatarURL,
+	getDisplayNameAndAvatarURL,
 	possessive,
 	possessiveEnding,
 } from "../../utils";
@@ -94,7 +94,7 @@ class SnakesAndLaddersGame {
 			throw new Error("you already joined!");
 		}
 
-		const { username, avatarURL } = await getUsernameAndAvatarURL(
+		const { username, avatarURL } = await getDisplayNameAndAvatarURL(
 			user,
 			guild,
 		);

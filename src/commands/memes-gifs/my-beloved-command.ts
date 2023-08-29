@@ -9,7 +9,7 @@ import { HtmlRenderer } from "../../services/html-renderer.js";
 import {
 	bufferToDataUri,
 	downloadToDataUri,
-	getUsernameAndAvatarURL,
+	getDisplayNameAndAvatarURL,
 	wait,
 } from "../../utils.js";
 
@@ -86,7 +86,7 @@ export const MyBelovedCommand: Command = {
 		const onlyImage = interaction.options.getBoolean("only-image", false);
 
 		try {
-			const { username, avatarURL } = await getUsernameAndAvatarURL(
+			const { username, avatarURL } = await getDisplayNameAndAvatarURL(
 				user ? user : interaction.user,
 				interaction.guild,
 			);

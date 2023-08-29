@@ -3,7 +3,7 @@ import { ClientUser } from "discord.js";
 import * as path from "path";
 import { Categories, Command } from "../../command";
 import { HtmlRenderer } from "../../services/html-renderer";
-import { downloadToDataUri, getUsernameAndAvatarURL } from "../../utils";
+import { downloadToDataUri, getDisplayNameAndAvatarURL } from "../../utils";
 
 export const OmgHiCommand: Command = {
 	category: Categories.memes,
@@ -19,7 +19,7 @@ export const OmgHiCommand: Command = {
 	onInteraction: async interaction => {
 		const user = interaction.options.getUser("friend", true);
 
-		const { username, avatarURL } = await getUsernameAndAvatarURL(
+		const { username, avatarURL } = await getDisplayNameAndAvatarURL(
 			user ? user : interaction.user,
 			interaction.guild,
 		);

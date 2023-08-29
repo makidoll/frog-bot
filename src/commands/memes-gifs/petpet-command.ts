@@ -13,7 +13,7 @@ import {
 	makeGif,
 	transparentBackground,
 } from "../../image-utils.js";
-import { downloadToBuffer, getUsernameAndAvatarURL } from "../../utils.js";
+import { downloadToBuffer, getDisplayNameAndAvatarURL } from "../../utils.js";
 
 const options = {
 	squish: 1.25,
@@ -124,7 +124,7 @@ export const PetpetCommand: Command = {
 		const justCircleCrop =
 			interaction.options.getBoolean("just-circle-crop");
 
-		const { avatarURL } = await getUsernameAndAvatarURL(
+		const { avatarURL } = await getDisplayNameAndAvatarURL(
 			user ? user : interaction.user,
 			interaction.guild,
 		);

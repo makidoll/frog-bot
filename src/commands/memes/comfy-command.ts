@@ -3,7 +3,7 @@ import { ClientUser } from "discord.js";
 import * as path from "path";
 import { Categories, Command } from "../../command";
 import { HtmlRenderer } from "../../services/html-renderer";
-import { downloadToDataUri, getUsernameAndAvatarURL } from "../../utils";
+import { downloadToDataUri, getDisplayNameAndAvatarURL } from "../../utils";
 
 export const ComfyCommand: Command = {
 	category: Categories.memes,
@@ -22,7 +22,7 @@ export const ComfyCommand: Command = {
 			false,
 		) as any;
 
-		const { avatarURL } = await getUsernameAndAvatarURL(
+		const { avatarURL } = await getDisplayNameAndAvatarURL(
 			user ? user : interaction.user,
 			interaction.guild,
 		);

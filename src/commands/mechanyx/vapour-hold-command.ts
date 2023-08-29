@@ -3,7 +3,7 @@ import { ClientUser } from "discord.js";
 import * as path from "path";
 import { Categories, Command } from "../../command";
 import { HtmlRenderer } from "../../services/html-renderer";
-import { downloadToDataUri, getUsernameAndAvatarURL } from "../../utils";
+import { downloadToDataUri, getDisplayNameAndAvatarURL } from "../../utils";
 
 export const VapourHoldCommand: Command = {
 	category: Categories.mechanyx,
@@ -19,7 +19,7 @@ export const VapourHoldCommand: Command = {
 			false,
 		) as any;
 
-		const { avatarURL } = await getUsernameAndAvatarURL(
+		const { avatarURL } = await getDisplayNameAndAvatarURL(
 			user,
 			interaction.guild,
 		);

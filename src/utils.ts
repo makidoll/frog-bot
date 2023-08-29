@@ -27,7 +27,7 @@ export function bufferToDataUri(buffer: Buffer, contentType: string) {
 	return "data:" + contentType + ";base64," + base64Data;
 }
 
-export async function getUsernameAndAvatarURL(
+export async function getDisplayNameAndAvatarURL(
 	user: User | ClientUser,
 	guild: Guild,
 ) {
@@ -38,7 +38,7 @@ export async function getUsernameAndAvatarURL(
 		forceStatic: true,
 	};
 	return {
-		username: member?.displayName ?? user.username,
+		username: member?.displayName ?? user.displayName,
 		avatarURL: member?.displayAvatarURL(options) ?? user.avatarURL(options),
 	};
 }

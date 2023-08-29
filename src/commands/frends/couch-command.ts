@@ -3,7 +3,7 @@ import { CommandInteraction } from "discord.js";
 import * as path from "path";
 import { Categories, Command } from "../../command";
 import { HtmlRenderer } from "../../services/html-renderer";
-import { downloadToDataUri, getUsernameAndAvatarURL } from "../../utils";
+import { downloadToDataUri, getDisplayNameAndAvatarURL } from "../../utils";
 
 export const CouchCommand: Command = {
 	category: Categories.frends,
@@ -28,7 +28,7 @@ export const CouchCommand: Command = {
 			async page => {
 				for (let i = 0; i < 4; i++) {
 					const { username, avatarURL } =
-						await getUsernameAndAvatarURL(
+						await getDisplayNameAndAvatarURL(
 							messages[i].author,
 							interaction.guild,
 						);

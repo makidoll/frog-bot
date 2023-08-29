@@ -40,7 +40,7 @@ import { Database } from "./services/database";
 import { HtmlRenderer } from "./services/html-renderer";
 import { MusicQueue } from "./services/music-queue";
 import { ToolsManager } from "./tools-manager";
-import { customIdMatch, shuffleArray } from "./utils";
+import { customIdMatch, plural, shuffleArray } from "./utils";
 
 // export const commandPrefix = "frog ";
 export const availableCommands: Command[] = [
@@ -182,6 +182,13 @@ https://github.com/makifoxgirl/frog-bot`.trim();
 
 		froglog.info(
 			`Invite link: https://discord.com/oauth2/authorize?client_id=${client.user.id}&scope=bot+applications.commands`,
+		);
+
+		const joinedGuilds = Array.from(client.guilds.cache.values());
+		froglog.info(
+			`Joined ${plural(joinedGuilds.length, "server")}: ${joinedGuilds
+				.map(guild => `"${guild.name}"`)
+				.join(", ")}`,
 		);
 
 		if (process.env.DEV != null) {

@@ -1,5 +1,5 @@
 import { MessageFlags, SlashCommandBuilder } from "discord.js";
-import execa from "execa";
+import { execa } from "execa";
 import { Categories, Command } from "../../command";
 import { froglog } from "../../froglog";
 import { ToolName, ToolsManager } from "../../tools-manager";

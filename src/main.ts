@@ -145,7 +145,7 @@ export const availableCommands: Command[] = [
 		client.user.setActivity({
 			name: "you " + activities[currentActivityIndex],
 			type: ActivityType.Watching,
-			url: "https://maki.cafe",
+			url: "https://makidrone.io",
 		});
 	};
 

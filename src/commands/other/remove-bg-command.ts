@@ -35,7 +35,7 @@ export const RemoveBgCommand: Command = {
 		// 	interaction.options.getBoolean("post-process-mask");
 
 		if (attachment == null) {
-			interaction.reply("ribbit! please send an image");
+			await interaction.reply("ribbit! please send an image");
 			return;
 		}
 
@@ -49,7 +49,7 @@ export const RemoveBgCommand: Command = {
 		// 	return;
 		// }
 
-		interaction.deferReply();
+		await interaction.deferReply();
 
 		// can there be no extension?
 		const outputFilename = attachment.name.replace(
@@ -69,7 +69,7 @@ export const RemoveBgCommand: Command = {
 				outputBuffer = await sharp(outputBuffer).png().toBuffer();
 			}
 
-			interaction.editReply({
+			await interaction.editReply({
 				files: [
 					{
 						attachment: outputBuffer,
@@ -78,7 +78,7 @@ export const RemoveBgCommand: Command = {
 				],
 			});
 		} catch (error) {
-			interaction.editReply("aw ribbit... it failed sorry :(");
+			await interaction.editReply("aw ribbit... it failed sorry :(");
 			froglog.error(error);
 		}
 	},

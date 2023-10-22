@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { ClientUser } from "discord.js";
-import execa from "execa";
+import { execa } from "execa";
 import * as fs from "fs/promises";
 import * as path from "path";
 import sharp from "sharp";

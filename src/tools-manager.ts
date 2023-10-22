@@ -1,7 +1,7 @@
 import axios from "axios";
 import decompress from "decompress";
 import decompressTarxz from "decompress-tarxz";
-import execa from "execa";
+import { execa } from "execa";
 import * as fs from "fs/promises";
 import * as os from "os";
 import * as path from "path";
@@ -190,7 +190,13 @@ export class ToolsManager {
 		// },
 		[ToolName.transparent_background]: {
 			// python blelelele
-			overrideInstalledPath: async () => which("transparent-background"),
+			overrideInstalledPath: async () => {
+				if (process.env.TRANSPARENT_BACKGROUND_OVERRIDE) {
+					return process.env.TRANSPARENT_BACKGROUND_OVERRIDE;
+				} else {
+					return which("transparent-background");
+				}
+			},
 		},
 	};
 

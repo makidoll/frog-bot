@@ -19,6 +19,7 @@ import { CasCommand } from "./commands/memes-gifs/cas-command";
 import { MyBelovedCommand } from "./commands/memes-gifs/my-beloved-command";
 import { PetpetCommand } from "./commands/memes-gifs/petpet-command";
 import { SquishyCommand } from "./commands/memes-gifs/squishy-command";
+import { BlahajWatchingCommand } from "./commands/memes/blahaj-watching-command";
 import { ComfyCommand } from "./commands/memes/comfy-command";
 import { DeepfryCommand } from "./commands/memes/deepfry-command";
 import { NokiaExcelCommand } from "./commands/memes/nokia-excel-command";
@@ -58,6 +59,7 @@ export const availableCommands: Command[] = [
 	OmgHiCommand,
 	ToastCommand,
 	NokiaExcelCommand,
+	BlahajWatchingCommand,
 	// > memes gifs
 	CasCommand,
 	PetpetCommand,

@@ -1,5 +1,4 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { ClientUser } from "discord.js";
 import * as path from "path";
 import { Categories, Command } from "../../command";
 import { HtmlRenderer } from "../../services/html-renderer";

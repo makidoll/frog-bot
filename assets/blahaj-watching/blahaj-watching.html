@@ -1,0 +1,65 @@
+<html>
+	<head>
+		<style>
+			* {
+				margin: 0;
+			}
+
+			#canvas {
+				width: 640px;
+				height: 640px;
+			}
+		</style>
+	</head>
+	<body>
+		<canvas id="canvas"></canvas>
+		<script src="../GlslCanvas.js"></script>
+		<script>
+			async function load(data) {
+				const canvas = document.getElementById("canvas");
+				canvas.width = 640;
+				canvas.height = 640;
+
+				const sandbox = new GlslCanvas(canvas);
+				sandbox.load(data.fragCode);
+
+				const filtering = "linear"; // or nearest
+
+				sandbox.uniformTexture(`u_tex_base`, data.baseImage, {
+					filtering,
+				});
+
+				sandbox.uniformTexture(`u_tex_overlay`, data.overlayImage, {
+					filtering,
+				});
+
+				sandbox.uniformTexture(`u_tex_user`, data.userImage, {
+					filtering,
+				});
+
+				sandbox.setUniform(
+					"u_user_image_aspect_ratio",
+					data.userImageAspectRatio,
+				);
+			}
+
+			// (async () => {
+			// 	const fragCode = await (
+			// 		await fetch("blahaj-watching.frag")
+			// 	).text();
+
+			// 	load({
+			// 		fragCode,
+			// 		baseImage: "blahaj-watching.jpg",
+			// 		overlayImage: "blahaj-watching-overlay.png",
+			// 		userImage:
+			// 			"https://www.gravatar.com/avatar/1f57254654d0bad120ac992dd8aaf6b6.png?s=2048",
+			// 		// userImage: "pixel 7 pro.png",
+			// 		// userImageAspectRatio: 1440 / 3120,
+			// 		// userImage: "banner.png",
+			// 		// userImageAspectRatio: 2400 / 848,
+			// 	});
+			// })();
+		</script>
+	</body>
+</html>

@@ -22,6 +22,20 @@ export async function downloadToDataUri(url: string) {
 	}
 }
 
+export async function downloadToBufferAndDataUri(url: string) {
+	try {
+		const req = await axios({ url, responseType: "arraybuffer" });
+		const contentType = req.headers["content-type"].split(" ")[0];
+		const base64Data = req.data.toString("base64");
+		return {
+			buffer: req.data,
+			dataUri: "data:" + contentType + ";base64," + base64Data,
+		};
+	} catch (error) {
+		return { buffer: null, dataUri: "" };
+	}
+}
+
 export function bufferToDataUri(buffer: Buffer, contentType: string) {
 	const base64Data = buffer.toString("base64");
 	return "data:" + contentType + ";base64," + base64Data;

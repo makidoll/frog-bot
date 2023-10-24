@@ -147,7 +147,7 @@ export const availableCommands: Command[] = [
 		client.user.setActivity({
 			name: "you " + activities[currentActivityIndex],
 			type: ActivityType.Watching,
-			url: "https://makidrone.io",
+			url: "https://makidoll.io",
 		});
 	};
 

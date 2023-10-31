@@ -1,5 +1,11 @@
 import axios from "axios";
-import { ClientUser, Guild, ImageURLOptions, User } from "discord.js";
+import {
+	ClientUser,
+	Guild,
+	GuildPremiumTier,
+	ImageURLOptions,
+	User,
+} from "discord.js";
 import * as fs from "fs/promises";
 
 export async function downloadToBuffer(url: string) {
@@ -189,4 +195,28 @@ export async function wait(ms: number) {
 	await new Promise(resolve => {
 		setTimeout(resolve, ms);
 	});
+}
+
+export function thousandsSeparators(n: number) {
+	let out = "";
+
+	const digits = String(n).split("").reverse();
+
+	const chunkSize = 3;
+	for (let i = 0; i < digits.length; i += chunkSize) {
+		out += digits.slice(i, i + chunkSize).join("") + ",";
+	}
+
+	return out.slice(0, -1).split("").reverse().join("");
+}
+
+export function getUploadLimitForGuild(guild: Guild) {
+	switch (guild.premiumTier) {
+		case GuildPremiumTier.Tier3:
+			return 100_000_000; // 100 MB
+		case GuildPremiumTier.Tier2:
+			return 50_000_000; // 50 MB
+		default:
+			return 8_000_000; // 8 MB default
+	}
 }

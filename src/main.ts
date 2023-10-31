@@ -41,6 +41,7 @@ import { Database } from "./services/database";
 import { HtmlRenderer } from "./services/html-renderer";
 import { MusicQueue } from "./services/music-queue";
 import { ToolsManager } from "./tools-manager";
+import { twitterEmbedOnMessage } from "./twitter-embeds";
 import { customIdMatch, plural, shuffleArray } from "./utils";
 
 // export const commandPrefix = "frog ";
@@ -95,6 +96,7 @@ export const availableCommands: Command[] = [
 			"GuildMessages",
 			"GuildMessageReactions",
 			"GuildVoiceStates",
+			"MessageContent",
 		],
 		partials: [Partials.Message, Partials.Channel, Partials.Reaction],
 	});
@@ -312,6 +314,12 @@ https://github.com/makifoxgirl/frog-bot`.trim();
 		}
 	});
 */
+
+	client.on("messageCreate", message => {
+		if (message.author.bot) return;
+
+		twitterEmbedOnMessage(message);
+	});
 
 	client.on("error", error => {
 		froglog.error(error);

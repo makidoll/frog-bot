@@ -552,7 +552,7 @@ export const SnakesAndLaddersCommand: Command = {
 			}
 		} catch (error) {
 			// update game message
-			console.error(error);
+			console.log(error);
 			try {
 				await interaction.update({
 					// files: [], // keep images
@@ -560,7 +560,7 @@ export const SnakesAndLaddersCommand: Command = {
 					content: errorRibbitMessage("something went wrong :("),
 				});
 			} catch (error) {
-				console.error(error);
+				console.log(error);
 			}
 		}
 	},

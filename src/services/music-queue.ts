@@ -243,7 +243,7 @@ export class MusicQueue {
 					"Loaded music queue from db for channel: " + channel.id,
 				);
 			} catch (error) {
-				console.error(error);
+				console.log(error);
 				froglog.error(
 					"Failed to load music queue from db for channel: " +
 						dbAudioQueue._id,
@@ -515,7 +515,7 @@ export class MusicQueue {
 				});
 			} catch (error) {
 				// ignore i guess
-				console.error(error);
+				console.log(error);
 			}
 		}
 
@@ -852,7 +852,7 @@ export class MusicQueue {
 				});
 			}
 		} catch (error) {
-			console.error(error);
+			console.log(error);
 		}
 
 		// try all future interactions
@@ -863,7 +863,7 @@ export class MusicQueue {
 					components: getPlayInteractionComponents(metadata, queue),
 				});
 			} catch (error) {
-				console.error(error);
+				console.log(error);
 			}
 		}
 

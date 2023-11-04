@@ -16,7 +16,7 @@ export async function twitterEmbedOnMessage(message: Message<boolean>) {
 
 	const matches = Array.from(
 		message.content.matchAll(
-			/https?:\/\/(?:www\.)?(?:twitter\.com|x\.com)(\/[^]+?)(?:\s|$)/gi,
+			/https?:\/\/(?:www\.)?(?:twitter\.com|x\.com)\/([^]+?)\/status\/([0-9]+?)(?:(?:\/)|(?:\s|$))/gi,
 		),
 	);
 
@@ -25,14 +25,17 @@ export async function twitterEmbedOnMessage(message: Message<boolean>) {
 	try {
 		await message.suppressEmbeds(true);
 	} catch (error) {
-		console.error(error);
+		console.log(error);
 	}
 
 	for (const match of matches) {
 		try {
-			await handleMessage(message, match[1]);
+			await handleMessage(
+				message,
+				"/" + match[1] + "/status/" + match[2],
+			);
 		} catch (error) {
-			console.error(error);
+			console.log(error);
 		}
 	}
 }
@@ -78,6 +81,8 @@ async function handleMessage(message: Message<boolean>, twitterPath: string) {
 	const combinedImageUrl =
 		images.length == 0
 			? ""
+			: images.length == 1
+			? images[0].url
 			: "https://convert.vxtwitter.com/rendercombined.jpg?imgs=" +
 			  encodeURIComponent(images.map(i => i.url).join(","));
 
@@ -109,8 +114,10 @@ async function handleMessage(message: Message<boolean>, twitterPath: string) {
 			...(video != null && videoBuffer == null
 				? [
 						{
-							title: "Failed to embed video",
-							description: "Discord has an upload size limit",
+							title: "Click here to see video",
+							description:
+								"Discord won't let me show you :<\n*(upload size limit and can't embed)*",
+							url: video.url,
 						},
 				  ]
 				: []),

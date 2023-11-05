@@ -16,7 +16,7 @@ export async function twitterEmbedOnMessage(message: Message<boolean>) {
 
 	const matches = Array.from(
 		message.content.matchAll(
-			/https?:\/\/(?:www\.)?(?:twitter\.com|x\.com)\/([^]+?)\/status\/([0-9]+?)(?:(?:\/)|(?:\s|$))/gi,
+			/https?:\/\/(?:www\.)?(?:twitter\.com|x\.com)\/([^]+?)\/status\/([0-9]+?)(?:\s|$|[/?])/gi,
 		),
 	);
 

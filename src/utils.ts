@@ -220,3 +220,7 @@ export function getUploadLimitForGuild(guild: Guild) {
 			return 8_000_000; // 8 MB default
 	}
 }
+
+export function removeDuplicates<T>(array: T[]) {
+	return array.filter((value, i) => array.indexOf(value) == i);
+}

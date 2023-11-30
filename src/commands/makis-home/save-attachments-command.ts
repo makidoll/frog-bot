@@ -15,7 +15,7 @@ import * as path from "path";
 import slugify from "slugify";
 import { Categories, Command } from "../../command";
 import { froglog } from "../../froglog";
-import { plural } from "../../utils";
+import { plural, removeDuplicates } from "../../utils";
 
 axiosRetry(axios, { retries: 3 });
 
@@ -53,37 +53,65 @@ async function saveAttachments(
 	const attachments: { id: string; urls: string[] }[] = [];
 
 	for (const message of allMessages) {
-		const messageAttachments = Array.from(message.attachments.values());
-		if (messageAttachments.length == 0) continue;
+		const msgAttachments = Array.from(message.attachments.values()).map(
+			a => a.url,
+		);
+
+		// can include video and thumbnail of video. dont know if i want that
+
+		const msgEmbeds = Array.from(message.embeds)
+			.map(e => [e?.video?.url, e?.image?.url, , e?.thumbnail?.url])
+			.flat();
+
+		const urls = removeDuplicates(
+			[...msgAttachments, ...msgEmbeds]
+				.filter(url => !(url == null || url == ""))
+				// remove video urls that dont resolve to a file.
+				// should we ever trust proxied video urls?
+				// discord doesnt support that many external services i guess.
+				// could also do a yt-dlp but already have `twitter-embeds.ts`
+				//
+				// oh also like the dumb empty reddit thumbnail.
+				// ok there's no way of knowing.
+				// TODO: there's also like blurred reddit thumbnails x.x
+				.filter(
+					url =>
+						!(
+							url.includes("twitter.com/i/videos/") ||
+							url.includes("x.com/i/videos/")
+						),
+				),
+		);
+
+		// if (message.id == "1177889720131403876") {
+		// 	console.log(urls);
+		// }
+
+		if (urls.length == 0) {
+			continue;
+		}
 
 		attachments.push({
 			id: message.id,
-			urls: messageAttachments.map(a => a.url),
+			urls,
 		});
 	}
 
-	let downloads: { filename: string; url: string }[] = [];
-
-	for (const attachment of attachments) {
-		if (attachment.urls.length == 1) {
-			const ext = path.extname(new URL(attachment.urls[0]).pathname);
-			downloads.push({
-				filename: attachment.id + ext,
-				url: attachment.urls[0],
-			});
-		} else {
-			downloads = [
-				...downloads,
-				...attachment.urls.map((url, i) => {
-					const ext = path.extname(new URL(url).pathname);
-					return {
-						filename: attachment.id + "-" + (i + 1) + ext,
-						url,
-					};
-				}),
-			];
-		}
-	}
+	const downloads = attachments
+		.map(({ id, urls }) =>
+			urls.map((url, i) => {
+				const ext = path.extname(new URL(url).pathname) ?? "";
+				// some urls are proxy links that dont have an extension,
+				// but i dont want to have to send a bunch of HEAD requests
+				return {
+					filename:
+						(urls.length == 1 ? id : id + "-" + (i + 1)) + ext,
+					url,
+					ext,
+				};
+			}),
+		)
+		.flat();
 
 	const slugifyOptions = {
 		lower: true,
@@ -144,9 +172,9 @@ async function saveAttachments(
 async function runCommand(
 	interaction: ChatInputCommandInteraction | ButtonInteraction,
 ) {
+	// media
+	// "1089011638511878175", // memes i guess (has too many alternative links)
 	const channelIds = [
-		// media
-		"1089011638511878175", // memes i guess
 		// art
 		"1089890698926510120", // cute characters
 		"1089891680586563665", // cute clothes

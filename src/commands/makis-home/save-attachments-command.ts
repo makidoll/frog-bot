@@ -151,15 +151,18 @@ async function runCommand(
 		"1089890698926510120", // cute characters
 		"1089891680586563665", // cute clothes
 		"1111560346717663292", // cute cybernetics
+		"1116323130550530068", // cute environments
+		"1147459690561806376", // girls being cute
 		// squishy squeak
 		"1089642397450903662", // uwaa whats this
-		"1112773080251641867", // hexcorp drones
+		"1174591584474501210", // animegao kigurimis
 		"1144405188023689357", // shiny latex
 		"1095731990831059074", // mercy and friends
 		"1100935621289185380", // samus aran
 		"1107284614894071838", // jester flamboyancy
 		"1110386667791069184", // transformation
 		"1132252572636434482", // league of leggings
+		"1112773080251641867", // hexcorp drones
 		// video games
 		"1111793860302090311", // overwatch art
 	];

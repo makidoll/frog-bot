@@ -183,7 +183,7 @@ async function runCommand(
 		"1147459690561806376", // girls being cute
 		// squishy squeak
 		"1089642397450903662", // uwaa whats this
-		"1174591584474501210", // animegao kigurimis
+		"1174591584474501210", // kigurimi dolls
 		"1144405188023689357", // shiny latex
 		"1095731990831059074", // mercy and friends
 		"1100935621289185380", // samus aran

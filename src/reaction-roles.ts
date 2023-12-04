@@ -8,43 +8,53 @@ import {
 } from "discord.js";
 import { froglog } from "./froglog";
 
-const ROLES_CHANNEL = "976645075142594561";
-const MESSAGES_TO_ROLES = {
-	"976645626437718016": {
-		"🟢": "they/them",
-		"🔴": "she/her",
-		"🔵": "he/him",
-		"⚪": "it/its",
-		"🟣": "xe/xir",
-		"🧚‍♀️": "fae/faer",
-		"🟡": "any/all",
+const channelMessageEmojiRoleMap = {
+	// frog couch: very-important-rules
+	"988555389635268629": {
+		"1181293365640298496": {
+			"<:frogcouch:976640982131019866>": "friendly frog",
+		},
 	},
-	"976647010730004480": {
-		"1️⃣": "north america",
-		"2️⃣": "south america",
-		"3️⃣": "europe",
-		"4️⃣": "africa",
-		"5️⃣": "asia",
-		"6️⃣": "oceania",
-		"7️⃣": "outer space",
-	},
-	"987133656151760966": {
-		"🤓": "🤓",
-		"😎": "😎",
-		"🤠": "🤠",
-		"👹": "👹",
-		"🤡": "🤡",
-		"👽": "👽",
-		"🤖": "🤖",
-		"🧚": "🧚",
-		"<:5021biblicalangel:1064639190010175579>": "😇",
-	},
-	"988551997298978836": {
-		"🎮": "🎮 gaymer",
-		"🎧": "🎧 vc friends",
-		"🦋": "🦋 moths",
+	// frog couch: pronouns-and-roles
+	"976645075142594561": {
+		"976645626437718016": {
+			"🟢": "they/them",
+			"🔴": "she/her",
+			"🔵": "he/him",
+			"⚪": "it/its",
+			"🟣": "xe/xir",
+			"🧚‍♀️": "fae/faer",
+			"🟡": "any/all",
+		},
+		"976647010730004480": {
+			"1️⃣": "north america",
+			"2️⃣": "south america",
+			"3️⃣": "europe",
+			"4️⃣": "africa",
+			"5️⃣": "asia",
+			"6️⃣": "oceania",
+			"7️⃣": "outer space",
+		},
+		"987133656151760966": {
+			"🤓": "🤓",
+			"😎": "😎",
+			"🤠": "🤠",
+			"👹": "👹",
+			"🤡": "🤡",
+			"👽": "👽",
+			"🤖": "🤖",
+			"🧚": "🧚",
+			"<:5021biblicalangel:1064639190010175579>": "😇",
+		},
+		"988551997298978836": {
+			"🎮": "🎮 gaymer",
+			"🎧": "🎧 vc friends",
+			"🦋": "🦋 moths",
+		},
 	},
 };
+
+const messageEmojiRoleMap = Object.values(channelMessageEmojiRoleMap).flat();
 
 function manageRoleFromMessageReaction(
 	client: Client,
@@ -54,7 +64,7 @@ function manageRoleFromMessageReaction(
 ) {
 	if (user.id == client.user.id) return;
 
-	const emojiToRoleName = MESSAGES_TO_ROLES[reaction.message.id];
+	const emojiToRoleName = messageEmojiRoleMap[reaction.message.id];
 	if (emojiToRoleName == null) return;
 
 	// froglog.debug(reaction.emoji.id); // 01928309123
@@ -105,20 +115,29 @@ export async function initReactionRoles(client: Client) {
 	});
 
 	try {
-		const rolesChannel = (await client.channels.fetch(
-			ROLES_CHANNEL,
-		)) as TextChannel;
+		for (const [channelId, messageEmojiRoleMap] of Object.entries(
+			channelMessageEmojiRoleMap,
+		)) {
+			const rolesChannel = (await client.channels.fetch(
+				channelId,
+			)) as TextChannel;
 
-		for (const roleMessageId of Object.keys(MESSAGES_TO_ROLES)) {
-			const message = await rolesChannel.messages.fetch(roleMessageId);
-			if (!message) continue;
+			for (const [roleMessageId, emojiToRole] of Object.keys(
+				messageEmojiRoleMap,
+			)) {
+				const message = await rolesChannel.messages.fetch(
+					roleMessageId,
+				);
 
-			for (const emoji of Object.keys(MESSAGES_TO_ROLES[roleMessageId])) {
-				message.react(emoji);
+				if (!message) continue;
+
+				for (const emoji of Object.keys(emojiToRole)) {
+					message.react(emoji);
+				}
 			}
-		}
 
-		froglog.info("Initialized reaction roles");
+			froglog.info("Initialized reaction roles");
+		}
 	} catch (error) {
 		if (error.code == 50001) {
 			if (process.env.DEV) {

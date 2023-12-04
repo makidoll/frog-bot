@@ -154,6 +154,7 @@ export async function initReactionRoles(client: Client) {
 				if (!message) continue;
 
 				for (const emoji of Object.keys(emojiToRole)) {
+					if (emoji == "any-fallback") continue;
 					message.react(emoji);
 				}
 			}

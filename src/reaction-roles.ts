@@ -179,6 +179,9 @@ async function manageRoleFromMessageReaction(
 				froglog.error(error);
 			});
 
+			// incase we're still checking for all unreacted
+			usersCheckingIfAllUnreacted.delete(user.id);
+
 			return;
 		}
 
@@ -278,19 +281,14 @@ export async function initReactionRoles(client: Client) {
 			if (!message) continue;
 
 			for (const emoji of Object.keys(reactionInfo.specificRoleMap)) {
-				message
-					.react(emoji)
-					.catch(error => {
-						froglog.error(
-							`Failed to react to message "${messageId}" in channel "${channel.name}"`,
-						);
-					})
-					.then(() => {
-						froglog.info(
-							`Reacted "${emoji}" to message in channel "${channel.name}"`,
-						);
-					});
+				message.react(emoji).catch(error => {
+					froglog.error(
+						`Failed to react to message "${messageId}" in channel "${channel.name}"`,
+					);
+				});
 			}
 		}
+
+		froglog.info(`Reacted emojis to messages in channel "${channel.name}"`);
 	}
 }

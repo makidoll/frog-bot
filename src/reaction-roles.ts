@@ -14,7 +14,7 @@ const channelMessageEmojiRoleMap: {
 	// frog couch: very-important-rules
 	"988555389635268629": {
 		"1181293365640298496": {
-			"<:frogcouch:976640982131019866>": "friendly frog",
+			"<:frogchamp:980305678071660544>": "friendly frog",
 		},
 	},
 	// frog couch: pronouns-and-roles

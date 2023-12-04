@@ -10,30 +10,8 @@ import {
 	ModalSubmitInteraction,
 	Partials,
 } from "discord.js";
-import { Command, ServerExclusiveCategories } from "./command";
-import { CouchCommand } from "./commands/frends/couch-command";
-import { FrugCommand } from "./commands/frends/frug-command";
-import { SaveAttachmentsCommand } from "./commands/makis-home/save-attachments-command";
-import { VapourHoldCommand } from "./commands/mechanyx/vapour-hold-command";
-import { CasCommand } from "./commands/memes-gifs/cas-command";
-import { MyBelovedCommand } from "./commands/memes-gifs/my-beloved-command";
-import { PetpetCommand } from "./commands/memes-gifs/petpet-command";
-import { SquishyCommand } from "./commands/memes-gifs/squishy-command";
-import { BlahajWatchingCommand } from "./commands/memes/blahaj-watching-command";
-import { ComfyCommand } from "./commands/memes/comfy-command";
-import { DeepfryCommand } from "./commands/memes/deepfry-command";
-import { NokiaExcelCommand } from "./commands/memes/nokia-excel-command";
-import { OmgHiCommand } from "./commands/memes/omg-hi-command";
-import { ToastCommand } from "./commands/memes/toast-command";
-import { LoopCommand } from "./commands/music/loop-command";
-import { PlayCommand } from "./commands/music/play-command";
-import { ShowQueueCommand } from "./commands/music/show-queue-command";
-import { SkipCommand } from "./commands/music/skip-command";
-import { StopCommand } from "./commands/music/stop-command";
-import { FeatureplsCommand } from "./commands/other/featurepls-command";
-import { HelpCommand } from "./commands/other/help-command";
-import { RemoveBgCommand } from "./commands/other/remove-bg-command";
-import { YtDlpCommand } from "./commands/other/yt-dlp-command";
+import { availableCommands } from "./available-commands";
+import { ServerExclusiveCategories } from "./command";
 import { froglog } from "./froglog";
 import { initReactionRoles } from "./reaction-roles";
 import { initReminders } from "./reminders";
@@ -43,42 +21,6 @@ import { MusicQueue } from "./services/music-queue";
 import { ToolsManager } from "./tools-manager";
 import { twitterEmbedOnMessage } from "./twitter-embeds";
 import { customIdMatch, plural, shuffleArray } from "./utils";
-
-// export const commandPrefix = "frog ";
-export const availableCommands: Command[] = [
-	// > other
-	HelpCommand,
-	RemoveBgCommand,
-	YtDlpCommand,
-	FeatureplsCommand,
-	// > frends
-	CouchCommand,
-	FrugCommand,
-	// > memes
-	ComfyCommand,
-	DeepfryCommand,
-	OmgHiCommand,
-	ToastCommand,
-	NokiaExcelCommand,
-	BlahajWatchingCommand,
-	// > memes gifs
-	CasCommand,
-	PetpetCommand,
-	SquishyCommand,
-	MyBelovedCommand,
-	// > music
-	PlayCommand,
-	StopCommand,
-	SkipCommand,
-	LoopCommand,
-	ShowQueueCommand,
-	// > games
-	// SnakesAndLaddersCommand,
-	// > mechanyx
-	VapourHoldCommand,
-	// > maki's home
-	SaveAttachmentsCommand,
-];
 
 (async () => {
 	if (process.env.DEV != null) {
@@ -175,11 +117,12 @@ export const availableCommands: Command[] = [
 		// https://discord.com/developers/applications
 		/*
 		const bio = `
-ribbit! im frog bot! hoppy 🐸 🌺
-• **maki made me, i love her so much 💕**
+ribbit! im froggy bot! hoppy 🐸 🌺
+• **maki doll made me, i love her so much 💕**
 • i was born one day before her birthday wahoo
 • **do feature request, do it do it! /featurepls**
-https://github.com/makifoxgirl/frog-bot`.trim();
+https://github.com/makidoll/frog-bot
+https://makidoll.io/`.trim();
 
 		rest.patch(Routes.user("@me"), { body: { bio } });
 		*/

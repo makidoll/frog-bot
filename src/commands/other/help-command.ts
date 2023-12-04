@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { MessageFlags } from "discord.js";
+import { availableCommands } from "../../available-commands";
 import { Categories, Command, ServerExclusiveCategories } from "../../command";
-import { availableCommands } from "../../main";
 import { plural } from "../../utils";
 
 export const HelpCommand: Command = {

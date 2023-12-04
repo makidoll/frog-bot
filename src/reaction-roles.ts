@@ -14,7 +14,8 @@ const channelMessageEmojiRoleMap: {
 	// frog couch: very-important-rules
 	"988555389635268629": {
 		"1181293365640298496": {
-			"<:frogchamp:980305678071660544>": "friendly frog",
+			// "<:frogchamp:980305678071660544>": "friendly frog",
+			"any-fallback": "friendly frog",
 		},
 	},
 	// frog couch: pronouns-and-roles
@@ -86,9 +87,16 @@ function manageRoleFromMessageReaction(
 	// froglog.debug(reaction.emoji.name); // name
 
 	let roleName = emojiToRoleName[reaction.emoji.name];
+
 	if (roleName == null) {
 		roleName = (Object.entries(emojiToRoleName).find(entry =>
 			entry[0].includes(reaction.emoji.identifier),
+		) ?? [null, null])[1];
+	}
+
+	if (roleName == null) {
+		roleName = (Object.entries(emojiToRoleName).find(
+			entry => entry[0] == "any-fallback",
 		) ?? [null, null])[1];
 	}
 

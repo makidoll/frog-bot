@@ -8,7 +8,9 @@ import {
 } from "discord.js";
 import { froglog } from "./froglog";
 
-const channelMessageEmojiRoleMap = {
+const channelMessageEmojiRoleMap: {
+	[channelId: string]: { [messageId: string]: { [emoji: string]: string } };
+} = {
 	// frog couch: very-important-rules
 	"988555389635268629": {
 		"1181293365640298496": {
@@ -54,7 +56,19 @@ const channelMessageEmojiRoleMap = {
 	},
 };
 
-const messageEmojiRoleMap = Object.values(channelMessageEmojiRoleMap).flat();
+let allMessageEmojiRoleMap: {
+	[messageId: string]: { [emoji: string]: string };
+} = {};
+
+for (const messageEmojiRoleMap of Object.values(
+	channelMessageEmojiRoleMap,
+).flat()) {
+	for (const [messageId, emojiRoleMap] of Object.entries(
+		messageEmojiRoleMap,
+	)) {
+		allMessageEmojiRoleMap[messageId] = emojiRoleMap;
+	}
+}
 
 function manageRoleFromMessageReaction(
 	client: Client,
@@ -64,7 +78,7 @@ function manageRoleFromMessageReaction(
 ) {
 	if (user.id == client.user.id) return;
 
-	const emojiToRoleName = messageEmojiRoleMap[reaction.message.id];
+	const emojiToRoleName = allMessageEmojiRoleMap[reaction.message.id];
 	if (emojiToRoleName == null) return;
 
 	// froglog.debug(reaction.emoji.id); // 01928309123
@@ -122,7 +136,7 @@ export async function initReactionRoles(client: Client) {
 				channelId,
 			)) as TextChannel;
 
-			for (const [roleMessageId, emojiToRole] of Object.keys(
+			for (const [roleMessageId, emojiToRole] of Object.entries(
 				messageEmojiRoleMap,
 			)) {
 				const message = await rolesChannel.messages.fetch(

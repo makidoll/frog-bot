@@ -7,71 +7,104 @@ import {
 	User,
 } from "discord.js";
 import { froglog } from "./froglog";
+import { generateRandomId } from "./utils";
 
-const channelMessageEmojiRoleMap: {
-	[channelId: string]: { [messageId: string]: { [emoji: string]: string } };
+interface ReactionInfo {
+	mode: "specific" | "any";
+	specificRoleMap?: { [emoji: string]: string };
+	anyRole?: string;
+}
+
+const channelMessageReactionInfo: {
+	[channelId: string]: {
+		[messageId: string]: ReactionInfo;
+	};
 } = {
 	// frog couch: very-important-rules
 	"988555389635268629": {
 		"1181293365640298496": {
-			// "<:frogchamp:980305678071660544>": "friendly frog",
-			"any-fallback": "friendly frog",
+			mode: "any",
+			anyRole: "friendly frog",
 		},
 	},
 	// frog couch: pronouns-and-roles
 	"976645075142594561": {
 		"976645626437718016": {
-			"🟢": "they/them",
-			"🔴": "she/her",
-			"🔵": "he/him",
-			"⚪": "it/its",
-			"🟣": "xe/xir",
-			"🧚‍♀️": "fae/faer",
-			"🟡": "any/all",
+			mode: "specific",
+			specificRoleMap: {
+				"🟢": "they/them",
+				"🔴": "she/her",
+				"🔵": "he/him",
+				"⚪": "it/its",
+				"🟣": "xe/xir",
+				"🧚‍♀️": "fae/faer",
+				"🟡": "any/all",
+			},
 		},
 		"976647010730004480": {
-			"1️⃣": "north america",
-			"2️⃣": "south america",
-			"3️⃣": "europe",
-			"4️⃣": "africa",
-			"5️⃣": "asia",
-			"6️⃣": "oceania",
-			"7️⃣": "outer space",
+			mode: "specific",
+			specificRoleMap: {
+				"1️⃣": "north america",
+				"2️⃣": "south america",
+				"3️⃣": "europe",
+				"4️⃣": "africa",
+				"5️⃣": "asia",
+				"6️⃣": "oceania",
+				"7️⃣": "outer space",
+			},
 		},
 		"987133656151760966": {
-			"🤓": "🤓",
-			"😎": "😎",
-			"🤠": "🤠",
-			"👹": "👹",
-			"🤡": "🤡",
-			"👽": "👽",
-			"🤖": "🤖",
-			"🧚": "🧚",
-			"<:5021biblicalangel:1064639190010175579>": "😇",
+			mode: "specific",
+			specificRoleMap: {
+				"🤓": "🤓",
+				"😎": "😎",
+				"🤠": "🤠",
+				"👹": "👹",
+				"🤡": "🤡",
+				"👽": "👽",
+				"🤖": "🤖",
+				"🧚": "🧚",
+				"<:5021biblicalangel:1064639190010175579>": "😇",
+			},
 		},
 		"988551997298978836": {
-			"🎮": "🎮 gaymer",
-			"🎧": "🎧 vc friends",
-			"🦋": "🦋 moths",
+			mode: "specific",
+			specificRoleMap: {
+				"🎮": "🎮 gaymer",
+				"🎧": "🎧 vc friends",
+				"🦋": "🦋 moths",
+			},
 		},
 	},
+	// maki's home: bot-testing
+	// "1086714710788952138": {
+	// 	"1181322145742204928": {
+	// 		mode: "any",
+	// 		// specificRoleMap: {
+	// 		// 	"🎀": "she/her",
+	// 		// },
+	// 		anyRole: "she/her",
+	// 	},
+	// },
 };
 
 let allMessageEmojiRoleMap: {
-	[messageId: string]: { [emoji: string]: string };
+	[messageId: string]: ReactionInfo;
 } = {};
 
 for (const messageEmojiRoleMap of Object.values(
-	channelMessageEmojiRoleMap,
+	channelMessageReactionInfo,
 ).flat()) {
-	for (const [messageId, emojiRoleMap] of Object.entries(
+	for (const [messageId, reactionInfo] of Object.entries(
 		messageEmojiRoleMap,
 	)) {
-		allMessageEmojiRoleMap[messageId] = emojiRoleMap;
+		allMessageEmojiRoleMap[messageId] = reactionInfo;
 	}
 }
 
-function manageRoleFromMessageReaction(
+let usersCheckingIfAllUnreacted: Map<string, string> = new Map();
+
+async function manageRoleFromMessageReaction(
 	client: Client,
 	reaction: MessageReaction | PartialMessageReaction,
 	user: User | PartialUser,
@@ -79,47 +112,131 @@ function manageRoleFromMessageReaction(
 ) {
 	if (user.id == client.user.id) return;
 
-	const emojiToRoleName = allMessageEmojiRoleMap[reaction.message.id];
-	if (emojiToRoleName == null) return;
+	const reactionInfo = allMessageEmojiRoleMap[reaction.message.id];
+	if (reactionInfo == null) return;
 
-	// froglog.debug(reaction.emoji.id); // 01928309123
-	// froglog.debug(reaction.emoji.identifier); // name:01928309123
-	// froglog.debug(reaction.emoji.name); // name
+	if (reactionInfo.mode == "specific") {
+		// froglog.debug(reaction.emoji.id); // 01928309123
+		// froglog.debug(reaction.emoji.identifier); // name:01928309123
+		// froglog.debug(reaction.emoji.name); // name
 
-	let roleName = emojiToRoleName[reaction.emoji.name];
+		let roleName = reactionInfo.specificRoleMap[reaction.emoji.name];
 
-	if (roleName == null) {
-		roleName = (Object.entries(emojiToRoleName).find(entry =>
-			entry[0].includes(reaction.emoji.identifier),
-		) ?? [null, null])[1];
-	}
+		if (roleName == null) {
+			roleName = (Object.entries(reactionInfo.specificRoleMap).find(
+				entry => entry[0].includes(reaction.emoji.identifier),
+			) ?? [null, null])[1];
+		}
 
-	if (roleName == null) {
-		roleName = (Object.entries(emojiToRoleName).find(
-			entry => entry[0] == "any-fallback",
-		) ?? [null, null])[1];
-	}
+		if (roleName == null) return;
 
-	if (roleName == null) return;
+		const role = reaction.message.guild.roles.cache.find(
+			role => role.name.toLowerCase() == roleName.toLowerCase(),
+		);
+		if (role == null) return;
 
-	const role = reaction.message.guild.roles.cache.find(
-		role => role.name.toLowerCase() == roleName.toLowerCase(),
-	);
-	if (role == null) return;
+		const member = reaction.message.guild.members.cache.get(user.id);
+		if (member == null) return;
 
-	const member = reaction.message.guild.members.cache.get(user.id);
-	if (member == null) return;
+		froglog.info(
+			`"${member.displayName}" ${(method == "ADD"
+				? 'reacted "~" adding'
+				: 'unreacted "~" removing'
+			).replace("~", reaction.emoji.name)} "${role.name}"`,
+		);
 
-	froglog.info(member.displayName + " " + method + " " + role.name);
+		if (method == "ADD") {
+			member.roles.add(role).catch(error => {
+				froglog.error(error);
+			});
+		} else if (method == "REMOVE") {
+			member.roles.remove(role).catch(error => {
+				froglog.error(error);
+			});
+		}
+	} else if (reactionInfo.mode == "any") {
+		const role = reaction.message.guild.roles.cache.find(
+			role =>
+				role.name.toLowerCase() == reactionInfo.anyRole.toLowerCase(),
+		);
+		if (role == null) return;
 
-	if (method == "ADD") {
-		member.roles.add(role).catch(error => {
-			froglog.error(error);
-		});
-	} else if (method == "REMOVE") {
+		const member = reaction.message.guild.members.cache.get(user.id);
+		if (member == null) return;
+
+		if (method == "ADD") {
+			// just give role
+
+			froglog.info(
+				`"${member.displayName}" ${
+					method == "ADD"
+						? 'reacted "any" adding'
+						: 'unreacted "any" removing'
+				} "${reactionInfo.anyRole}"`,
+			);
+
+			member.roles.add(role).catch(error => {
+				froglog.error(error);
+			});
+
+			return;
+		}
+
+		// need to fetch channel and message to get all current reactions
+
+		const channel = (await client.channels
+			.fetch(reaction.message.channelId)
+			.catch(error => {
+				froglog.error(
+					`"${member.displayName}" unreacted "any" removing "${reactionInfo.anyRole}" but failed to find channel "${reaction.message.channelId}"`,
+				);
+			})) as TextChannel;
+
+		if (!channel) return;
+
+		const message = await channel.messages
+			.fetch(reaction.message.id)
+			.catch(error => {
+				froglog.error(
+					`"${member.displayName}" unreacted "any" removing "${reactionInfo.anyRole}" but failed to find message "${reaction.message.id}" in channel "${reaction.message.channelId}"`,
+				);
+			});
+
+		if (!message) return;
+
+		const reactions = message.reactions.cache.values();
+
+		// now we just count reactions
+		// if we have more than 1 reaction for our user, then just return
+
+		// reaction.users.fetch() takes a long time for some reason
+		// it can cause the code to lag behind and make things confusing
+		// so we'll generate a random request id and store in a map
+		// which will take handle which request should continue
+
+		const requestId = generateRandomId(16);
+
+		usersCheckingIfAllUnreacted.set(user.id, requestId);
+
+		for (const reaction of reactions) {
+			// other function already took control
+			if (usersCheckingIfAllUnreacted.get(user.id) != requestId) return;
+
+			const users = await reaction.users.fetch();
+			if (users.has(user.id)) return;
+		}
+
+		// no reactions so lets remove role
+
+		froglog.info(
+			`"${member.displayName}" unreacted "all" removing "${reactionInfo.anyRole}"`,
+		);
+
 		member.roles.remove(role).catch(error => {
 			froglog.error(error);
 		});
+
+		usersCheckingIfAllUnreacted.delete(user.id);
 	}
 }
 
@@ -136,44 +253,44 @@ export async function initReactionRoles(client: Client) {
 		} catch (error) {}
 	});
 
-	try {
-		for (const [channelId, messageEmojiRoleMap] of Object.entries(
-			channelMessageEmojiRoleMap,
+	for (const [channelId, messageReactionInfo] of Object.entries(
+		channelMessageReactionInfo,
+	)) {
+		const channel = (await client.channels.fetch(channelId).catch(error => {
+			froglog.error(`Failed to find role channel "${channelId}"`);
+		})) as TextChannel;
+
+		if (!channel) continue;
+
+		for (const [messageId, reactionInfo] of Object.entries(
+			messageReactionInfo,
 		)) {
-			const rolesChannel = (await client.channels.fetch(
-				channelId,
-			)) as TextChannel;
+			if (reactionInfo.mode != "specific") continue;
 
-			for (const [roleMessageId, emojiToRole] of Object.entries(
-				messageEmojiRoleMap,
-			)) {
-				const message = await rolesChannel.messages.fetch(
-					roleMessageId,
-				);
+			const message = await channel.messages
+				.fetch(messageId)
+				.catch(error => {
+					froglog.error(
+						`Failed to find role message "${messageId}" in channel "${channel.name}"`,
+					);
+				});
 
-				if (!message) continue;
+			if (!message) continue;
 
-				for (const emoji of Object.keys(emojiToRole)) {
-					if (emoji == "any-fallback") continue;
-					message.react(emoji);
-				}
+			for (const emoji of Object.keys(reactionInfo.specificRoleMap)) {
+				message
+					.react(emoji)
+					.catch(error => {
+						froglog.error(
+							`Failed to react to message "${messageId}" in channel "${channel.name}"`,
+						);
+					})
+					.then(() => {
+						froglog.info(
+							`Reacted "${emoji}" to message in channel "${channel.name}"`,
+						);
+					});
 			}
-
-			froglog.info("Initialized reaction roles");
-		}
-	} catch (error) {
-		if (error.code == 50001) {
-			if (process.env.DEV) {
-				froglog.debug(
-					"Failed to initialize reaction roles, missing access. Intended when developing",
-				);
-			} else {
-				froglog.error(
-					"Failed to initialize reaction roles, missing access",
-				);
-			}
-		} else {
-			froglog.error(error);
 		}
 	}
 }

@@ -106,6 +106,8 @@ async function playInteraction(
 
 		const components = getPlayInteractionComponents(metadatas[0], queue);
 
+		const emptyText = " ‍ "; // https://iempty.tooliphone.net/copy-empty-text
+
 		const followUpMessage = await interaction.followUp({
 			content: [
 				isPlaylist
@@ -119,6 +121,9 @@ async function playInteraction(
 							seconds,
 					  )}** long, froggy adding to queue...`,
 				isPlaylist ? metadatas[0].playlistUrl : metadatas[0].videoUrl,
+				">  ",
+				"> ribbit! if the music is too loud, just turn me down! *right click me in vc*",
+				">  " + emptyText,
 			].join("\n"),
 			components,
 		});

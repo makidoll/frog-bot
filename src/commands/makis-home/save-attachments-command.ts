@@ -176,6 +176,7 @@ async function runCommand(
 	// "1089011638511878175", // memes i guess (has too many alternative links)
 	const channelIds = [
 		// art
+		"1183492272130637834", // hatsune miku
 		"1089890698926510120", // cute characters
 		"1089891680586563665", // cute clothes
 		"1111560346717663292", // cute cybernetics

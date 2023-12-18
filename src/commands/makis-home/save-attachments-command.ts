@@ -177,11 +177,10 @@ async function runCommand(
 	const channelIds = [
 		// art
 		"1183492272130637834", // hatsune miku
-		"1089890698926510120", // cute characters
+		"1089890698926510120", // girls being cute
 		"1089891680586563665", // cute clothes
 		"1111560346717663292", // cute cybernetics
 		"1116323130550530068", // cute environments
-		"1147459690561806376", // girls being cute
 		// squishy squeak
 		"1089642397450903662", // uwaa whats this
 		"1174591584474501210", // kigurimi dolls

@@ -19,7 +19,7 @@ these will get automatically downloaded:
 
 copy `.env.sample` to `.env` and set your token
 
-install packages with `yarn`
+install packages with `pnpm install`
 
 install playwright deps with `sudo npx playwright install-deps`
 

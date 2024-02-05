@@ -40,7 +40,7 @@ export const HelpCommand: Command = {
 
 		const facts = [
 			"suggest new commands with **/featurepls** and i'll try my best~",
-			"see me hoppy! 🐛 https://github.com/makifoxgirl/frog-bot",
+			"see me hoppy! 🐛 https://github.com/makidoll/frog-bot",
 			"oh also i'm part of **" +
 				plural(totalServers, "server") +
 				"**, yay!",

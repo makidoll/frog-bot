@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { all } from "axios";
 import { Message } from "discord.js";
 import { Categories, ServerExclusiveCategories } from "./command";
 import {
@@ -40,6 +40,23 @@ export async function twitterEmbedOnMessage(message: Message<boolean>) {
 	}
 }
 
+async function downloadFileToUpload(
+	url: string,
+	message: Message<boolean>,
+): Promise<{ attachment: Buffer; name: string }> {
+	try {
+		const fileRes = await fetch(url);
+		const fileBytes = Number(fileRes.headers.get("content-length"));
+
+		if (fileBytes < getUploadLimitForGuild(message.guild)) {
+			return {
+				attachment: Buffer.from(await fileRes.arrayBuffer()),
+				name: new URL(url).pathname.split("/").pop(),
+			};
+		}
+	} catch (error) {}
+}
+
 async function handleMessage(message: Message<boolean>, twitterPath: string) {
 	await message.channel.sendTyping();
 
@@ -71,97 +88,66 @@ async function handleMessage(message: Message<boolean>, twitterPath: string) {
 
 	const tweet = res.data;
 
-	const video = tweet.media_extended.find(m => m.type == "video");
+	const videoUrl = (tweet.media_extended.find(m => m.type == "video") ?? {})
+		.url;
 
-	const images =
-		video == null
-			? tweet.media_extended.filter(m => m.type == "image")
-			: [];
+	const allFileUrls =
+		videoUrl == null
+			? tweet.media_extended
+					.filter(m => m.type == "image")
+					.map(m => m.url)
+			: [videoUrl];
 
-	const combinedImageUrl =
-		images.length == 0
-			? ""
-			: images.length == 1
-			? images[0].url
-			: "https://convert.vxtwitter.com/rendercombined.jpg?imgs=" +
-			  encodeURIComponent(images.map(i => i.url).join(","));
+	// download all buffers
 
-	let videoBuffer: Buffer = null;
-	let videoFilename = "";
+	let filesToUpload: { attachment: Buffer; name: string }[] = [];
+	let failedUploads: string[] = [];
 
-	try {
-		if (video != null) {
-			const videoRes = await fetch(video.url);
-			const videoBytes = Number(videoRes.headers.get("content-length"));
-
-			if (videoBytes < getUploadLimitForGuild(message.guild)) {
-				videoBuffer = Buffer.from(await videoRes.arrayBuffer());
-				videoFilename = new URL(video.url).pathname.split("/").pop();
-			}
+	for (const fileUrl of allFileUrls) {
+		const file = await downloadFileToUpload(fileUrl, message);
+		if (file == null) {
+			failedUploads.push(fileUrl);
+		} else {
+			filesToUpload.push(file);
 		}
-	} catch (error) {}
+	}
+
+	// TODO: migrate old messages on dollhouse to new format?
 
 	message.reply({
-		files: videoBuffer
-			? [
-					{
-						attachment: videoBuffer,
-						name: videoFilename,
-					},
-			  ]
-			: [],
+		files: filesToUpload,
 		embeds: [
-			...(video != null && videoBuffer == null
-				? [
-						{
-							title: "Click here to see video",
-							description:
-								"Discord won't let me show you :<\n*(upload size limit and can't embed)*",
-							url: video.url,
-						},
-				  ]
-				: []),
+			...failedUploads.map(url => ({
+				title: "Click here to see content",
+				description:
+					"Discord won't let me show you :<\n*(upload size limit and can't embed)*",
+				url: url,
+			})),
 			{
-				author: {
-					name: `${tweet.user_name} (@${tweet.user_screen_name})`,
-					url: "https://twitter.com/" + tweet.user_screen_name,
-				},
-				title: tweet.text,
+				// author: {
+				// 	name: `${tweet.user_name} (@${tweet.user_screen_name})`,
+				// 	url: "https://twitter.com/" + tweet.user_screen_name,
+				// },
+				title: `${tweet.user_name} (@${tweet.user_screen_name})`,
 				url: tweet.tweetURL,
+				description: tweet.text,
 				fields: [
 					{
-						name: "❤️ Likes",
-						value: thousandsSeparator(tweet.likes),
+						name: `❤️ ${thousandsSeparator(tweet.likes)}`,
+						value: "",
 						inline: true,
 					},
 					{
-						name: "🔁 Retweets",
-						value: thousandsSeparator(tweet.retweets),
+						name: `🔁 ${thousandsSeparator(tweet.retweets)}`,
+						value: "",
 						inline: true,
 					},
 					{
-						name: "💬 Replies",
-						value: thousandsSeparator(tweet.replies),
+						name: `💬 ${thousandsSeparator(tweet.replies)}`,
+						value: "",
 						inline: true,
 					},
 				],
-				...(video != null
-					? {
-							// bots cant do this :<
-							// video: {
-							// 	url: video.url,
-							// },
-							thumbnail: {
-								url: video.thumbnail_url,
-							},
-					  }
-					: combinedImageUrl != ""
-					? {
-							image: {
-								url: combinedImageUrl,
-							},
-					  }
-					: {}),
 				color: 1942002, // twitter blue
 				footer: {
 					text: "Twitter",

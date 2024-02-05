@@ -16,7 +16,7 @@ export enum Categories {
 	music = "🎶 music",
 	games = "🎮 games",
 	mechanyx = "<:SteamHeart:472359081693413379> mechanyx",
-	makisHome = "😇 maki's home",
+	dollhouse = "😇 dollhouse",
 }
 
 export const ServerExclusiveCategories = {
@@ -25,7 +25,7 @@ export const ServerExclusiveCategories = {
 		"976245585956978688", // vapour chamber
 		"699048789377417326", // workshop
 	],
-	[Categories.makisHome]: ["1086714710008791121"],
+	[Categories.dollhouse]: ["1086714710008791121"],
 };
 
 export interface Command {

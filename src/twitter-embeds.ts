@@ -8,7 +8,7 @@ import {
 
 export const TwitterEmbedsServers = [
 	...ServerExclusiveCategories[Categories.mechanyx],
-	...ServerExclusiveCategories[Categories.makisHome],
+	...ServerExclusiveCategories[Categories.dollhouse],
 ];
 
 export async function twitterEmbedOnMessage(message: Message<boolean>) {

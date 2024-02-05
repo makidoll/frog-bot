@@ -1,7 +1,7 @@
 import { Command } from "./command";
 import { CouchCommand } from "./commands/frends/couch-command";
 import { FrugCommand } from "./commands/frends/frug-command";
-import { SaveAttachmentsCommand } from "./commands/makis-home/save-attachments-command";
+import { SaveAttachmentsCommand } from "./commands/dollhouse/save-attachments-command";
 import { VapourHoldCommand } from "./commands/mechanyx/vapour-hold-command";
 import { CasCommand } from "./commands/memes-gifs/cas-command";
 import { MyBelovedCommand } from "./commands/memes-gifs/my-beloved-command";

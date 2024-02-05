@@ -297,7 +297,7 @@ async function runCommand(
 }
 
 export const SaveAttachmentsCommand: Command = {
-	category: Categories.makisHome,
+	category: Categories.dollhouse,
 	command: new SlashCommandBuilder()
 		.setName("save-attachments")
 		.setDescription("🖼️ save attachments from certain channels to folders"),

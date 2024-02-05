@@ -1,6 +1,7 @@
 import { Command } from "./command";
 import { CouchCommand } from "./commands/frends/couch-command";
 import { FrugCommand } from "./commands/frends/frug-command";
+import { HangOutCommand } from "./commands/dollhouse/hang-out";
 import { SaveAttachmentsCommand } from "./commands/dollhouse/save-attachments-command";
 import { VapourHoldCommand } from "./commands/mechanyx/vapour-hold-command";
 import { CasCommand } from "./commands/memes-gifs/cas-command";
@@ -56,4 +57,5 @@ export const availableCommands: Command[] = [
 	VapourHoldCommand,
 	// > maki's home
 	SaveAttachmentsCommand,
+	HangOutCommand,
 ];

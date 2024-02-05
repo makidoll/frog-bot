@@ -34,8 +34,9 @@ export interface AudioQueueMetadata {
 	seconds: number;
 	videoUrl: string;
 	playlistUrl: string;
-	goodbye: boolean;
-	isFile: boolean;
+	odemonGoodbye: boolean;
+	isLocalStream: boolean;
+	froggyHangOut: boolean;
 	// for updating loop button and knowing where to leave message
 	followUpMessage?: Message<boolean>;
 	textChannel?: GuildTextBasedChannel;
@@ -441,8 +442,9 @@ export class MusicQueue {
 						seconds,
 						videoUrl: search,
 						playlistUrl: null,
-						goodbye: false,
-						isFile: false,
+						odemonGoodbye: false,
+						isLocalStream: false,
+						froggyHangOut: false,
 					},
 				];
 			}
@@ -510,8 +512,9 @@ export class MusicQueue {
 					seconds: duration,
 					videoUrl: tryShortenYoutubeLink(webpage_url),
 					playlistUrl,
-					goodbye: false,
-					isFile: false,
+					odemonGoodbye: false,
+					isLocalStream: false,
+					froggyHangOut: false,
 				});
 			} catch (error) {
 				// ignore i guess
@@ -597,29 +600,43 @@ export class MusicQueue {
 	private createAudioResource(metadata: AudioQueueMetadata, seekSeconds = 0) {
 		// https://github.com/skick1234/DisTube/blob/stable/src/core/DisTubeStream.ts
 
-		const args = [
+		let args: string[] = [];
+
+		if (!metadata.isLocalStream) {
 			// fixes youtube links from stopping
-			...(metadata.isFile
-				? []
-				: [
-						"-reconnect",
-						"1",
-						"-reconnect_streamed",
-						"1",
-						"-reconnect_delay_max",
-						"5",
-				  ]),
+			args.push(
+				"-reconnect",
+				"1",
+				"-reconnect_streamed",
+				"1",
+				"-reconnect_delay_max",
+				"5",
+			);
+		}
+
+		if (seekSeconds > 0) {
 			// seek seconds. needs to be placed before -i or will take a long time
-			...(seekSeconds > 0 ? ["-ss", String(seekSeconds)] : []),
-			// input
-			"-i",
-			metadata.url,
-			// normalize audio https://superuser.com/a/323127
-			// https://ffmpeg.org/ffmpeg-filters.html#dynaudnorm
-			// https://ffmpeg.org/ffmpeg-filters.html#loudnorm
-			// loudnorm sounds better than dynaudnorm=p=0.9:s=5
-			"-filter:a",
-			"loudnorm,volume=" + (metadata.goodbye ? 0.5 : 0.25),
+			args.push("-ss", String(seekSeconds));
+		}
+
+		if (metadata.froggyHangOut) {
+			// just silence
+			args.push("-f", "lavfi", "-i", "anullsrc=cl=mono");
+		} else {
+			args.push(
+				// input
+				"-i",
+				metadata.url,
+				// normalize audio https://superuser.com/a/323127
+				// https://ffmpeg.org/ffmpeg-filters.html#dynaudnorm
+				// https://ffmpeg.org/ffmpeg-filters.html#loudnorm
+				// loudnorm sounds better than dynaudnorm=p=0.9:s=5
+				"-filter:a",
+				"loudnorm,volume=" + (metadata.odemonGoodbye ? 0.5 : 0.25),
+			);
+		}
+
+		args.push(
 			// https://github.com/discordjs/voice/blob/main/src/audio/TransformerGraph.ts
 			"-analyzeduration",
 			"0",
@@ -634,7 +651,7 @@ export class MusicQueue {
 			"opus",
 			"-acodec",
 			"libopus",
-		];
+		);
 
 		const stream = new FFmpeg({ args, shell: false });
 
@@ -667,8 +684,9 @@ export class MusicQueue {
 			seconds: await this.fetchLengthInSeconds(filePath), // should i be concerned
 			videoUrl: null,
 			playlistUrl: null,
-			goodbye: true,
-			isFile: true,
+			odemonGoodbye: true,
+			isLocalStream: true,
+			froggyHangOut: false,
 		};
 	}
 
@@ -694,7 +712,7 @@ export class MusicQueue {
 				queue.looping &&
 				queue.skipping == false &&
 				// dont loop goodbye
-				!queue.current?.metadata?.goodbye
+				!queue.current?.metadata?.odemonGoodbye
 			) {
 				// adding timeout might help?
 				setTimeout(() => {
@@ -742,7 +760,7 @@ export class MusicQueue {
 			// but we should add it before a found goodbye resource
 
 			const goodbyeIndex = foundQueue.resourcesMetadatas.findIndex(
-				resource => resource.goodbye,
+				resource => resource.odemonGoodbye,
 			);
 
 			for (const metadata of metadatas) {

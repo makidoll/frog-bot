@@ -306,7 +306,15 @@ export class ToolsManager {
 					lastInstalledTools == null ||
 					Date.now() > lastInstalledTools + this.apiCooldownTime
 				) {
-					latestVersion = await toolInfo.getLatestVersion();
+					try {
+						latestVersion = await toolInfo.getLatestVersion();
+					} catch (error) {
+						froglog.warn(
+							`Failed to get latest version for "${name}" but "${installedVersion}" installed`,
+						);
+						toolInfo.available = true;
+						continue;
+					}
 				} else {
 					froglog.info(`Skipping "${name}" to avoid rate limit`);
 					toolInfo.available = true;

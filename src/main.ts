@@ -12,6 +12,7 @@ import {
 } from "discord.js";
 import { availableCommands } from "./available-commands";
 import { ServerExclusiveCategories } from "./command";
+import { externalEmbedOnMessage } from "./external-embeds";
 import { froglog } from "./froglog";
 import { initReactionRoles } from "./reaction-roles";
 import { initReminders } from "./reminders";
@@ -19,7 +20,6 @@ import { Database } from "./services/database";
 import { HtmlRenderer } from "./services/html-renderer";
 import { MusicQueue } from "./services/music-queue";
 import { ToolsManager } from "./tools-manager";
-import { twitterEmbedOnMessage } from "./twitter-embeds";
 import { customIdMatch, plural, shuffleArray } from "./utils";
 
 (async () => {
@@ -261,7 +261,7 @@ https://makidoll.io/`.trim();
 	client.on("messageCreate", message => {
 		if (message.author.bot) return;
 
-		twitterEmbedOnMessage(message);
+		externalEmbedOnMessage(message);
 	});
 
 	client.on("error", error => {

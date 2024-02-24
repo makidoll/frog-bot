@@ -10,16 +10,16 @@ import {
 	ModalSubmitInteraction,
 	Partials,
 } from "discord.js";
+import { externalEmbedOnMessage } from "./addons/external-embeds";
+import { initReactionRoles } from "./addons/reaction-roles";
+import { initTwitchLiveNotifications } from "./addons/twitch-live-notifications";
 import { availableCommands } from "./available-commands";
 import { ServerExclusiveCategories } from "./command";
-import { externalEmbedOnMessage } from "./external-embeds";
 import { froglog } from "./froglog";
-import { initReactionRoles } from "./reaction-roles";
 import { Database } from "./services/database";
 import { HtmlRenderer } from "./services/html-renderer";
 import { MusicQueue } from "./services/music-queue";
 import { ToolsManager } from "./tools-manager";
-import { initTwitchLiveNotifications } from "./twitch-live-notifications";
 import { customIdMatch, plural, shuffleArray } from "./utils";
 
 (async () => {
@@ -99,16 +99,18 @@ import { customIdMatch, plural, shuffleArray } from "./utils";
 		froglog.info(`Logged in as: ${client.user.tag}`);
 
 		// cycle activity every 5 minutes
+
 		setActivity();
 		setInterval(setActivity, 1000 * 60 * 5);
 
+		// init addons
+
 		initReactionRoles(client);
-
 		// initReminders(client);
-
 		initTwitchLiveNotifications(client);
 
 		// load music from database if bot restarted
+
 		await MusicQueue.instance.loadFromDatabase(client);
 
 		const rest = new REST({ version: "10" }).setToken(
@@ -146,6 +148,7 @@ https://makidoll.io/`.trim();
 			);
 
 			// if dev just do all
+
 			rest.put(Routes.applicationCommands(client.user.id), {
 				body: availableCommands.map(command =>
 					command.command.toJSON(),
@@ -236,29 +239,6 @@ https://makidoll.io/`.trim();
 			}
 		}
 	});
-
-	/*
-	client.on("messageCreate", async message => {
-		if (message.author.bot) return;
-
-		const lowerContent = message.content.toLowerCase().trim();
-
-		for (let { command, shortCommand, onMessage } of availableCommands) {
-			let short = shortCommand;
-			let long = commandPrefix + command;
-
-			let commandLength = 0;
-			if (lowerContent.startsWith(short)) commandLength = short.length;
-			else if (lowerContent.startsWith(long)) commandLength = long.length;
-
-			if (commandLength == 0) continue;
-
-			const argument = message.content.substring(command.length + 1).trim();
-			onMessage(argument, message, services);
-			break; // dont run other commands
-		}
-	});
-*/
 
 	client.on("messageCreate", message => {
 		if (message.author.bot) return;

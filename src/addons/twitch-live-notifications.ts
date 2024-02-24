@@ -3,9 +3,9 @@ import { APIEmbed, Client, TextChannel } from "discord.js";
 import Mitt, { Emitter } from "mitt";
 import { error } from "ololog";
 import WebSocket from "ws";
-import { froglog } from "./froglog";
-import { Database } from "./services/database";
-import { generateRandomId, wait } from "./utils";
+import { froglog } from "../froglog";
+import { Database } from "../services/database";
+import { generateRandomId, wait } from "../utils";
 
 let discordChannelTwitchChannelMap: { [key: string]: string[] };
 

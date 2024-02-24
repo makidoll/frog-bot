@@ -1,6 +1,6 @@
 import { CronJob } from "cron";
 import { Client, TextChannel } from "discord.js";
-import { froglog } from "./froglog";
+import { froglog } from "../froglog";
 
 interface Reminder {
 	cron: string;

@@ -1,10 +1,10 @@
 import axios from "axios";
 import { Message, MessageReplyOptions } from "discord.js";
-import { Categories, ServerExclusiveCategories } from "./command";
+import { Categories, ServerExclusiveCategories } from "../command";
 import {
 	getUploadLimitForGuild,
 	thousandsSeparators as thousandsSeparator,
-} from "./utils";
+} from "../utils";
 
 export const ExternalEmbedServers = [
 	...ServerExclusiveCategories[Categories.mechanyx],

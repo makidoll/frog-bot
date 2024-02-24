@@ -6,8 +6,8 @@ import {
 	TextChannel,
 	User,
 } from "discord.js";
-import { froglog } from "./froglog";
-import { generateRandomId } from "./utils";
+import { froglog } from "../froglog";
+import { generateRandomId } from "../utils";
 
 interface ReactionInfo {
 	mode: "specific" | "any";

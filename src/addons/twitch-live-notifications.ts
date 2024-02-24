@@ -19,6 +19,7 @@ if (process.env.DEV) {
 		// steamshell armoury announcements
 		"466236835472080919": [
 			"blender_fox",
+			"lofi_juno",
 			"odemon",
 			"serah_cross",
 			"steamshellkidd",

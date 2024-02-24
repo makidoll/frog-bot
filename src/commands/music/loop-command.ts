@@ -1,6 +1,7 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { GuildMember } from "discord.js";
 import { Categories, Command } from "../../command";
+import { froglog } from "../../froglog";
 import { MusicQueue } from "../../services/music-queue";
 
 export const LoopCommand: Command = {
@@ -29,6 +30,7 @@ export const LoopCommand: Command = {
 				);
 			}
 		} catch (error) {
+			froglog.error("Failed to loop current song", error);
 			await interaction.reply("aw ribbit, couldn't loop current song");
 		}
 	},

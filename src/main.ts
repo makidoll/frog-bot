@@ -15,11 +15,11 @@ import { ServerExclusiveCategories } from "./command";
 import { externalEmbedOnMessage } from "./external-embeds";
 import { froglog } from "./froglog";
 import { initReactionRoles } from "./reaction-roles";
-import { initReminders } from "./reminders";
 import { Database } from "./services/database";
 import { HtmlRenderer } from "./services/html-renderer";
 import { MusicQueue } from "./services/music-queue";
 import { ToolsManager } from "./tools-manager";
+import { initTwitchLiveNotifications } from "./twitch-live-notifications";
 import { customIdMatch, plural, shuffleArray } from "./utils";
 
 (async () => {
@@ -104,7 +104,9 @@ import { customIdMatch, plural, shuffleArray } from "./utils";
 
 		initReactionRoles(client);
 
-		initReminders(client);
+		// initReminders(client);
+
+		initTwitchLiveNotifications(client);
 
 		// load music from database if bot restarted
 		await MusicQueue.instance.loadFromDatabase(client);

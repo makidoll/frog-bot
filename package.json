@@ -21,6 +21,7 @@
 		"execa": "^8.0.1",
 		"fit-box": "^1.1.1",
 		"libsodium-wrappers": "^0.7.13",
+		"mitt": "^3.0.1",
 		"nedb-promises": "^6.2.3",
 		"ololog": "^1.1.175",
 		"playwright": "^1.39.0",
@@ -28,10 +29,12 @@
 		"sharp": "^0.32.6",
 		"slugify": "^1.6.6",
 		"tmp-promise": "^3.0.3",
+		"ws": "^8.16.0",
 		"xml2js": "^0.6.2"
 	},
 	"devDependencies": {
 		"@types/decompress": "^4.2.6",
+		"@types/ws": "^8.5.10",
 		"@types/xml2js": "^0.4.13",
 		"tsx": "^3.14.0"
 	}

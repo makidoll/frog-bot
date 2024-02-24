@@ -22,6 +22,11 @@ export interface InstalledToolsDocument {
 	version: string;
 }
 
+export interface TwitchLastOfflineDocument {
+	_id: string; // username
+	lastOffline: number; // date
+}
+
 export class Database {
 	private static _instance: Database;
 
@@ -38,6 +43,7 @@ export class Database {
 
 	public musicAudioQueue: Datastore<MusicAudioQueueDocument>;
 	public installedTools: Datastore<InstalledToolsDocument>;
+	public twitchLastOffline: Datastore<TwitchLastOfflineDocument>;
 
 	private dbDir = path.resolve(__dirname, "../../db");
 
@@ -52,6 +58,7 @@ export class Database {
 	async init() {
 		this.musicAudioQueue = await this.initDb("music-audio-queue.db");
 		this.installedTools = await this.initDb("installed-tools.db");
+		this.twitchLastOffline = await this.initDb("twitch-last-offline.db");
 		this.keyValue = await this.initDb("key-value.db");
 
 		froglog.info(

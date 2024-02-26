@@ -1,5 +1,6 @@
 import axios from "axios";
 import { APIEmbed, Client, TextChannel } from "discord.js";
+import ImgurClient from "imgur";
 import Mitt, { Emitter } from "mitt";
 import { error } from "ololog";
 import WebSocket from "ws";
@@ -243,6 +244,11 @@ class TwitchStream {
 }
 
 export async function initTwitchLiveNotifications(client: Client<boolean>) {
+	const imgur = new ImgurClient({
+		clientId: process.env.IMGUR_CLIENT_ID,
+		clientSecret: process.env.IMGUR_CLIENT_SECRET,
+	});
+
 	// flip map the other way around
 
 	const twitchChannelDiscordChannelMap: { [key: string]: string[] } = {};
@@ -356,7 +362,7 @@ export async function initTwitchLiveNotifications(client: Client<boolean>) {
 					url: channelUrl,
 					icon_url: profileImageUrl,
 				},
-				image: { url: previewImageUrl },
+				// image: { url: previewImageUrl },
 				url: channelUrl,
 				color:
 					primaryColorHex == null
@@ -368,6 +374,20 @@ export async function initTwitchLiveNotifications(client: Client<boolean>) {
 				},
 				timestamp: new Date().toISOString(),
 			};
+
+			// or we just upload it to imgur
+
+			try {
+				const res = await fetch(previewImageUrl);
+				const image = Buffer.from(await res.arrayBuffer());
+				const upload = await imgur.upload({ image });
+				if (upload.success) {
+					embed.image = { url: upload.data.link };
+				}
+			} catch (error) {
+				froglog.error(error);
+				embed.image = { url: previewImageUrl };
+			}
 
 			// game can be null if not set
 			// it can also be null if we fetch metadata too quickly

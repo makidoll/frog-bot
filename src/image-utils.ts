@@ -175,6 +175,7 @@ export async function transparentBackground(
 	file: Buffer,
 	filename: string,
 	fast = false,
+	threshold: number = null,
 ): Promise<Buffer> {
 	const ext = path.extname(filename);
 	const inputFile = await tmp.file({ postfix: ext });
@@ -193,6 +194,9 @@ export async function transparentBackground(
 			"--dest",
 			outputDir.path,
 			...(fast ? ["--fast"] : []),
+			...(typeof threshold == "number"
+				? ["--threshold", String(threshold)]
+				: []),
 		],
 		{
 			reject: false,

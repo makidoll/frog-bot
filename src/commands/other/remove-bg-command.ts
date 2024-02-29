@@ -18,6 +18,24 @@ export const RemoveBgCommand: Command = {
 		)
 		.addBooleanOption(option =>
 			option
+				.setName("fast-mode")
+				.setDescription(
+					"fast mode which sometimes yields different results",
+				)
+				.setRequired(false),
+		)
+		.addNumberOption(option =>
+			option
+				.setName("threshold")
+				.setDescription(
+					"threshold which sometimes yields different results",
+				)
+				.setMinValue(0)
+				.setMaxValue(1)
+				.setRequired(false),
+		)
+		.addBooleanOption(option =>
+			option
 				.setName("trim")
 				.setDescription("trims the pixels around the subject")
 				.setRequired(false),
@@ -30,9 +48,9 @@ export const RemoveBgCommand: Command = {
 	// ),
 	onInteraction: async interaction => {
 		const attachment = interaction.options.getAttachment("image");
+		const fastMode = interaction.options.getBoolean("fast-mode");
+		const threshold = interaction.options.getNumber("threshold");
 		const trim = interaction.options.getBoolean("trim");
-		// const postProcessMask =
-		// 	interaction.options.getBoolean("post-process-mask");
 
 		if (attachment == null) {
 			await interaction.reply("ribbit! please send an image");
@@ -63,6 +81,8 @@ export const RemoveBgCommand: Command = {
 			let outputBuffer = await transparentBackground(
 				inputBuffer,
 				new URL(attachment.url).pathname,
+				fastMode ?? false,
+				threshold, // can be null
 			);
 
 			if (trim) {

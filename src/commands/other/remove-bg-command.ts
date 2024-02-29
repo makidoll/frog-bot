@@ -18,8 +18,8 @@ export const RemoveBgCommand: Command = {
 		)
 		.addBooleanOption(option =>
 			option
-				.setName("dont-trim")
-				.setDescription("you dont always want it!")
+				.setName("trim")
+				.setDescription("trims the pixels around the subject")
 				.setRequired(false),
 		),
 	// .addBooleanOption(option =>
@@ -30,7 +30,7 @@ export const RemoveBgCommand: Command = {
 	// ),
 	onInteraction: async interaction => {
 		const attachment = interaction.options.getAttachment("image");
-		const dontTrim = interaction.options.getBoolean("dont-trim");
+		const trim = interaction.options.getBoolean("trim");
 		// const postProcessMask =
 		// 	interaction.options.getBoolean("post-process-mask");
 
@@ -65,8 +65,13 @@ export const RemoveBgCommand: Command = {
 				new URL(attachment.url).pathname,
 			);
 
-			if (!dontTrim) {
+			if (trim) {
 				outputBuffer = await sharp(outputBuffer).png().toBuffer();
+			} else {
+				outputBuffer = await sharp(outputBuffer)
+					.trim()
+					.png()
+					.toBuffer();
 			}
 
 			await interaction.editReply({

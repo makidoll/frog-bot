@@ -66,8 +66,6 @@ export const RemoveBgCommand: Command = {
 			);
 
 			if (trim) {
-				outputBuffer = await sharp(outputBuffer).png().toBuffer();
-			} else {
 				outputBuffer = await sharp(outputBuffer)
 					.trim()
 					.png()

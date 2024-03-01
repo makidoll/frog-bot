@@ -11,7 +11,7 @@ import {
 export enum Categories {
 	other = "🎀 other",
 	frends = "🤗 frends",
-	memes = "😂 memes",
+	memes = "😅 memes",
 	memesGifs = "🎞️ memes but gifs",
 	music = "🎶 music",
 	games = "🎮 games",

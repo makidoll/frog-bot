@@ -2,6 +2,7 @@ import { SlashCommandBuilder } from "@discordjs/builders";
 import { MessageFlags } from "discord.js";
 import { availableCommands } from "../../available-commands";
 import { Categories, Command, ServerExclusiveCategories } from "../../command";
+import { frollSyntax } from "../../text-commands/roll";
 import { plural } from "../../utils";
 
 export const HelpCommand: Command = {
@@ -38,15 +39,19 @@ export const HelpCommand: Command = {
 
 		const totalServers = interaction.client.guilds.cache.size;
 
-		const facts = [
-			"suggest new commands with **/featurepls** and i'll try my best~",
-			"see me hoppy! 🐛 https://github.com/makidoll/frog-bot",
-			"oh also i'm part of **" +
+		const lines = [
+			"**other features**",
+			"- use `-froll " + frollSyntax + "` to do a dice roll",
+			"",
+			"**froggy info**",
+			"- suggest new commands with **/featurepls** and i'll try my best~",
+			"- see me hoppy! 🐛 https://github.com/makidoll/frog-bot",
+			"- oh also i'm part of **" +
 				plural(totalServers, "server") +
 				"**, yay!",
 		];
 
-		content += facts.map(line => "• " + line).join("\n");
+		content += lines.join("\n");
 
 		interaction.reply({
 			content,

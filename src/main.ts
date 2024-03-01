@@ -19,6 +19,7 @@ import { froglog } from "./froglog";
 import { Database } from "./services/database";
 import { HtmlRenderer } from "./services/html-renderer";
 import { MusicQueue } from "./services/music-queue";
+import { handleRollMessage } from "./text-commands/roll";
 import { ToolsManager } from "./tools-manager";
 import { customIdMatch, plural, shuffleArray } from "./utils";
 
@@ -242,6 +243,8 @@ https://makidoll.io/`.trim();
 
 	client.on("messageCreate", message => {
 		if (message.author.bot) return;
+
+		if (handleRollMessage(message)) return;
 
 		externalEmbedOnMessage(message);
 	});

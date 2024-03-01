@@ -41,7 +41,7 @@ export const HelpCommand: Command = {
 
 		const lines = [
 			"**other features**",
-			"- use `-froll " + frollSyntax + "` to do a dice roll",
+			"- 🎲 use **-froll help** to do a (froggy) dice roll",
 			"",
 			"**froggy info**",
 			"- suggest new commands with **/featurepls** and i'll try my best~",

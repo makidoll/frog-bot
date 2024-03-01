@@ -94,9 +94,18 @@ export async function handleRollMessage(message: Message) {
 	const extra = Number(matches[4] ?? 0) * (symbol == "+" ? 1 : -1);
 
 	const { rolls, pseudo } = await getRolls(amount, size);
-	const total = rolls.reduce((a, b) => a + b, 0) + extra;
+	const total = rolls.reduce((a, b) => a + b, 0) + extra * amount;
 
-	const messageStr = `🎲 ${total} [${rolls.join(" ")}]` + pseudoMsg(pseudo);
+	let rollsStr = "";
+	if (extra == 0) {
+		rollsStr = rolls.join(" ");
+	} else {
+		rollsStr = rolls
+			.map(r => r + "*" + symbol + Math.abs(extra) + "*")
+			.join(" ");
+	}
+
+	const messageStr = `🎲 ${total} [${rollsStr}]` + pseudoMsg(pseudo);
 
 	if (messageStr.length > 2000) {
 		return message.channel.send("🎲 ribbit! response is too big :<");

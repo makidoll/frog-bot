@@ -241,10 +241,14 @@ https://makidoll.io/`.trim();
 		}
 	});
 
-	client.on("messageCreate", message => {
+	client.on("messageCreate", async message => {
 		if (message.author.bot) return;
 
-		if (handleRollMessage(message)) return;
+		try {
+			if (await handleRollMessage(message)) return;
+		} catch (error) {
+			froglog.error(error);
+		}
 
 		externalEmbedOnMessage(message);
 	});

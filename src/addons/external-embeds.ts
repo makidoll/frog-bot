@@ -1,6 +1,7 @@
 import axios from "axios";
 import { Message, MessageReplyOptions } from "discord.js";
 import { Categories, ServerExclusiveCategories } from "../command";
+import { froglog } from "../froglog";
 import {
 	getUploadLimitForGuild,
 	thousandsSeparators as thousandsSeparator,
@@ -54,6 +55,7 @@ async function handleTwitter(
 	await message.channel.sendTyping();
 
 	const res = await axios<{
+		communityNote: null;
 		conversationID: string;
 		date: string;
 		date_epoch: number;
@@ -61,7 +63,7 @@ async function handleTwitter(
 		likes: number;
 		mediaURLs: string[];
 		media_extended: {
-			altText: null;
+			altText: string;
 			duration_millis: number;
 			size: { width: number; height: number };
 			thumbnail_url: string;
@@ -76,6 +78,7 @@ async function handleTwitter(
 		tweetID: string;
 		tweetURL: string;
 		user_name: string;
+		user_profile_image_url: string;
 		user_screen_name: string;
 	}>(twitterUrl);
 
@@ -110,6 +113,7 @@ async function handleTwitter(
 				// author: {
 				// 	name: `${tweet.user_name} (@${tweet.user_screen_name})`,
 				// 	url: "https://twitter.com/" + tweet.user_screen_name,
+				// 	icon_url: tweet.user_profile_image_url,
 				// },
 				title: `${tweet.user_name} (@${tweet.user_screen_name})`,
 				url: tweet.tweetURL,
@@ -134,7 +138,6 @@ async function handleTwitter(
 				color: 0x1da1f2, // twitter blue
 				footer: {
 					text: "Twitter",
-					// icon_url: ""
 				},
 				timestamp: new Date(tweet.date).toISOString(),
 			},
@@ -291,7 +294,7 @@ export async function externalEmbedOnMessage(message: Message<boolean>) {
 		try {
 			await message.suppressEmbeds(true);
 		} catch (error) {
-			console.log(error);
+			froglog.error(error);
 		}
 
 		for (const match of matches) {
@@ -302,7 +305,7 @@ export async function externalEmbedOnMessage(message: Message<boolean>) {
 				);
 				await message.reply(reply);
 			} catch (error) {
-				console.log(error);
+				froglog.error(error);
 			}
 		}
 	}

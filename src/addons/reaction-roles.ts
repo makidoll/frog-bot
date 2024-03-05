@@ -67,6 +67,28 @@ const channelMessageReactionInfo: {
 				"<:5021biblicalangel:1064639190010175579>": "😇",
 			},
 		},
+		// "": {
+		// 	mode: "specific",
+		// 	specificRoleMap: {
+		// 		"1️⃣": "northeast/great lakes US",
+		// 		"2️⃣": "southeast US",
+		// 		"3️⃣": "great plains",
+		// 		"4️⃣": "northwest US/pacific coast",
+		// 		"5️⃣": "southwest US",
+		// 		"6️⃣": "non-mainland US",
+		// 		"🌍": "africa",
+		// 		"⚜️": "europe",
+		// 		"🐪": "west asia/mediterranean",
+		// 		"🚄": "east asia",
+		// 		"🆒": "south/southeast asia",
+		// 		"🏝️": "oceania",
+		// 		"🇨🇦": "canada",
+		// 		"🇦": "central america/caribbean",
+		// 		"🐦": "south america",
+		// 		"✨": "outer space",
+		// 		"🏡": "local peeps",
+		// 	},
+		// },
 		"988551997298978836": {
 			mode: "specific",
 			specificRoleMap: {
@@ -123,9 +145,13 @@ async function manageRoleFromMessageReaction(
 		let roleName = reactionInfo.specificRoleMap[reaction.emoji.name];
 
 		if (roleName == null) {
-			roleName = (Object.entries(reactionInfo.specificRoleMap).find(
-				entry => entry[0].includes(reaction.emoji.identifier),
-			) ?? [null, null])[1];
+			for (const [emoji, queryRoleName] of Object.entries(
+				reactionInfo.specificRoleMap,
+			)) {
+				if (emoji.includes(reaction.emoji.identifier)) {
+					roleName = queryRoleName;
+				}
+			}
 		}
 
 		if (roleName == null) return;
@@ -133,6 +159,7 @@ async function manageRoleFromMessageReaction(
 		const role = reaction.message.guild.roles.cache.find(
 			role => role.name.toLowerCase() == roleName.toLowerCase(),
 		);
+
 		if (role == null) return;
 
 		const member = reaction.message.guild.members.cache.get(user.id);

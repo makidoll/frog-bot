@@ -17,8 +17,8 @@ if (process.env.DEV) {
 	};
 } else {
 	discordChannelTwitchChannelMap = {
-		// steamshell armoury announcements
-		"466236835472080919": [
+		// steamshell armoury, captains-are-live
+		"1214318507546771466": [
 			"blender_fox",
 			"lofi_juno",
 			"odemon",

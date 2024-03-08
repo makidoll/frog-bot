@@ -44,13 +44,7 @@ const channelMessageReactionInfo: {
 		"976647010730004480": {
 			mode: "specific",
 			specificRoleMap: {
-				"1️⃣": "north america",
-				"2️⃣": "south america",
-				"3️⃣": "europe",
-				"4️⃣": "africa",
-				"5️⃣": "asia",
-				"6️⃣": "oceania",
-				"7️⃣": "outer space",
+				"🏡": "local peeps",
 			},
 		},
 		"987133656151760966": {
@@ -67,28 +61,6 @@ const channelMessageReactionInfo: {
 				"<:5021biblicalangel:1064639190010175579>": "😇",
 			},
 		},
-		// "": {
-		// 	mode: "specific",
-		// 	specificRoleMap: {
-		// 		"1️⃣": "northeast/great lakes US",
-		// 		"2️⃣": "southeast US",
-		// 		"3️⃣": "great plains",
-		// 		"4️⃣": "northwest US/pacific coast",
-		// 		"5️⃣": "southwest US",
-		// 		"6️⃣": "non-mainland US",
-		// 		"🌍": "africa",
-		// 		"⚜️": "europe",
-		// 		"🐪": "west asia/mediterranean",
-		// 		"🚄": "east asia",
-		// 		"🆒": "south/southeast asia",
-		// 		"🏝️": "oceania",
-		// 		"🇨🇦": "canada",
-		// 		"🇦": "central america/caribbean",
-		// 		"🐦": "south america",
-		// 		"✨": "outer space",
-		// 		"🏡": "local peeps",
-		// 	},
-		// },
 		"988551997298978836": {
 			mode: "specific",
 			specificRoleMap: {

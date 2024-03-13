@@ -184,10 +184,11 @@ async function runCommand(
 		"1116323130550530068", // cute environments
 		// squishy squeak
 		"1089642397450903662", // uwaa whats this
-		"1174591584474501210", // kigurimi dolls
-		"1100935621289185380", // samus aran cute
-		"1144405188023689357", // shiny latex
+		"1216960791165796535", // cute ponies
 		"1095731990831059074", // mercy and friends
+		"1144405188023689357", // shiny latex
+		"1100935621289185380", // samus aran cute
+		"1174591584474501210", // kigurimi dolls
 		"1107284614894071838", // jester flamboyancy
 		"1110386667791069184", // transformation
 		"1132252572636434482", // league of leggings

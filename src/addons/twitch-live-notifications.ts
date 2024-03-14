@@ -13,7 +13,7 @@ let discordChannelTwitchChannelMap: { [key: string]: string[] };
 if (process.env.DEV) {
 	discordChannelTwitchChannelMap = {
 		// dollhouse bot testing
-		"1086714710788952138": ["maki_doll_testing"],
+		// "1086714710788952138": ["maki_doll_testing"],
 	};
 } else {
 	discordChannelTwitchChannelMap = {

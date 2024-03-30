@@ -100,7 +100,8 @@ async function saveAttachments(
 	const downloads = attachments
 		.map(({ id, urls }) =>
 			urls.map((url, i) => {
-				const ext = path.extname(new URL(url).pathname) ?? "";
+				let ext = path.extname(new URL(url).pathname) ?? "";
+				ext = ext.replace(/:[^]*$/, ""); // remove e.g. :large
 				// some urls are proxy links that dont have an extension,
 				// but i dont want to have to send a bunch of HEAD requests
 				return {

@@ -185,7 +185,8 @@ async function runCommand(
 		"1116323130550530068", // cute environments
 		// squishy squeak
 		"1089642397450903662", // uwaa whats this
-		"1216960791165796535", // cute ponies
+		"1233214473594994789", // cute ponies
+		"1216960791165796535", // popen ponies
 		"1095731990831059074", // mercy and friends
 		"1144405188023689357", // shiny latex
 		"1100935621289185380", // samus aran cute

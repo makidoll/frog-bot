@@ -248,7 +248,7 @@ async function runCommand(
 					categoryResults[categoryName]
 						.map(
 							({ channel, output }) =>
-								`\`${channel.name}:\` ${output}`,
+								`\`${channel.name}\`: ${output}`,
 						)
 						.join("\n"),
 			)

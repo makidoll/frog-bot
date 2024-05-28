@@ -112,8 +112,6 @@ async function saveAttachments(
 				ext = ext.replace(/:[^]*$/, ""); // remove e.g. :large
 				// some urls are proxy links that dont have an extension,
 				// but i dont want to have to send a bunch of HEAD requests
-				console.log(id);
-				console.log(convertIDtoUnix(id));
 				return {
 					filename:
 						(urls.length == 1 ? id : id + "-" + (i + 1)) + ext,

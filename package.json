@@ -7,7 +7,7 @@
 	},
 	"dependencies": {
 		"@discordjs/builders": "^1.6.5",
-		"@discordjs/opus": "^0.9.0",
+		"@discordjs/opus": "https://github.com/discordjs/opus",
 		"@discordjs/rest": "^2.0.1",
 		"@discordjs/voice": "^0.16.0",
 		"axios": "^1.5.1",

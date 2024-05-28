@@ -200,6 +200,7 @@ async function runCommand(
 		"1089891680586563665", // cute clothes
 		"1111560346717663292", // cute cybernetics
 		"1116323130550530068", // cute environments
+		"1240773843702911026", // animal crossing
 		// squishy squeak
 		"1089642397450903662", // uwaa whats this
 		"1233214473594994789", // cute ponies

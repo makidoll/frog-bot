@@ -23,8 +23,16 @@ interface SaveAttachmentsResult {
 	total: number;
 	added: number;
 	removed: number;
+	errored: number;
 	saveDir: string;
 }
+
+const convertIDtoUnix = (id: string) => {
+	const bin = (+id).toString(2);
+	return (
+		parseInt(bin.substring(0, 42 - (64 - bin.length)), 2) + 1420070400000
+	);
+};
 
 async function saveAttachments(
 	channel: GuildTextBasedChannel,
@@ -104,11 +112,14 @@ async function saveAttachments(
 				ext = ext.replace(/:[^]*$/, ""); // remove e.g. :large
 				// some urls are proxy links that dont have an extension,
 				// but i dont want to have to send a bunch of HEAD requests
+				console.log(id);
+				console.log(convertIDtoUnix(id));
 				return {
 					filename:
 						(urls.length == 1 ? id : id + "-" + (i + 1)) + ext,
 					url,
 					ext,
+					date: new Date(convertIDtoUnix(id)),
 				};
 			}),
 		)
@@ -144,28 +155,36 @@ async function saveAttachments(
 	// download and save
 
 	let added = 0;
+	let errored = 0;
 
-	for (const { url, filename } of downloads) {
+	for (const { url, filename, date } of downloads) {
 		if (alreadyFilenames.includes(filename)) {
 			continue;
 		}
 
 		const savePath = path.resolve(saveDir, filename);
 
-		const response = await axios(url, {
-			method: "GET",
-			responseType: "arraybuffer",
-		});
+		try {
+			const response = await axios(url, {
+				method: "GET",
+				responseType: "arraybuffer",
+			});
 
-		await fs.writeFile(savePath, response.data);
+			await fs.writeFile(savePath, response.data);
+			await fs.utimes(savePath, date, date);
 
-		added++;
+			added++;
+		} catch (error) {
+			froglog.error(error);
+			errored++;
+		}
 	}
 
 	return {
 		total: downloads.length,
 		added,
 		removed,
+		errored,
 		saveDir,
 	};
 }
@@ -178,25 +197,25 @@ async function runCommand(
 	const channelIds = [
 		// art
 		"1183492272130637834", // hatsune miku
-		"1192954392199057448", // metroid art
-		"1089890698926510120", // girls being cute
-		"1089891680586563665", // cute clothes
-		"1111560346717663292", // cute cybernetics
-		"1116323130550530068", // cute environments
-		// squishy squeak
-		"1089642397450903662", // uwaa whats this
-		"1233214473594994789", // cute ponies
-		"1216960791165796535", // popen ponies
-		"1095731990831059074", // mercy and friends
-		"1144405188023689357", // shiny latex
-		"1100935621289185380", // samus aran cute
-		"1174591584474501210", // kigurimi dolls
-		"1107284614894071838", // jester flamboyancy
-		"1110386667791069184", // transformation
-		"1132252572636434482", // league of leggings
-		"1112773080251641867", // hexcorp drones
-		// video games
-		"1111793860302090311", // overwatch art
+		// "1192954392199057448", // metroid art
+		// "1089890698926510120", // girls being cute
+		// "1089891680586563665", // cute clothes
+		// "1111560346717663292", // cute cybernetics
+		// "1116323130550530068", // cute environments
+		// // squishy squeak
+		// "1089642397450903662", // uwaa whats this
+		// "1233214473594994789", // cute ponies
+		// "1216960791165796535", // popen ponies
+		// "1095731990831059074", // mercy and friends
+		// "1144405188023689357", // shiny latex
+		// "1100935621289185380", // samus aran cute
+		// "1174591584474501210", // kigurimi dolls
+		// "1107284614894071838", // jester flamboyancy
+		// "1110386667791069184", // transformation
+		// "1132252572636434482", // league of leggings
+		// "1112773080251641867", // hexcorp drones
+		// // video games
+		// "1111793860302090311", // overwatch art
 	];
 
 	const categoryResults: {
@@ -268,16 +287,19 @@ async function runCommand(
 
 		for (let i = 0; i < channelsAndResults.length; i++) {
 			try {
-				const { total, added, removed, saveDir } =
+				const { total, added, removed, errored } =
 					await saveAttachments(channelsAndResults[i].channel);
 
 				const addedText = added == 0 ? "+0" : `**+${added}**`;
 				const removedText = removed == 0 ? "-0" : `**-${removed}**`;
 
+				const erroredText =
+					errored == 0 ? ", errored: 0" : `, errored: **${errored}**`;
+
 				const output = `${addedText}, ${removedText}, total: ${plural(
 					total,
 					"attachment",
-				)}`;
+				)}${erroredText}`;
 
 				channelsAndResults[i].output = output;
 			} catch (error) {

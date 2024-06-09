@@ -92,7 +92,7 @@ async function playInteraction(
 	});
 
 	try {
-		const metadatas = await MusicQueue.instance.getYtDlpInfo(search);
+		const metadatas = await MusicQueue.instance.getInfoFromSearch(search);
 		const queue = MusicQueue.instance.getAudioQueue(channel);
 
 		if (metadatas.length == 0) {
@@ -108,19 +108,34 @@ async function playInteraction(
 
 		const emptyText = " ‍ "; // https://iempty.tooliphone.net/copy-empty-text
 
+		let content: string[] = [];
+
+		if (isPlaylist) {
+			content.push(
+				`🎶 ribbit, found **${metadatas.length} songs** in a playlist!`,
+				`it's **${formatDuration(
+					seconds,
+				)}** in total, froggy adding all to queue...`,
+				metadatas[0].playlistUrl,
+			);
+		} else {
+			if (metadatas[0].livestream) {
+				content.push("🎶 ribbit, found livestream!");
+			} else {
+				content.push(
+					"🎶 ribbit, found song!",
+					`it's **${formatDuration(
+						seconds,
+					)}** long, froggy adding to queue...`,
+				);
+			}
+
+			content.push(metadatas[0].videoUrl);
+		}
+
 		const followUpMessage = await interaction.followUp({
 			content: [
-				isPlaylist
-					? `🎶 ribbit, found **${metadatas.length} songs** in a playlist!`
-					: "🎶 ribbit, found song!",
-				isPlaylist
-					? `it's **${formatDuration(
-							seconds,
-					  )}** in total, froggy adding all to queue...`
-					: `it's **${formatDuration(
-							seconds,
-					  )}** long, froggy adding to queue...`,
-				isPlaylist ? metadatas[0].playlistUrl : metadatas[0].videoUrl,
+				...content,
 				">  ",
 				"> ribbit! if the music is too loud, just turn me down! *right click me in vc*",
 				">  " + emptyText,

@@ -87,7 +87,7 @@ export function possessive(name: string) {
 }
 
 export function formatDuration(s: number) {
-	if (s < 0) return "unknown";
+	if (s <= 0) return "unknown seconds";
 
 	const seconds = Math.floor(s % 60);
 	const minutes = Math.floor((s / 60) % 60);

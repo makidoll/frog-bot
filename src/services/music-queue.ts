@@ -37,6 +37,7 @@ export interface AudioQueueMetadata {
 	odemonGoodbye: boolean;
 	isLocalStream: boolean;
 	froggyHangOut: boolean;
+	livestream: boolean;
 	// for updating loop button and knowing where to leave message
 	followUpMessage?: Message<boolean>;
 	textChannel?: GuildTextBasedChannel;
@@ -56,13 +57,13 @@ export interface AudioQueue {
 	skipping: boolean;
 }
 
-interface YtDlpFormat {
-	resolution: string;
-	abr: number;
-	vbr: number;
-	url: string;
-	protocol: string;
-}
+// interface YtDlpFormat {
+// 	resolution: string;
+// 	abr: number;
+// 	vbr: number;
+// 	url: string;
+// 	protocol: string;
+// }
 
 export class MusicQueue {
 	private static _instance: MusicQueue;
@@ -82,12 +83,12 @@ export class MusicQueue {
 	private audioQueue = new Map<string, AudioQueue>();
 
 	private pathToFfmpeg = "";
-	private ffmpegExtensions: string[] = [];
+	// private ffmpegExtensions: string[] = [];
 
 	async init() {
 		this.pathToFfmpeg = await which("ffmpeg");
 
-		await this.getFfmpegExtensions();
+		// await this.getFfmpegExtensions();
 
 		const reaperInterval = 1000 * 60; // every minute
 		setInterval(this.reaperCallback.bind(this), reaperInterval);
@@ -225,13 +226,14 @@ export class MusicQueue {
 				}
 
 				// TODO: will skip a bit, is this bad?
+
 				const seekMs = Date.now() - dbAudioQueue.currentStarted;
 				const seekSeconds = seekMs / 1000;
 
 				await this.addToQueue(
 					channel,
 					[dbAudioQueue.current],
-					seekSeconds,
+					seekSeconds, // livestreams will ignore this
 				);
 
 				// update queue
@@ -283,6 +285,7 @@ export class MusicQueue {
 		}
 	}
 
+	/*
 	private async getFfmpegExtensions() {
 		const dbKey = "exts-for-" + this.pathToFfmpeg;
 
@@ -336,44 +339,67 @@ export class MusicQueue {
 
 		froglog.info("Done!");
 	}
+	*/
 
-	private fetchLengthInSeconds(input: string) {
+	private async ffmpegGetInfo(input: string) {
 		// start ffmpeg but don't output. this will error but
 		// it'll print the duration. it doesn't come with ffprobe
 
-		return new Promise<number>(async resolve => {
-			const tryFindDuration = (output: string) => {
-				const matches = output.match(
-					/Duration: ([0-9]+):([0-9]+):([0-9]+)\.([0-9]+)/,
+		const output = {
+			found: false,
+			totalSeconds: 0,
+			streamName: "",
+		};
+
+		const tryFindDuration = (stdOutput: string) => {
+			// if no duration, then its unreachable
+			const durationMatches = stdOutput.match(
+				/Duration: (?:([0-9]+):([0-9]+):([0-9]+)\.([0-9]+))|(N\/A)/,
+			);
+
+			if (durationMatches == null) return false;
+
+			output.found = true;
+
+			if (durationMatches[5] == "N/A") {
+				// probably a livestream
+
+				const icyNameMatches = stdOutput.match(
+					/icy-name\s+:\s+([^]+?)\n/,
 				);
-				if (matches == null) return false;
 
-				const h = parseInt(matches[1]) * 60 * 60;
-				const m = parseInt(matches[2]) * 60;
-				const s = parseInt(matches[3]);
-				const ms = parseFloat("0." + matches[4]);
-				const totalSeconds = h + m + s + ms;
+				if (icyNameMatches != null) {
+					output.streamName = icyNameMatches[1];
+				}
 
-				resolve(totalSeconds);
 				return true;
-			};
+			} else {
+				const h = parseInt(durationMatches[1]) * 60 * 60;
+				const m = parseInt(durationMatches[2]) * 60;
+				const s = parseInt(durationMatches[3]);
+				const ms = parseFloat("0." + durationMatches[4]);
 
-			try {
-				const { stdout, stderr } = await execa(this.pathToFfmpeg, [
-					"-hide_banner",
-					"-i",
-					input,
-					"-f",
-					"null",
-				]);
-				if (tryFindDuration(stdout)) return;
-				if (tryFindDuration(stderr)) return;
-			} catch (error) {
-				if (tryFindDuration(error.stderr)) return;
+				output.totalSeconds = h + m + s + ms;
+
+				return true;
 			}
+		};
 
-			resolve(-1);
-		});
+		try {
+			const { stderr } = await execa(this.pathToFfmpeg, [
+				"-hide_banner",
+				"-i",
+				input,
+				"-f",
+				"null",
+			]);
+
+			if (tryFindDuration(stderr)) return output;
+		} catch (error) {
+			if (tryFindDuration(error.stderr)) return output;
+		}
+
+		return output;
 	}
 
 	/*
@@ -425,29 +451,28 @@ export class MusicQueue {
 	}
 	*/
 
-	async getYtDlpInfo(search: string): Promise<AudioQueueMetadata[]> {
+	async getInfoFromSearch(search: string): Promise<AudioQueueMetadata[]> {
 		const isUrl = /^https?:\/\//i.test(search);
 
 		if (isUrl) {
-			const url = new URL(search);
-			const ext = url.pathname.split(".").pop();
+			const { found, streamName, totalSeconds } =
+				await this.ffmpegGetInfo(search);
 
-			if (this.ffmpegExtensions.includes(ext)) {
-				const seconds = await this.fetchLengthInSeconds(search);
+			if (found == false) return [];
 
-				return [
-					{
-						title: search,
-						url: search,
-						seconds,
-						videoUrl: search,
-						playlistUrl: null,
-						odemonGoodbye: false,
-						isLocalStream: false,
-						froggyHangOut: false,
-					},
-				];
-			}
+			return [
+				{
+					title: streamName ?? search,
+					url: search,
+					seconds: totalSeconds,
+					videoUrl: search,
+					playlistUrl: null,
+					odemonGoodbye: false,
+					isLocalStream: false,
+					froggyHangOut: false,
+					livestream: totalSeconds == 0,
+				},
+			];
 		}
 
 		// TODO: livestream support maybe?
@@ -515,6 +540,7 @@ export class MusicQueue {
 					odemonGoodbye: false,
 					isLocalStream: false,
 					froggyHangOut: false,
+					livestream: false, // TODO: potentially could be a livestream??
 				});
 			} catch (error) {
 				// ignore i guess
@@ -614,7 +640,7 @@ export class MusicQueue {
 			);
 		}
 
-		if (seekSeconds > 0) {
+		if (!metadata.livestream && seekSeconds > 0) {
 			// seek seconds. needs to be placed before -i or will take a long time
 			args.push("-ss", String(seekSeconds));
 		}
@@ -637,7 +663,7 @@ export class MusicQueue {
 		}
 
 		args.push(
-			// https://github.com/discordjs/voice/blob/main/src/audio/TransformerGraph.ts
+			// https://github.com/discordjs/discord.js/blob/main/packages/voice/src/audio/TransformerGraph.ts
 			"-analyzeduration",
 			"0",
 			"-loglevel",
@@ -652,6 +678,8 @@ export class MusicQueue {
 			"-acodec",
 			"libopus",
 		);
+
+		// TODO: livestream skip when starting until they eventually dont. its really weird
 
 		const stream = new FFmpeg({ args, shell: false });
 
@@ -681,12 +709,13 @@ export class MusicQueue {
 		return {
 			title: "frog bot says goodbye",
 			url: filePath,
-			seconds: await this.fetchLengthInSeconds(filePath), // should i be concerned
+			seconds: (await this.ffmpegGetInfo(filePath)).totalSeconds,
 			videoUrl: null,
 			playlistUrl: null,
 			odemonGoodbye: true,
 			isLocalStream: true,
 			froggyHangOut: false,
+			livestream: false,
 		};
 	}
 
@@ -708,43 +737,43 @@ export class MusicQueue {
 			const connection = await this.ensureConnection(channel);
 			const player = await this.ensurePlayer(channel, connection);
 
+			const playNow = (metadata: AudioQueueMetadata) => {
+				const resource = this.createAudioResource(metadata);
+				queue.current = resource;
+				queue.currentStarted = Date.now();
+				player.play(resource);
+				this.syncToDatabase();
+			};
+
+			const continuePlaying =
+				queue.looping || queue.current?.metadata?.livestream;
+
 			if (
-				queue.looping &&
+				continuePlaying &&
 				queue.skipping == false &&
 				// dont loop goodbye
 				!queue.current?.metadata?.odemonGoodbye
 			) {
 				// adding timeout might help?
 				setTimeout(() => {
-					const metadata = queue.current.metadata;
-					const resource = this.createAudioResource(metadata);
-					queue.current = resource;
-					queue.currentStarted = Date.now();
-					player.play(queue.current);
+					playNow(queue.current.metadata);
+				}, 500);
+				return;
+			}
 
-					this.syncToDatabase();
+			// if we're looping this'll make sure we dont skip again
+			queue.skipping = false;
+
+			// disconnect if empty
+			if (queue.resourcesMetadatas.length == 0) {
+				// wait half a second just incase its still streaming
+				setTimeout(() => {
+					// will sync to database
+					this.disconnectAndCleanup(channel);
 				}, 500);
 			} else {
-				// if we're looping this'll make sure we dont skip again
-				queue.skipping = false;
-
-				if (queue.resourcesMetadatas.length == 0) {
-					// disconnect if empty
-					// wait half a second just incase its still streaming
-					setTimeout(() => {
-						// will sync to database
-						this.disconnectAndCleanup(channel);
-					}, 500);
-				} else {
-					// shift song and play
-					const metadata = queue.resourcesMetadatas.shift();
-					const resource = this.createAudioResource(metadata);
-					queue.current = resource;
-					queue.currentStarted = Date.now();
-					player.play(resource);
-
-					this.syncToDatabase();
-				}
+				// shift song to play next
+				playNow(queue.resourcesMetadatas.shift());
 			}
 		};
 	}

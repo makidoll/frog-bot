@@ -458,21 +458,21 @@ export class MusicQueue {
 			const { found, streamName, totalSeconds } =
 				await this.ffmpegGetInfo(search);
 
-			if (found == false) return [];
-
-			return [
-				{
-					title: streamName ?? search,
-					url: search,
-					seconds: totalSeconds,
-					videoUrl: search,
-					playlistUrl: null,
-					odemonGoodbye: false,
-					isLocalStream: false,
-					froggyHangOut: false,
-					livestream: totalSeconds == 0,
-				},
-			];
+			if (found) {
+				return [
+					{
+						title: streamName ?? search,
+						url: search,
+						seconds: totalSeconds,
+						videoUrl: search,
+						playlistUrl: null,
+						odemonGoodbye: false,
+						isLocalStream: false,
+						froggyHangOut: false,
+						livestream: totalSeconds == 0,
+					},
+				];
+			}
 		}
 
 		// TODO: livestream support maybe?
@@ -480,6 +480,14 @@ export class MusicQueue {
 
 		const isUrlWithoutHttp =
 			/^youtube\.com/i.test(search) || /^youtu\.be/i.test(search);
+
+		let ytDlpSearch = "";
+
+		if (isUrl || isUrlWithoutHttp) {
+			ytDlpSearch = isUrlWithoutHttp ? "https://" + search : search;
+		} else {
+			ytDlpSearch = "ytsearch1:" + search;
+		}
 
 		const args = [
 			"--no-warnings",
@@ -489,11 +497,7 @@ export class MusicQueue {
 			// ok we're not. todo above related
 			"-f",
 			"bestaudio",
-			isUrl || isUrlWithoutHttp
-				? isUrlWithoutHttp
-					? "https://" + search
-					: search
-				: "ytsearch1:" + search,
+			ytDlpSearch,
 		];
 
 		const { stdout } = await execa(
@@ -658,7 +662,8 @@ export class MusicQueue {
 				// https://ffmpeg.org/ffmpeg-filters.html#loudnorm
 				// loudnorm sounds better than dynaudnorm=p=0.9:s=5
 				"-filter:a",
-				"loudnorm,volume=" + (metadata.odemonGoodbye ? 0.5 : 0.25),
+				// "loudnorm,volume=" + (metadata.odemonGoodbye ? 0.5 : 0.25),
+				"loudnorm,volume=" + (metadata.odemonGoodbye ? 0.8 : 0.5),
 			);
 		}
 

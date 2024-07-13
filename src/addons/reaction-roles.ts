@@ -67,7 +67,7 @@ const channelMessageReactionInfo: {
 				"🎮": "🎮 gaymer",
 				"🎧": "🎧 vc friends",
 				"🦋": "🦋 moths",
-				"📚": "📚 literature",
+				"📚": "📚 froggy academics",
 			},
 		},
 	},

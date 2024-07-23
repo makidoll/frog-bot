@@ -27,6 +27,13 @@ const channelMessageReactionInfo: {
 			anyRole: "friendly frog",
 		},
 	},
+	// frog couch: froggy-announcements
+	"1214652900714876998": {
+		"1264671092472021074": {
+			mode: "any",
+			anyRole: "politics discussion",
+		},
+	},
 	// frog couch: pronouns-and-roles
 	"976645075142594561": {
 		"976645626437718016": {

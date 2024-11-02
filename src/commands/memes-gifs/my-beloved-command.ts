@@ -72,6 +72,12 @@ export const MyBelovedCommand: Command = {
 		)
 		.addBooleanOption(option =>
 			option.setName("only-image").setDescription("dont make gif"),
+		)
+		.addAttachmentOption(option =>
+			option.setName("custom-avatar").setDescription("custom avatar"),
+		)
+		.addStringOption(option =>
+			option.setName("custom-name").setDescription("custom name"),
 		),
 	onInteraction: async interaction => {
 		await interaction.deferReply();
@@ -85,13 +91,25 @@ export const MyBelovedCommand: Command = {
 
 		const onlyImage = interaction.options.getBoolean("only-image", false);
 
-		try {
-			const { username, avatarURL } = await getDisplayNameAndAvatarURL(
-				user ? user : interaction.user,
-				interaction.guild,
-			);
+		const customAvatar = interaction.options.getAttachment(
+			"custom-avatar",
+			false,
+		);
 
-			const avatarDataUri = await downloadToDataUri(avatarURL);
+		const customName = interaction.options.getString("custom-name", false);
+
+		try {
+			let { username: mentionUsername, avatarURL: mentionAvatarURL } =
+				await getDisplayNameAndAvatarURL(
+					user ? user : interaction.user,
+					interaction.guild,
+				);
+
+			const inputName = customName ? customName : mentionUsername;
+
+			const inputAvatarDataUri = await downloadToDataUri(
+				customAvatar ? customAvatar.url : mentionAvatarURL,
+			);
 
 			const renderFrame = (frameNumber: number): Promise<Buffer> =>
 				HtmlRenderer.instance.renderHtml(
@@ -106,11 +124,11 @@ export const MyBelovedCommand: Command = {
 						await wait(100);
 
 						const frameData = {
-							name: username,
+							name: inputName,
 							big,
 							fragCode: myBelovedFragCode,
 							images: {
-								avatar: avatarDataUri,
+								avatar: inputAvatarDataUri,
 								...(big ? myBelovedFramesBig : myBelovedFrames)[
 									frameNumber
 								],
@@ -126,7 +144,7 @@ export const MyBelovedCommand: Command = {
 				);
 
 			const fileNameWithoutExt =
-				username.toLowerCase() + "_my_beloved" + (big ? "_big" : "");
+				inputName.toLowerCase() + "_my_beloved" + (big ? "_big" : "");
 
 			if (onlyImage) {
 				const outputBuffer = await renderFrame(

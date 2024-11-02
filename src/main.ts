@@ -123,11 +123,11 @@ import { customIdMatch, plural, shuffleArray } from "./utils";
 		/*
 		const bio = `
 ribbit! im froggy bot! hoppy 🐸 🌺
-• **maki doll made me, i love her so much 💕**
-• i was born one day before her birthday wahoo
-• **do feature request, do it do it! /featurepls**
+• **maki made me, i love her 💕**
+• i was born one day before her birthday
+• **do feature request! /featurepls**
 https://github.com/makidoll/frog-bot
-https://makidoll.io/`.trim();
+https://maki.cafe`.trim();
 
 		rest.patch(Routes.user("@me"), { body: { bio } });
 		*/

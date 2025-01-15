@@ -1,6 +1,6 @@
 import axios from "axios";
 import decompress from "decompress";
-import decompressTarxz from "decompress-tarxz";
+import decompressTarxz from "@felipecrs/decompress-tarxz";
 import { execa } from "execa";
 import * as fs from "fs/promises";
 import * as os from "os";

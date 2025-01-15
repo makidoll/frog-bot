@@ -1,0 +1,10 @@
+services:
+    frog-bot:
+        build: .
+        restart: always
+        env_file: .env
+        volumes:
+            - ./db:/app/db
+            - ./tools:/app/tools
+            - ./venv:/app/venv
+            - ./attachments:/app/attachments

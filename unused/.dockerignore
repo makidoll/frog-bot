@@ -1,0 +1,14 @@
+dist
+node_modules
+tsconfig.tsbuildinfo
+yarn-error.log
+.env
+dalle-saved
+stable-diffusion-saved
+novelai-saved
+.vscode
+tools
+db
+attachments
+transparent-background-venv
+venv
